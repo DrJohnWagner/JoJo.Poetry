@@ -62,7 +62,10 @@
         ],
         "rating": 88,
         "lines": 47,
-        "words": 178
+        "words": 178,
+        "pinned": false,
+        "authors_notes": [],
+        "notes": []
     },
     {
         "id": "1933022b-5fe0-4d60-800a-066c5324473e",
@@ -116,7 +119,10 @@
         ],
         "rating": 83,
         "lines": 50,
-        "words": 208
+        "words": 208,
+        "pinned": false,
+        "authors_notes": [],
+        "notes": []
     },
     {
         "id": "9fbae049-771e-4340-8f69-d67d9e2950ae",
@@ -174,7 +180,10 @@
         ],
         "rating": 85,
         "lines": 63,
-        "words": 233
+        "words": 233,
+        "pinned": false,
+        "authors_notes": [],
+        "notes": []
     },
     {
         "id": "cffddeb4-3b8d-4b92-b052-409e3fddc7c5",
@@ -226,7 +235,10 @@
         ],
         "rating": 80,
         "lines": 78,
-        "words": 353
+        "words": 353,
+        "pinned": false,
+        "authors_notes": [],
+        "notes": []
     },
     {
         "id": "71187973-dcde-4aa3-aeb3-36f3bb222d6c",
@@ -278,6 +290,9 @@
         ],
         "rating": 86,
         "lines": 37,
-        "words": 127
+        "words": 127,
+        "pinned": false,
+        "authors_notes": [],
+        "notes": []
     }
 ]

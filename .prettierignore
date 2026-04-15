@@ -1,0 +1,13 @@
+.git
+.next
+.pytest_cache
+.venv
+node_modules
+dist
+build
+coverage
+htmlcov
+uv.lock
+package-lock.json
+database/*.json
+*.py

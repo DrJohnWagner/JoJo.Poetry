@@ -1,0 +1,27 @@
+services:
+  server:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    ports:
+      - "${API_PORT:-8000}:8000"
+    volumes:
+      - ./database:/app/database
+    environment:
+      - POEMS_DATABASE=database/Poems.json
+      - CORS_ORIGINS=http://localhost:3005,http://127.0.0.1:3005
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+      args:
+        - NEXT_PUBLIC_API_BASE_URL=http://localhost:8000
+        - API_BASE_URL_SERVER=http://server:8000
+    ports:
+      - "${WEB_PORT:-3005}:3000"
+    environment:
+      - NEXT_PUBLIC_API_BASE_URL=http://localhost:8000
+      - API_BASE_URL_SERVER=http://server:8000
+    depends_on:
+      - server

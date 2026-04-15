@@ -1,0 +1,45 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    html {
+        color-scheme: light;
+    }
+    body {
+        @apply bg-paper text-ink font-serif antialiased;
+        text-rendering: optimizeLegibility;
+    }
+    a {
+        @apply text-accent underline-offset-[0.2em] decoration-1;
+    }
+    a:hover {
+        @apply underline;
+    }
+    ::selection {
+        background: #efe7d6;
+    }
+    input,
+    textarea {
+        @apply bg-transparent;
+    }
+}
+
+@layer components {
+    .eyebrow {
+        @apply text-[0.76rem] uppercase tracking-wider2 text-muted font-sans;
+    }
+    .rule {
+        @apply h-px bg-rule;
+    }
+    /* Poem body: preserves authored whitespace and line breaks. */
+    .poem-body {
+        @apply whitespace-pre-wrap font-serif leading-[1.24] text-[1.12rem];
+        hyphens: none;
+        font-variant-numeric: oldstyle-nums;
+    }
+    /* Tag list: quiet small-caps feel */
+    .taglist {
+        @apply font-sans text-[0.82rem] text-muted;
+    }
+}
