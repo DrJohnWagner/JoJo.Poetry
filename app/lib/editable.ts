@@ -33,7 +33,6 @@ export const IMMUTABLE_FIELDS = ["id", "lines", "words"] as const
  *  dedicated editor). */
 export const NOT_INLINE_EDITABLE = [
     "contests",
-    "authors_notes",
     "notes",
 ] as const
 

@@ -59,7 +59,6 @@ def test_create_minimal_payload_succeeds(client, db):
 
     # Defaults applied
     assert poem["pinned"] is False
-    assert poem["authors_notes"] == []
     assert poem["notes"] == []
     assert poem["themes"] == []
     assert poem["contests"] == []

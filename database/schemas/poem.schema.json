@@ -103,12 +103,6 @@
       "type": "boolean",
       "default": false
     },
-    "authors_notes": {
-      "description": "Optional. Author-facing notes. Defaults to [] when absent.",
-      "type": "array",
-      "default": [],
-      "items": { "$ref": "#/$defs/Note" }
-    },
     "notes": {
       "description": "Optional. Editorial / public-facing notes. Defaults to [] when absent.",
       "type": "array",

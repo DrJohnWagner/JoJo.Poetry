@@ -33,7 +33,6 @@ export interface Poem extends Omit<PoemSummary, "has_contests"> {
     body: string
     contests: Contest[]
     key_images: string[]
-    authors_notes: Note[]
     notes: Note[]
     socials: string[]
 }

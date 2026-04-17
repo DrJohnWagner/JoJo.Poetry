@@ -104,7 +104,7 @@ The authoritative schema is `database/schemas/poem.schema.json`;
 | `lines`, `words`                                                              | int ≥ 0                          | yes                        | **derived**   | no                              | Recomputed from `body` on every write.                                                           |
 | `pinned`                                                                      | bool                             | optional (default `false`) | yes           | no                              | Pinned poems lead listings.                                                                      |
 | `socials`                                                                     | `string[]`                       | optional (default `[]`)    | yes           | no                              | Social media URLs; displayed as links on the detail page.                                        |
-| `authors_notes`, `notes`                                                      | `[{body, created_at?, author?}]` | optional (default `[]`)    | yes (API)     | via simple/advanced text search | No inline UI yet.                                                                                |
+| `notes`                                                                       | `[{body, created_at?, author?}]` | optional (default `[]`)    | yes (API)     | via simple/advanced text search | No inline UI yet.                                                                                |
 
 Strictness: `extra="forbid"` on the Pydantic model and
 `additionalProperties: false` on the JSON Schema. Unknown fields are
@@ -147,7 +147,7 @@ read or write them.
 - **`poem.py`** — Pydantic models (`Poem`, `Contest`, `Note`). Used
   by the backend at runtime for load-time validation, PATCH-merge
   validation, and response shaping. Applies the documented defaults
-  (`pinned=false`, `socials=[]`, `authors_notes=[]`, `notes=[]`) when
+  (`pinned=false`, `socials=[]`, `notes=[]`) when
   optional fields are absent.
 
 ## Configuration
@@ -277,8 +277,8 @@ Two endpoints, intentionally distinct.
 ### Simple keyword search — `GET /api/poems?q=…`
 
 Case-insensitive substring match over a curated set of fields: `title`,
-body plain-text projection, `project`, all tag arrays, and both note
-arrays. Excluded: URLs, `id`, numeric and boolean fields. `q` combines conjunctively with the same
+body plain-text projection, `project`, all tag arrays, and the `notes`
+array. Excluded: URLs, `id`, numeric and boolean fields. `q` combines conjunctively with the same
 endpoint's tag and numeric filters (`themes=…`, `min_rating=…`, etc.).
 
 ### Advanced field search — `GET /api/poems/search`
@@ -291,7 +291,7 @@ If `q` is also supplied, it is applied first as the same free-text
 match used by `GET /api/poems`, so advanced search can further narrow
 an already filtered collection.
 
-Populated fields: `title`, `body`, `project`, `authors_notes`, `notes`
+Populated fields: `title`, `body`, `project`, `notes`
 (all case-insensitive substring); tag arrays
 (OR within field, case-insensitive exact-entry equality); `year`,
 `month` (integer equality on `date`); rating band (`min_rating` +
@@ -426,9 +426,9 @@ Test files:
   changes will need a `schema_version` and a one-shot migration.
 - **No relevance ranking.** Search filters but does not rank; order
   is always authoritative (pinned → date-desc → id-asc).
-- **`contests`, `authors_notes`, `notes` have no inline UI yet.**
+- **`contests` and `notes` have no inline UI yet.**
   They are object arrays; the backend accepts PATCH, but the UI
-  surfaces contests as read-only and has no editor for note arrays.
+  surfaces contests as read-only and has no editor for the notes array.
 - **Browser-native modals** are used for discard/confirm prompts
   (`window.confirm`, `beforeunload`). Fine for a first draft; a
   styled in-page prompt would match the literary aesthetic better.
@@ -437,8 +437,8 @@ Test files:
 
 ## Sensible next steps
 
-1. **Object-array editors** for `contests`, `authors_notes`, and
-   `notes` in both the create and edit surfaces.
+1. **Object-array editors** for `contests` and `notes` in both the
+   create and edit surfaces.
 2. **Optimistic concurrency** via `ETag` / `If-Match` headers so a
    stale-client PATCH fails with `409` instead of silently winning.
 3. **Schema versioning** (`schema_version` on each record) plus a

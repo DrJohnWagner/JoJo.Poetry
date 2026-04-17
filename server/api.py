@@ -161,7 +161,6 @@ def _matches(
             " ".join(p.form_and_craft),
             " ".join(p.key_images),
             " ".join(p.contest_fit),
-            " ".join(n.body for n in p.authors_notes),
             " ".join(n.body for n in p.notes),
         ]
         if needle not in " \n".join(haystack_parts).casefold():
@@ -278,7 +277,7 @@ class PoemCreate(BaseModel):
       ``form_and_craft`` / ``key_images`` / ``contest_fit`` — default
       to ``[]``.
     - ``pinned`` — defaults to ``False``.
-    - ``authors_notes`` / ``notes`` — default to ``[]``.
+    - ``notes`` — defaults to ``[]``.
 
     Forbidden on input (the server supplies them):
 
@@ -305,7 +304,6 @@ class PoemCreate(BaseModel):
     key_images: List[str] = Field(default_factory=list)
     contest_fit: List[str] = Field(default_factory=list)
     pinned: bool = False
-    authors_notes: List[Note] = Field(default_factory=list)
     notes: List[Note] = Field(default_factory=list)
 
 
@@ -337,7 +335,6 @@ class PoemPatch(BaseModel):
     contest_fit: Optional[List[str]] = None
     rating: Optional[int] = Field(None, ge=0, le=100)
     pinned: Optional[bool] = None
-    authors_notes: Optional[List[Note]] = None
     notes: Optional[List[Note]] = None
 
 
@@ -374,7 +371,6 @@ def advanced_search(
     form_and_craft: List[str] = Query(default_factory=list),
     key_images: List[str] = Query(default_factory=list),
     contest_fit: List[str] = Query(default_factory=list),
-    authors_notes: Optional[str] = Query(None, description="Case-insensitive substring over author's-notes bodies."),
     notes: Optional[str] = Query(None, description="Case-insensitive substring over public notes bodies."),
     year: Optional[int] = Query(None, ge=1, le=9999, description="Match poems whose date year equals this."),
     month: Optional[int] = Query(None, ge=1, le=12, description="Match poems whose date month equals this."),
@@ -406,8 +402,7 @@ def advanced_search(
 
     Matching rules:
 
-    - **Text fields** (``title``, ``body``, ``project``,
-      ``authors_notes``, ``notes``): case-insensitive substring on a
+    - **Text fields** (``title``, ``body``, ``project``, ``notes``): case-insensitive substring on a
       normalised projection (HTML ``<br/>`` collapsed to newlines,
       entities unescaped). For note arrays, the projection is the
       concatenation of ``.body`` across entries.
@@ -441,7 +436,6 @@ def advanced_search(
         "title": title,
         "project": project,
         "body": body,
-        "authors_notes": authors_notes,
         "notes": notes,
     }
     tag_queries = {
@@ -473,10 +467,6 @@ def advanced_search(
         if project and _text_hit(project, p.project):
             return True
         if body and _text_hit(body, _body_to_plaintext(p.body)):
-            return True
-        if authors_notes and _text_hit(
-            authors_notes, "\n".join(n.body for n in p.authors_notes)
-        ):
             return True
         if notes and _text_hit(notes, "\n".join(n.body for n in p.notes)):
             return True

@@ -71,7 +71,6 @@ def test_loads_and_validates_canonical_file(poems_file):
         assert p.id.version == 4
         # optional-field defaults applied
         assert p.pinned is False
-        assert p.authors_notes == []
         assert p.notes == []
 
 
