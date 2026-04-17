@@ -25,14 +25,6 @@ class Contest(BaseModel):
     title: Optional[str] = None
 
 
-class Note(BaseModel):
-    model_config = ConfigDict(extra="forbid")
-
-    body: str = Field(min_length=1)
-    created_at: Optional[datetime] = None
-    author: Optional[str] = None
-
-
 class Poem(BaseModel):
     """Persisted poem record.
 
@@ -67,7 +59,7 @@ class Poem(BaseModel):
 
     # Optional with defaults
     pinned: bool = False
-    notes: List[Note] = Field(default_factory=list)
+    notes: List[str] = Field(default_factory=list)
     socials: List[str] = Field(default_factory=list)
 
     @field_validator("id")

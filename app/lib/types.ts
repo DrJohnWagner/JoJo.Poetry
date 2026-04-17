@@ -6,12 +6,6 @@ export interface Contest {
     title?: string
 }
 
-export interface Note {
-    body: string
-    created_at?: string | null
-    author?: string | null
-}
-
 export interface PoemSummary {
     id: UUID
     title: string
@@ -33,7 +27,7 @@ export interface Poem extends Omit<PoemSummary, "has_contests"> {
     body: string
     contests: Contest[]
     key_images: string[]
-    notes: Note[]
+    notes: string[]
     socials: string[]
 }
 

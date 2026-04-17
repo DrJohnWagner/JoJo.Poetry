@@ -10,6 +10,7 @@ import {
     isDirty,
     type PoemDraft,
 } from "@/lib/editable"
+import NotesEditor from "./NotesEditor"
 
 /** Shared inline editor for a full poem — exactly the same editable
  *  field set wherever it is rendered. `density` tweaks the layout for
@@ -123,6 +124,11 @@ export default function PoemEditorForm({
                     style={{ tabSize: 4, MozTabSize: 4 } as React.CSSProperties}
                 />
             </Labelled>
+
+            <NotesEditor
+                value={draft.notes}
+                onChange={(v) => set("notes", v)}
+            />
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-x-6 gap-y-4">
                 <Labelled label="Rating (0–100)">

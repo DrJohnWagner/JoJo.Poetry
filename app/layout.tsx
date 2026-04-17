@@ -39,13 +39,13 @@ export default function RootLayout({
         >
             <body suppressHydrationWarning>
                 <AppConfigProvider readOnly={readOnly}>
-                    <div className="mx-auto max-w-prose px-6 pt-16 pb-24">
+                    <div className="mx-auto max-w-prose px-6 pb-24 pt-16">
                         <header className="mb-10 flex items-end justify-between gap-6">
                             <Link
                                 href="/"
-                                className="no-underline text-ink hover:no-underline inline-block"
+                                className="inline-block text-ink no-underline hover:no-underline"
                             >
-                                <h1 className="font-display text-3xl md:text-4xl tracking-tight leading-none">
+                                <h1 className="font-display text-3xl leading-none tracking-tight md:text-4xl">
                                     JoJo.Poetry
                                 </h1>
                                 <p className="eyebrow mt-2">Collected poems</p>
@@ -53,14 +53,14 @@ export default function RootLayout({
                             {!readOnly && (
                                 <Link
                                     href="/poems/new"
-                                    className="eyebrow border-b border-muted pb-1 hover:text-ink hover:border-ink hover:no-underline transition-colors"
+                                    className="eyebrow border-b border-muted pb-1 transition-colors hover:border-ink hover:text-ink hover:no-underline"
                                 >
                                     New poem
                                 </Link>
                             )}
                         </header>
                         <main>{children}</main>
-                        <footer className="mt-24 pt-8 border-t border-rule eyebrow">
+                        <footer className="eyebrow mt-12 border-t border-rule pt-8">
                             © JoJo · <Link href="/">Index</Link>
                         </footer>
                     </div>

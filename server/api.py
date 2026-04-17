@@ -30,8 +30,8 @@ from server.repository import (
 )
 from server.config import get_settings
 
-# Re-export Contest / Note locally for the patch model.
-from poem import Contest, Note  # noqa: E402
+# Re-export Contest locally for the patch model.
+from poem import Contest  # noqa: E402
 
 
 # ---------------------------------------------------------------- read-only guard
@@ -161,7 +161,7 @@ def _matches(
             " ".join(p.form_and_craft),
             " ".join(p.key_images),
             " ".join(p.contest_fit),
-            " ".join(n.body for n in p.notes),
+            " ".join(p.notes),
         ]
         if needle not in " \n".join(haystack_parts).casefold():
             return False
@@ -304,7 +304,7 @@ class PoemCreate(BaseModel):
     key_images: List[str] = Field(default_factory=list)
     contest_fit: List[str] = Field(default_factory=list)
     pinned: bool = False
-    notes: List[Note] = Field(default_factory=list)
+    notes: List[str] = Field(default_factory=list)
 
 
 class PoemPatch(BaseModel):
@@ -335,7 +335,7 @@ class PoemPatch(BaseModel):
     contest_fit: Optional[List[str]] = None
     rating: Optional[int] = Field(None, ge=0, le=100)
     pinned: Optional[bool] = None
-    notes: Optional[List[Note]] = None
+    notes: Optional[List[str]] = None
 
 
 AWARD_VOCAB = ("Gold", "Silver", "Bronze", "Honorable Mention", "None")
@@ -468,7 +468,7 @@ def advanced_search(
             return True
         if body and _text_hit(body, _body_to_plaintext(p.body)):
             return True
-        if notes and _text_hit(notes, "\n".join(n.body for n in p.notes)):
+        if notes and _text_hit(notes, "\n".join(p.notes)):
             return True
         # Tags
         for field, needles in tag_queries.items():

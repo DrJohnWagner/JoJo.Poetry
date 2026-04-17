@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react"
 import { useRouter } from "next/navigation"
 import { createPoem } from "@/lib/api"
 import { plainTextToBody } from "@/lib/format"
+import NotesEditor from "./NotesEditor"
 
 /** Dedicated create form. Mirrors the editing surface in field names,
  *  widgets, and behaviour so that the create and edit experiences feel
@@ -31,6 +32,7 @@ export default function PoemCreateForm() {
     const [keyImages, setKeyImages] = useState("")
     const [contestFit, setContestFit] = useState("")
     const [pinned, setPinned] = useState(false)
+    const [notes, setNotes] = useState("")
 
     const [saving, setSaving] = useState(false)
     const [err, setErr] = useState<string | null>(null)
@@ -47,7 +49,8 @@ export default function PoemCreateForm() {
         formAndCraft !== "" ||
         keyImages !== "" ||
         contestFit !== "" ||
-        pinned
+        pinned ||
+        notes !== ""
 
     // Unsaved-changes guard on page unload.
     useEffect(() => {
@@ -94,6 +97,8 @@ export default function PoemCreateForm() {
             payload.form_and_craft = splitTags(formAndCraft)
         if (keyImages.trim()) payload.key_images = splitTags(keyImages)
         if (contestFit.trim()) payload.contest_fit = splitTags(contestFit)
+        const noteLines = notes.split("\n").map((s) => s.trim()).filter(Boolean)
+        if (noteLines.length > 0) payload.notes = noteLines
 
         try {
             const created = await createPoem(payload)
@@ -185,6 +190,8 @@ export default function PoemCreateForm() {
                     style={{ tabSize: 4, MozTabSize: 4 } as React.CSSProperties}
                 />
             </Labelled>
+
+            <NotesEditor value={notes} onChange={setNotes} />
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-x-6 gap-y-4">
                 <Labelled label="Rating (0–100)" required>

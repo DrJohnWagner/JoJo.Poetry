@@ -52,7 +52,7 @@ Two services, one flat JSON data source:
 │   └── Dockerfile                    # Python 3.12-slim image
 ├── requirements.txt                  # Production Python deps
 ├── requirements-dev.txt              # Adds pytest, httpx, jsonschema
-├── tests/server/                     # pytest suite (81 tests)
+├── tests/server/                     # pytest suite (85 tests)
 ├── app/
 │   ├── page.tsx                      # Landing: listing + search + incremental load
 │   ├── poems/[id]/page.tsx           # Detail + inline editing
@@ -104,7 +104,7 @@ The authoritative schema is `database/schemas/poem.schema.json`;
 | `lines`, `words`                                                              | int ≥ 0                          | yes                        | **derived**   | no                              | Recomputed from `body` on every write.                                                           |
 | `pinned`                                                                      | bool                             | optional (default `false`) | yes           | no                              | Pinned poems lead listings.                                                                      |
 | `socials`                                                                     | `string[]`                       | optional (default `[]`)    | yes           | no                              | Social media URLs; displayed as links on the detail page.                                        |
-| `notes`                                                                       | `[{body, created_at?, author?}]` | optional (default `[]`)    | yes (API)     | via simple/advanced text search | No inline UI yet.                                                                                |
+| `notes`                                                                       | `string[]`                       | optional (default `[]`)    | yes           | yes                             | One string per note; edited via multi-line textbox (one line = one note).                        |
 
 Strictness: `extra="forbid"` on the Pydantic model and
 `additionalProperties: false` on the JSON Schema. Unknown fields are
@@ -147,8 +147,7 @@ read or write them.
 - **`poem.py`** — Pydantic models (`Poem`, `Contest`, `Note`). Used
   by the backend at runtime for load-time validation, PATCH-merge
   validation, and response shaping. Applies the documented defaults
-  (`pinned=false`, `socials=[]`, `notes=[]`) when
-  optional fields are absent.
+  (`pinned=false`, `socials=[]`, `notes=[]`) when optional fields are absent.
 
 ## Configuration
 
@@ -342,7 +341,7 @@ datetime, no fallback needed.
   (comfortable density). Fields editable inline in both contexts:
   `title`, `project`, `body`, `rating`, `pinned`, `date`, `url`,
   `themes`, `emotional_register`, `form_and_craft`, `key_images`,
-  `contest_fit`, `socials`. PATCH sends only the diff; local
+  `contest_fit`, `socials`, `notes`. PATCH sends only the diff; local
   state is replaced from the server response; failure keeps edit
   mode open with an inline error.
 - **Creation** — dedicated page at `/poems/new`. Required inputs:
@@ -377,7 +376,7 @@ make check          # test + typecheck + lint
 Or manually:
 
 ```bash
-READ_ONLY=false uv run pytest tests/server   # ~81 tests, ~4 s
+READ_ONLY=false uv run pytest tests/server   # ~85 tests, ~4 s
 npx tsc --noEmit                             # TypeScript type-check
 npx next build                               # production build
 ```
@@ -426,9 +425,8 @@ Test files:
   changes will need a `schema_version` and a one-shot migration.
 - **No relevance ranking.** Search filters but does not rank; order
   is always authoritative (pinned → date-desc → id-asc).
-- **`contests` and `notes` have no inline UI yet.**
-  They are object arrays; the backend accepts PATCH, but the UI
-  surfaces contests as read-only and has no editor for the notes array.
+- **`contests` has no inline UI yet.** It is an object array; the
+  backend accepts PATCH, but the UI surfaces it as read-only only.
 - **Browser-native modals** are used for discard/confirm prompts
   (`window.confirm`, `beforeunload`). Fine for a first draft; a
   styled in-page prompt would match the literary aesthetic better.
@@ -437,8 +435,8 @@ Test files:
 
 ## Sensible next steps
 
-1. **Object-array editors** for `contests` and `notes` in both the
-   create and edit surfaces.
+1. **Object-array editor** for `contests` in both the create and edit
+   surfaces.
 2. **Optimistic concurrency** via `ETag` / `If-Match` headers so a
    stale-client PATCH fails with `409` instead of silently winning.
 3. **Schema versioning** (`schema_version` on each record) plus a

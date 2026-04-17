@@ -91,6 +91,24 @@ def test_patch_array_is_replaced_not_merged(client):
     assert r.json()["themes"] == ["one", "two"]
 
 
+def test_patch_notes_roundtrip(client, db):
+    pid = _first_id(client)
+    new_notes = ["First note.", "Second note."]
+    r = client.patch(f"/api/poems/{pid}", json={"notes": new_notes})
+    assert r.status_code == 200
+    assert r.json()["notes"] == new_notes
+    on_disk = {p["id"]: p for p in json.loads(db.read_text())}
+    assert on_disk[pid]["notes"] == new_notes
+
+
+def test_patch_notes_cleared_with_empty_array(client):
+    pid = _first_id(client)
+    client.patch(f"/api/poems/{pid}", json={"notes": ["a note"]})
+    r = client.patch(f"/api/poems/{pid}", json={"notes": []})
+    assert r.status_code == 200
+    assert r.json()["notes"] == []
+
+
 def test_patch_empty_body_returns_current(client):
     pid = _first_id(client)
     before = client.get(f"/api/poems/{pid}").json()

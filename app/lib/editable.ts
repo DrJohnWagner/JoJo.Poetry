@@ -22,6 +22,7 @@ export const EDITABLE_FIELDS = [
     "key_images",
     "contest_fit",
     "socials",
+    "notes",
 ] as const
 export type EditableField = (typeof EDITABLE_FIELDS)[number]
 
@@ -31,10 +32,7 @@ export const IMMUTABLE_FIELDS = ["id", "lines", "words"] as const
 /** Backend accepts edits via PATCH but no inline UI ships for them in
  *  this first draft (they are structured object arrays and need a
  *  dedicated editor). */
-export const NOT_INLINE_EDITABLE = [
-    "contests",
-    "notes",
-] as const
+export const NOT_INLINE_EDITABLE = ["contests"] as const
 
 /** Working draft used by editors: every inline-editable field is a
  *  string input except pinned (boolean) and rating (number). Tag lists
@@ -53,6 +51,7 @@ export interface PoemDraft {
     key_images: string
     contest_fit: string
     socials: string // comma-separated
+    notes: string // newline-separated
 }
 
 export function draftFromPoem(p: Poem, plainBody: string): PoemDraft {
@@ -70,6 +69,7 @@ export function draftFromPoem(p: Poem, plainBody: string): PoemDraft {
         key_images: p.key_images.join(", "),
         contest_fit: p.contest_fit.join(", "),
         socials: p.socials.join(", "),
+        notes: p.notes.join("\n"),
     }
 }
 
@@ -112,6 +112,16 @@ export function diffDraft(
         if (next.length !== prev.length || next.some((v, i) => v !== prev[i])) {
             ;(out as Record<string, unknown>)[k] = next
         }
+    }
+    const nextNotes = draft.notes
+        .split("\n")
+        .map((s) => s.trim())
+        .filter(Boolean)
+    if (
+        nextNotes.length !== base.notes.length ||
+        nextNotes.some((v, i) => v !== base.notes[i])
+    ) {
+        out.notes = nextNotes
     }
     return out
 }

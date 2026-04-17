@@ -104,10 +104,10 @@
       "default": false
     },
     "notes": {
-      "description": "Optional. Editorial / public-facing notes. Defaults to [] when absent.",
+      "description": "Optional. Editorial notes, one string per note. Defaults to [] when absent.",
       "type": "array",
       "default": [],
-      "items": { "$ref": "#/$defs/Note" }
+      "items": { "type": "string", "minLength": 1 }
     },
     "socials": {
       "description": "Optional. Social media post URLs or handles for this poem. Defaults to [] when absent.",
@@ -132,16 +132,6 @@
           "description": "Optional name of the contest.",
           "type": "string"
         }
-      }
-    },
-    "Note": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": ["body"],
-      "properties": {
-        "body": { "type": "string", "minLength": 1 },
-        "created_at": { "type": "string", "format": "date-time" },
-        "author": { "type": "string" }
       }
     }
   }

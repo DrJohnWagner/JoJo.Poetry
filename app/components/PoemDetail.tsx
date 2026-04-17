@@ -9,6 +9,7 @@ import PoemBody from "./PoemBody"
 import PinToggle from "./PinToggle"
 import DeleteButton from "./DeleteButton"
 import PoemEditorForm from "./PoemEditorForm"
+import HorizontalRule from "./HorizontalRule"
 
 function medalColor(award: string): string {
     if (award === "Gold") return "#b8860b"
@@ -42,7 +43,7 @@ export default function PoemDetail({ poem: initial }: { poem: Poem }) {
 
     return (
         <div>
-            <header className="mb-10">
+            <header className="mb-5">
                 <div className="flex items-baseline justify-between gap-6">
                     <h1 className="flex-1 font-display text-3xl leading-tight tracking-tight md:text-4xl">
                         {poem.title}
@@ -67,21 +68,36 @@ export default function PoemDetail({ poem: initial }: { poem: Poem }) {
                 </div>
 
                 {poem.project && (
-                    <p className="mt-6 italic leading-relaxed text-ink/90">
+                    <p className="mt-5 italic leading-relaxed text-ink/90">
                         {poem.project}
                     </p>
                 )}
             </header>
 
-            <div className="rule my-10" />
+            <HorizontalRule />
 
-            <section aria-label="Poem body" className="my-12">
+            <section aria-label="Poem body" className="my-5">
                 <PoemBody body={poem.body} />
             </section>
 
-            <div className="rule my-10" />
+            <section aria-label="Author's Notes" className="my-5">
+                <p className="eyebrow mb-2">Author&#39;s Notes</p>
+                {poem.notes.length > 0 ? (
+                    <ul className="space-y-1 font-sans text-[0.85rem] text-ink/80">
+                        {poem.notes.map((n, i) => (
+                            <li key={i}>{n}</li>
+                        ))}
+                    </ul>
+                ) : (
+                    <p className="font-sans text-[0.85rem] text-muted">
+                        [No notes.]
+                    </p>
+                )}
+            </section>
 
-            <dl className="grid grid-cols-1 gap-x-8 gap-y-5 text-[0.95rem] md:grid-cols-[9rem_1fr]">
+            <HorizontalRule />
+
+            <dl className="grid grid-cols-1 gap-x-3 gap-y-3 text-[0.95rem] md:grid-cols-[9rem_1fr]">
                 <MetaRow label="Themes" values={poem.themes} />
                 <MetaRow label="Register" values={poem.emotional_register} />
                 <MetaRow label="Form" values={poem.form_and_craft} />
@@ -152,7 +168,7 @@ export default function PoemDetail({ poem: initial }: { poem: Poem }) {
                 </dd>
             </dl>
 
-            <div className="rule my-10" />
+            <HorizontalRule />
             {!readOnly && (
                 <footer className="flex items-center justify-between gap-6">
                     <button
