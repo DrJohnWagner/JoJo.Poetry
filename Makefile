@@ -57,21 +57,37 @@ install: setup ## Alias for setup
 # Local development
 # ------------------------------------------------------------------------------
 
-.PHONY: dev-server
-dev-server: ## Run backend in reload mode (uvicorn)
-	$(UV) run uvicorn $(UVICORN_APP) --reload --host $(SERVER_HOST) --port $(SERVER_PORT)
+.PHONY: dev-server-ro
+dev-server-ro: ## Run backend in reload mode (uvicorn)
+	READ_ONLY=true $(UV) run uvicorn $(UVICORN_APP) --reload --host $(SERVER_HOST) --port $(SERVER_PORT)
 
-.PHONY: dev-web
-dev-web: ## Run Next.js development server
-	$(NPM) run dev
+.PHONY: dev-web-ro
+dev-web-ro: ## Run Next.js development server
+	READ_ONLY=true $(NPM) run dev
 
-.PHONY: dev
-dev: ## Run backend + frontend together (parallel)
-	$(MAKE) -j2 dev-server dev-web
+.PHONY: dev-server-rw
+dev-server-rw: ## Run backend in reload mode (uvicorn)
+	READ_ONLY=false $(UV) run uvicorn $(UVICORN_APP) --reload --host $(SERVER_HOST) --port $(SERVER_PORT)
 
-.PHONY: start-web
-start-web: ## Run Next.js production server
-	$(NPM) run start
+.PHONY: dev-web-rw
+dev-web-rw: ## Run Next.js development server
+	READ_ONLY=false $(NPM) run dev
+
+.PHONY: dev-ro
+dev-ro: ## Run backend + frontend together (parallel)
+	$(MAKE) -j2 dev-server-ro dev-web-ro
+
+.PHONY: dev-rw
+dev-rw: ## Run backend + frontend together (parallel)
+	$(MAKE) -j2 dev-server-rw dev-web-rw
+
+.PHONY: start-web-ro
+start-web-ro: ## Run Next.js production server
+	READ_ONLY=true $(NPM) run start
+
+ .PHONY: start-web-rw
+ start-web-rw: ## Run Next.js production server
+	READ_ONLY=false $(NPM) run start
 
 # ------------------------------------------------------------------------------
 # Testing / quality
@@ -79,11 +95,11 @@ start-web: ## Run Next.js production server
 
 .PHONY: test
 test: ## Run Python test suite
-	$(UV) run pytest $(PYTEST_PATH) -q
+	READ_ONLY=false $(UV) run pytest $(PYTEST_PATH) -q
 
 .PHONY: test-verbose
 test-verbose: ## Run Python tests with full verbosity
-	$(UV) run pytest $(PYTEST_PATH) -vv
+	READ_ONLY=false $(UV) run pytest $(PYTEST_PATH) -vv
 
 .PHONY: typecheck
 typecheck: ## Run TypeScript typecheck
@@ -111,29 +127,49 @@ build: build-web ## Alias for build-web
 # Docker / compose
 # ------------------------------------------------------------------------------
 
-.PHONY: docker-build
-docker-build: ## Build Docker images
-	$(COMPOSE) build
+.PHONY: docker-build-ro
+docker-build-ro: ## Build Docker images
+	READ_ONLY=true $(COMPOSE) build
 
-.PHONY: docker-up
-docker-up: ## Start Docker services in foreground
-	$(COMPOSE) up
+.PHONY: docker-build-rw
+docker-build-rw: ## Build Docker images
+	READ_ONLY=false $(COMPOSE) build
 
-.PHONY: docker-up-build
-docker-up-build: ## Build and start Docker services in foreground
-	$(COMPOSE) up --build
+.PHONY: docker-up-ro
+docker-up-ro: ## Start Docker services in foreground
+	READ_ONLY=true $(COMPOSE) up
 
-.PHONY: docker-up-detached
-docker-up-detached: ## Start Docker services in background
-	$(COMPOSE) up -d
+.PHONY: docker-up-rw
+docker-up-rw: ## Start Docker services in foreground
+	READ_ONLY=false $(COMPOSE) up
+
+.PHONY: docker-up-build-ro
+docker-up-build-ro: ## Build and start Docker services in foreground
+	READ_ONLY=true $(COMPOSE) up --build
+
+.PHONY: docker-up-build-rw
+docker-up-build-rw: ## Build and start Docker services in foreground
+	READ_ONLY=false $(COMPOSE) up --build
+
+.PHONY: docker-up-detached-ro
+docker-up-detached-ro: ## Start Docker services in background
+	READ_ONLY=true $(COMPOSE) up -d
+
+ .PHONY: docker-up-detached-rw
+ docker-up-detached-rw: ## Start Docker services in background
+	READ_ONLY=false $(COMPOSE) up -d
+
+.PHONY: docker-restart-ro
+docker-restart-ro: ## Restart Docker services
+	READ_ONLY=true $(COMPOSE) restart
+
+ .PHONY: docker-restart-rw
+ docker-restart-rw: ## Restart Docker services
+	READ_ONLY=false $(COMPOSE) restart
 
 .PHONY: docker-down
 docker-down: ## Stop and remove Docker services
 	$(COMPOSE) down
-
-.PHONY: docker-restart
-docker-restart: ## Restart Docker services
-	$(COMPOSE) restart
 
 .PHONY: docker-logs
 docker-logs: ## Stream Docker compose logs

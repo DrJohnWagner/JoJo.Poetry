@@ -10,6 +10,7 @@ services:
     environment:
       - POEMS_DATABASE=database/Poems.json
       - CORS_ORIGINS=http://localhost:3005,http://127.0.0.1:3005
+      - READ_ONLY=${READ_ONLY:-true}
 
   web:
     build:
@@ -23,5 +24,6 @@ services:
     environment:
       - NEXT_PUBLIC_API_BASE_URL=http://localhost:8000
       - API_BASE_URL_SERVER=http://server:8000
+      - READ_ONLY=${READ_ONLY:-true}
     depends_on:
       - server

@@ -16,12 +16,12 @@ export const EDITABLE_FIELDS = [
     "pinned",
     "date",
     "url",
-    "copyright",
     "themes",
     "emotional_register",
     "form_and_craft",
     "key_images",
     "contest_fit",
+    "socials",
 ] as const
 export type EditableField = (typeof EDITABLE_FIELDS)[number]
 
@@ -48,12 +48,12 @@ export interface PoemDraft {
     pinned: boolean
     date: string // ISO 8601
     url: string
-    copyright: string
     themes: string // comma-separated
     emotional_register: string
     form_and_craft: string
     key_images: string
     contest_fit: string
+    socials: string // comma-separated
 }
 
 export function draftFromPoem(p: Poem, plainBody: string): PoemDraft {
@@ -65,12 +65,12 @@ export function draftFromPoem(p: Poem, plainBody: string): PoemDraft {
         pinned: p.pinned,
         date: p.date,
         url: p.url,
-        copyright: p.copyright,
         themes: p.themes.join(", "),
         emotional_register: p.emotional_register.join(", "),
         form_and_craft: p.form_and_craft.join(", "),
         key_images: p.key_images.join(", "),
         contest_fit: p.contest_fit.join(", "),
+        socials: p.socials.join(", "),
     }
 }
 
@@ -98,7 +98,6 @@ export function diffDraft(
     if (draft.pinned !== base.pinned) out.pinned = draft.pinned
     if (draft.date !== base.date) out.date = draft.date
     if (draft.url !== base.url) out.url = draft.url
-    if (draft.copyright !== base.copyright) out.copyright = draft.copyright
 
     const tagFields: (keyof PoemDraft & keyof Poem)[] = [
         "themes",
@@ -106,6 +105,7 @@ export function diffDraft(
         "form_and_craft",
         "key_images",
         "contest_fit",
+        "socials",
     ]
     for (const k of tagFields) {
         const next = splitTags(draft[k] as string)

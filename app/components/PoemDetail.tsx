@@ -1,14 +1,25 @@
 "use client"
 
 import { useState } from "react"
+import { FaMedal } from "react-icons/fa"
 import type { Poem } from "@/lib/types"
+import { useAppConfig } from "./AppConfig"
 import { formatDate } from "@/lib/format"
 import PoemBody from "./PoemBody"
 import PinToggle from "./PinToggle"
 import DeleteButton from "./DeleteButton"
 import PoemEditorForm from "./PoemEditorForm"
 
+function medalColor(award: string): string {
+    if (award === "Gold") return "#b8860b"
+    if (award === "Silver") return "#888"
+    if (award === "Bronze") return "#a0522d"
+    if (award === "Honorable Mention") return "#4a7c59"
+    return "currentColor"
+}
+
 export default function PoemDetail({ poem: initial }: { poem: Poem }) {
+    const { readOnly } = useAppConfig()
     const [poem, setPoem] = useState<Poem>(initial)
     const [editing, setEditing] = useState(false)
 
@@ -33,7 +44,7 @@ export default function PoemDetail({ poem: initial }: { poem: Poem }) {
         <div>
             <header className="mb-10">
                 <div className="flex items-baseline justify-between gap-6">
-                    <h1 className="font-display text-3xl md:text-4xl leading-tight tracking-tight flex-1">
+                    <h1 className="flex-1 font-display text-3xl leading-tight tracking-tight md:text-4xl">
                         {poem.title}
                     </h1>
                     <PinToggle
@@ -56,39 +67,76 @@ export default function PoemDetail({ poem: initial }: { poem: Poem }) {
                 </div>
 
                 {poem.project && (
-                    <p className="mt-6 italic text-ink/90 leading-relaxed">
+                    <p className="mt-6 italic leading-relaxed text-ink/90">
                         {poem.project}
                     </p>
                 )}
             </header>
 
-            <div className="my-10 rule" />
+            <div className="rule my-10" />
 
             <section aria-label="Poem body" className="my-12">
                 <PoemBody body={poem.body} />
             </section>
 
-            <div className="my-10 rule" />
+            <div className="rule my-10" />
 
-            <dl className="grid grid-cols-1 md:grid-cols-[9rem_1fr] gap-y-5 gap-x-8 text-[0.95rem]">
+            <dl className="grid grid-cols-1 gap-x-8 gap-y-5 text-[0.95rem] md:grid-cols-[9rem_1fr]">
                 <MetaRow label="Themes" values={poem.themes} />
                 <MetaRow label="Register" values={poem.emotional_register} />
                 <MetaRow label="Form" values={poem.form_and_craft} />
                 <MetaRow label="Images" values={poem.key_images} />
                 <MetaRow label="Contest fit" values={poem.contest_fit} />
+                {poem.socials.length > 0 && (
+                    <>
+                        <dt className="eyebrow pt-1">Socials</dt>
+                        <dd className="space-y-1">
+                            {poem.socials.map((s) => (
+                                <div key={s}>
+                                    <a
+                                        href={s}
+                                        target="_blank"
+                                        rel="noreferrer"
+                                    >
+                                        {(() => {
+                                            try {
+                                                return (
+                                                    new URL(s).hostname + " ↗"
+                                                )
+                                            } catch {
+                                                return s + " ↗"
+                                            }
+                                        })()}
+                                    </a>
+                                </div>
+                            ))}
+                        </dd>
+                    </>
+                )}
 
                 {poem.contests.length > 0 && (
                     <>
                         <dt className="eyebrow pt-1">Contests</dt>
                         <dd className="space-y-1">
                             {poem.contests.map((c) => (
-                                <div key={c.url}>
+                                <div
+                                    key={c.url}
+                                    className="flex items-center gap-1.5"
+                                >
+                                    <FaMedal
+                                        style={{
+                                            color: medalColor(c.award),
+                                            flexShrink: 0,
+                                        }}
+                                    />
                                     <a
                                         href={c.url}
                                         target="_blank"
                                         rel="noreferrer"
                                     >
-                                        {c.award}
+                                        {c.title
+                                            ? `${c.award} — ${c.title}`
+                                            : c.award}
                                     </a>
                                 </div>
                             ))}
@@ -104,25 +152,18 @@ export default function PoemDetail({ poem: initial }: { poem: Poem }) {
                 </dd>
             </dl>
 
-            {poem.copyright && (
-                <>
-                    <div className="my-10 rule" />
-                    <section className="text-sm text-muted leading-relaxed whitespace-pre-wrap">
-                        {poem.copyright.replace(/<br\s*\/?>\n?/gi, "\n")}
-                    </section>
-                </>
+            <div className="rule my-10" />
+            {!readOnly && (
+                <footer className="flex items-center justify-between gap-6">
+                    <button
+                        onClick={() => setEditing(true)}
+                        className="eyebrow border-b border-ink pb-1 transition-colors hover:border-accent hover:text-accent"
+                    >
+                        Edit poem
+                    </button>
+                    <DeleteButton id={poem.id} />
+                </footer>
             )}
-
-            <div className="my-10 rule" />
-            <footer className="flex items-center justify-between gap-6">
-                <button
-                    onClick={() => setEditing(true)}
-                    className="eyebrow border-b border-ink pb-1 hover:text-accent hover:border-accent transition-colors"
-                >
-                    Edit poem
-                </button>
-                <DeleteButton id={poem.id} />
-            </footer>
         </div>
     )
 }

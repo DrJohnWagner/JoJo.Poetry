@@ -47,7 +47,6 @@ export default function PoemEditorForm({
         if (!dirty) return
         const handler = (e: BeforeUnloadEvent) => {
             e.preventDefault()
-            e.returnValue = ""
         }
         window.addEventListener("beforeunload", handler)
         return () => window.removeEventListener("beforeunload", handler)
@@ -180,15 +179,11 @@ export default function PoemEditorForm({
                 value={draft.contest_fit}
                 onChange={(v) => set("contest_fit", v)}
             />
-
-            <Labelled label="Copyright / note">
-                <textarea
-                    value={draft.copyright}
-                    onChange={(e) => set("copyright", e.target.value)}
-                    rows={3}
-                    className={textareaCls}
-                />
-            </Labelled>
+            <TagInput
+                label="Socials"
+                value={draft.socials}
+                onChange={(v) => set("socials", v)}
+            />
 
             <div className="pt-2 flex items-center gap-6 font-sans text-[0.72rem] uppercase tracking-wider2">
                 <button

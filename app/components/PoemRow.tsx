@@ -3,6 +3,7 @@
 import Link from "next/link"
 import { useState } from "react"
 import type { Poem, PoemSummary } from "@/lib/types"
+import { useAppConfig } from "./AppConfig"
 import { formatDate } from "@/lib/format"
 import { fetchPoem } from "@/lib/api"
 import PinToggle from "./PinToggle"
@@ -28,6 +29,7 @@ export default function PoemRow({
     onDelete: () => void
     onPinChanged: (pinned: boolean) => void
 }) {
+    const { readOnly } = useAppConfig()
     const [armedDelete, setArmedDelete] = useState(false)
     const [bodyOpen, setBodyOpen] = useState(false)
     const [body, setBody] = useState<string | null>(null)
@@ -103,24 +105,26 @@ export default function PoemRow({
                     {poem.themes.slice(0, 6).join(" · ")}
                 </p>
             )}
-            <div className="mt-4 flex items-center gap-5 font-sans text-[0.72rem] uppercase tracking-wider2 text-muted">
-                <button onClick={onEdit} className="hover:text-ink">
-                    edit
-                </button>
-                <button
-                    onClick={() => {
-                        if (!armedDelete) {
-                            setArmedDelete(true)
-                            setTimeout(() => setArmedDelete(false), 4000)
-                            return
-                        }
-                        onDelete()
-                    }}
-                    className={armedDelete ? "text-red-700" : "hover:text-ink"}
-                >
-                    {armedDelete ? "confirm delete" : "delete"}
-                </button>
-            </div>
+            {!readOnly && (
+                <div className="mt-4 flex items-center gap-5 font-sans text-[0.72rem] uppercase tracking-wider2 text-muted">
+                    <button onClick={onEdit} className="hover:text-ink">
+                        edit
+                    </button>
+                    <button
+                        onClick={() => {
+                            if (!armedDelete) {
+                                setArmedDelete(true)
+                                setTimeout(() => setArmedDelete(false), 4000)
+                                return
+                            }
+                            onDelete()
+                        }}
+                        className={armedDelete ? "text-red-700" : "hover:text-ink"}
+                    >
+                        {armedDelete ? "confirm delete" : "delete"}
+                    </button>
+                </div>
+            )}
         </article>
     )
 }

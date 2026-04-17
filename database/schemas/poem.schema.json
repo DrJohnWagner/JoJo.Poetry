@@ -10,7 +10,6 @@
     "title",
     "url",
     "body",
-    "copyright",
     "contests",
     "date",
     "themes",
@@ -43,10 +42,6 @@
       "description": "Poem body as an HTML fragment with <br/> line breaks and literal whitespace for indentation. Editable. Searchable via a normalised plain-text projection, not the raw HTML.",
       "type": "string",
       "minLength": 1
-    },
-    "copyright": {
-      "description": "Free-form copyright / provenance / commentary block as authored. May contain <br/> breaks and embedded URLs.",
-      "type": "string"
     },
     "contests": {
       "description": "Zero or more contest entries the poem was submitted to.",
@@ -119,6 +114,12 @@
       "type": "array",
       "default": [],
       "items": { "$ref": "#/$defs/Note" }
+    },
+    "socials": {
+      "description": "Optional. Social media post URLs or handles for this poem. Defaults to [] when absent.",
+      "type": "array",
+      "default": [],
+      "items": { "type": "string" }
     }
   },
   "$defs": {
@@ -132,6 +133,10 @@
           "description": "Award tier. Observed values: Gold. Kept open-vocabulary for flexibility.",
           "type": "string",
           "minLength": 1
+        },
+        "title": {
+          "description": "Optional name of the contest.",
+          "type": "string"
         }
       }
     },

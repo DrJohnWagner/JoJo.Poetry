@@ -28,9 +28,21 @@ from server.repository import (
     _body_to_plaintext,
     get_repository,
 )
+from server.config import get_settings
 
 # Re-export Contest / Note locally for the patch model.
 from poem import Contest, Note  # noqa: E402
+
+
+# ---------------------------------------------------------------- read-only guard
+
+def require_write_access() -> None:
+    """Dependency that rejects all mutations when READ_ONLY=true."""
+    if get_settings().read_only:
+        raise HTTPException(
+            status_code=status.HTTP_405_METHOD_NOT_ALLOWED,
+            detail="This instance is read-only.",
+        )
 
 
 # ---------------------------------------------------------------- response models
@@ -51,10 +63,9 @@ class HealthResponse(BaseModel):
 class PoemSummary(BaseModel):
     """List-view projection of a poem.
 
-    Intentionally omits the large ``body``, the free-form ``copyright``
-    block, and the note arrays, so list payloads stay compact and
-    cache-friendly. Clients fetch the full record via
-    ``GET /api/poems/{id}`` when needed.
+    Intentionally omits the large ``body`` and the note arrays, so list
+    payloads stay compact and cache-friendly. Clients fetch the full
+    record via ``GET /api/poems/{id}`` when needed.
     """
     model_config = ConfigDict(extra="forbid")
 
@@ -263,7 +274,6 @@ class PoemCreate(BaseModel):
     Optional (defaults applied server-side):
 
     - ``date`` — defaults to the current UTC time (second precision).
-    - ``copyright`` — defaults to ``""``.
     - ``contests`` / ``themes`` / ``emotional_register`` /
       ``form_and_craft`` / ``key_images`` / ``contest_fit`` — default
       to ``[]``.
@@ -288,7 +298,6 @@ class PoemCreate(BaseModel):
     rating: int = Field(ge=0, le=100)
 
     date: Optional[datetime] = None
-    copyright: str = ""
     contests: List[Contest] = Field(default_factory=list)
     themes: List[str] = Field(default_factory=list)
     emotional_register: List[str] = Field(default_factory=list)
@@ -318,7 +327,6 @@ class PoemPatch(BaseModel):
     title: Optional[str] = Field(None, min_length=1)
     url: Optional[str] = None
     body: Optional[str] = Field(None, min_length=1)
-    copyright: Optional[str] = None
     contests: Optional[List[Contest]] = None
     date: Optional[datetime] = None
     themes: Optional[List[str]] = None
@@ -361,7 +369,6 @@ def advanced_search(
     title: Optional[str] = Query(None, description="Case-insensitive substring of title."),
     body: Optional[str] = Query(None, description="Case-insensitive substring of body (plain-text projection)."),
     project: Optional[str] = Query(None, description="Case-insensitive substring of project statement."),
-    copyright: Optional[str] = Query(None, description="Case-insensitive substring of copyright/commentary block."),
     themes: List[str] = Query(default_factory=list, description="Any of these themes (OR within field)."),
     emotional_register: List[str] = Query(default_factory=list),
     form_and_craft: List[str] = Query(default_factory=list),
@@ -399,7 +406,7 @@ def advanced_search(
 
     Matching rules:
 
-    - **Text fields** (``title``, ``body``, ``project``, ``copyright``,
+    - **Text fields** (``title``, ``body``, ``project``,
       ``authors_notes``, ``notes``): case-insensitive substring on a
       normalised projection (HTML ``<br/>`` collapsed to newlines,
       entities unescaped). For note arrays, the projection is the
@@ -433,7 +440,6 @@ def advanced_search(
     text_queries = {
         "title": title,
         "project": project,
-        "copyright": copyright,
         "body": body,
         "authors_notes": authors_notes,
         "notes": notes,
@@ -465,8 +471,6 @@ def advanced_search(
         if title and _text_hit(title, p.title):
             return True
         if project and _text_hit(project, p.project):
-            return True
-        if copyright and _text_hit(copyright, p.copyright):
             return True
         if body and _text_hit(body, _body_to_plaintext(p.body)):
             return True
@@ -537,6 +541,7 @@ def advanced_search(
 def create_poem(
     payload: PoemCreate,
     repo: PoemRepository = Depends(get_repository),
+    _: None = Depends(require_write_access),
 ) -> Poem:
     """Create a new poem.
 
@@ -595,6 +600,7 @@ def patch_poem(
     poem_id: UUID,
     patch: PoemPatch,
     repo: PoemRepository = Depends(get_repository),
+    _: None = Depends(require_write_access),
 ) -> Poem:
     """Partial update of an existing poem.
 
@@ -627,7 +633,11 @@ def patch_poem(
     response_class=Response,
     tags=["poems"],
 )
-def delete_poem(poem_id: UUID, repo: PoemRepository = Depends(get_repository)) -> None:
+def delete_poem(
+    poem_id: UUID,
+    repo: PoemRepository = Depends(get_repository),
+    _: None = Depends(require_write_access),
+) -> None:
     """Hard delete. Returns ``204 No Content`` on success, ``404`` if
     the id does not exist. The frontend must treat this as
     confirmed-destructive and only issue it after user confirmation.

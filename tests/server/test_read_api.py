@@ -42,7 +42,7 @@ def test_list_default_shape_and_pagination(client):
     assert set(body) == {"items", "pagination"}
     assert body["pagination"] == {"total": 5, "offset": 0, "limit": 3, "has_more": True}
     summary = body["items"][0]
-    # summary omits body / copyright / notes
+    # summary omits body and notes
     assert "body" not in summary and "copyright" not in summary
     assert set(summary) >= {
         "id", "title", "url", "date", "rating", "lines", "words",
@@ -102,8 +102,8 @@ def test_get_full_poem_by_id(client):
     assert r.status_code == 200
     full = r.json()
     assert full["id"] == pid
-    # full record includes body + copyright
-    assert full["body"] and full["copyright"]
+    # full record includes body
+    assert full["body"]
 
 
 def test_malformed_id_returns_422(client):

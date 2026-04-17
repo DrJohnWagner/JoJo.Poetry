@@ -3,6 +3,7 @@ export type UUID = string
 export interface Contest {
     url: string
     award: string
+    title?: string
 }
 
 export interface Note {
@@ -30,11 +31,11 @@ export interface PoemSummary {
 
 export interface Poem extends Omit<PoemSummary, "has_contests"> {
     body: string
-    copyright: string
     contests: Contest[]
     key_images: string[]
     authors_notes: Note[]
     notes: Note[]
+    socials: string[]
 }
 
 export interface Pagination {

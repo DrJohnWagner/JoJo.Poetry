@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react"
 import { patchPoem } from "@/lib/api"
+import { useAppConfig } from "./AppConfig"
 
 /** A small, text-forward pin control. Visually secondary to the title.
  *  Server-confirmed: local state flips only after PATCH returns 200.
@@ -15,9 +16,12 @@ export default function PinToggle({
     initialPinned: boolean
     onChange?: (next: boolean) => void
 }) {
+    const { readOnly } = useAppConfig()
     const [pinned, setPinned] = useState(initialPinned)
     const [pending, startTransition] = useTransition()
     const [err, setErr] = useState<string | null>(null)
+
+    if (readOnly) return null
 
     function toggle() {
         setErr(null)

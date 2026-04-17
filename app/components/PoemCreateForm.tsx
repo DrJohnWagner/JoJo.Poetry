@@ -25,7 +25,6 @@ export default function PoemCreateForm() {
 
     // Optional — empty strings/arrays map to backend defaults if left blank
     const [date, setDate] = useState<string>("") // blank → backend uses now()
-    const [copyright, setCopyright] = useState("")
     const [themes, setThemes] = useState("")
     const [emotionalRegister, setEmotionalRegister] = useState("")
     const [formAndCraft, setFormAndCraft] = useState("")
@@ -43,7 +42,6 @@ export default function PoemCreateForm() {
         body !== "" ||
         rating !== 75 ||
         date !== "" ||
-        copyright !== "" ||
         themes !== "" ||
         emotionalRegister !== "" ||
         formAndCraft !== "" ||
@@ -56,7 +54,6 @@ export default function PoemCreateForm() {
         if (!dirty || saving) return
         const handler = (e: BeforeUnloadEvent) => {
             e.preventDefault()
-            e.returnValue = ""
         }
         window.addEventListener("beforeunload", handler)
         return () => window.removeEventListener("beforeunload", handler)
@@ -90,7 +87,6 @@ export default function PoemCreateForm() {
             pinned,
         }
         if (date.trim()) payload.date = date.trim()
-        if (copyright) payload.copyright = copyright
         if (themes.trim()) payload.themes = splitTags(themes)
         if (emotionalRegister.trim())
             payload.emotional_register = splitTags(emotionalRegister)
@@ -244,15 +240,6 @@ export default function PoemCreateForm() {
                 value={contestFit}
                 onChange={setContestFit}
             />
-
-            <Labelled label="Copyright / note" hint="Optional; free-form.">
-                <textarea
-                    value={copyright}
-                    onChange={(e) => setCopyright(e.target.value)}
-                    rows={3}
-                    className={textareaCls}
-                />
-            </Labelled>
 
             <div className="pt-4 flex items-center gap-6 font-sans text-[0.72rem] uppercase tracking-wider2">
                 <button

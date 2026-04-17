@@ -22,6 +22,7 @@ class Contest(BaseModel):
 
     url: HttpUrl
     award: str = Field(min_length=1)
+    title: Optional[str] = None
 
 
 class Note(BaseModel):
@@ -50,7 +51,6 @@ class Poem(BaseModel):
     title: str = Field(min_length=1)
     url: HttpUrl
     body: str = Field(min_length=1)
-    copyright: str
     contests: List[Contest]
     date: datetime
     themes: List[str]
@@ -69,6 +69,7 @@ class Poem(BaseModel):
     pinned: bool = False
     authors_notes: List[Note] = Field(default_factory=list)
     notes: List[Note] = Field(default_factory=list)
+    socials: List[str] = Field(default_factory=list)
 
     @field_validator("id")
     @classmethod

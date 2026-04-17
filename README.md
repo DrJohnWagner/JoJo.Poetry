@@ -59,13 +59,15 @@ Two services, one flat JSON data source:
 │   ├── poems/new/page.tsx            # Dedicated create page
 │   ├── layout.tsx, globals.css
 │   ├── components/
-│   │   ├── PoemListing.tsx           # Client: fetch, paginate, row edit/delete
+│   │   ├── AppConfig.tsx             # React context provider for runtime config (readOnly)
+│   │   ├── PoemListing.tsx           # Client: fetch, infinite scroll, row edit/delete
 │   │   ├── PoemEditorForm.tsx        # Shared editor (list row + detail)
 │   │   ├── PoemRowEditor.tsx         # Thin wrapper around PoemEditorForm for rows
 │   │   ├── PoemCreateForm.tsx        # Dedicated POST form with defaults + guards
 │   │   ├── PoemDetail.tsx            # Reading view + Edit toggle
 │   │   ├── SearchBar.tsx             # q + submit + Advanced modal trigger
 │   │   ├── AdvancedSearchDialog.tsx  # Native <dialog>-backed modal
+│   │   ├── PoemRow.tsx               # Single poem row (title, meta, collapsible body)
 │   │   ├── PinToggle.tsx             # Server-confirmed pin/unpin
 │   │   ├── DeleteButton.tsx          # Two-step confirmation control
 │   │   └── PoemBody.tsx              # Body -> plaintext projection display
@@ -94,14 +96,14 @@ The authoritative schema is `database/schemas/poem.schema.json`;
 | `title`                                                                       | string                           | yes                        | yes           | yes                             |                                                                                                  |
 | `url`                                                                         | URI                              | yes                        | yes           | no                              | Canonical external link.                                                                         |
 | `body`                                                                        | string (HTML fragment)           | yes                        | yes           | yes\*                           | `<br/>` line breaks + literal whitespace for indentation. \*Search hits a plain-text projection. |
-| `copyright`                                                                   | string                           | yes                        | yes           | advanced only                   | Free-form commentary. Excluded from simple search.                                               |
-| `contests`                                                                    | `[{url, award}]`                 | yes (may be empty)         | yes (API)     | via `awards` filter             | Only `award` is surfaced to search.                                                              |
+| `contests`                                                                    | `[{url, award, title?}]`         | yes (may be empty)         | yes (API)     | via `awards` filter             | `award` is surfaced to search; `title` is an optional contest name displayed in the UI.          |
 | `date`                                                                        | ISO 8601 datetime                | yes                        | yes           | year/month in advanced search   | Timezone-aware; UTC in existing data.                                                            |
 | `themes`, `emotional_register`, `form_and_craft`, `key_images`, `contest_fit` | `string[]`                       | yes (may be empty)         | yes           | yes                             | Free-vocabulary tags.                                                                            |
 | `project`                                                                     | string                           | yes                        | yes           | yes                             | One-sentence authorial statement.                                                                |
 | `rating`                                                                      | int 0–100                        | yes                        | yes           | min/max band                    | Authorial self-rating.                                                                           |
 | `lines`, `words`                                                              | int ≥ 0                          | yes                        | **derived**   | no                              | Recomputed from `body` on every write.                                                           |
 | `pinned`                                                                      | bool                             | optional (default `false`) | yes           | no                              | Pinned poems lead listings.                                                                      |
+| `socials`                                                                     | `string[]`                       | optional (default `[]`)    | yes           | no                              | Social media URLs; displayed as links on the detail page.                                        |
 | `authors_notes`, `notes`                                                      | `[{body, created_at?, author?}]` | optional (default `[]`)    | yes (API)     | via simple/advanced text search | No inline UI yet.                                                                                |
 
 Strictness: `extra="forbid"` on the Pydantic model and
@@ -145,12 +147,10 @@ read or write them.
 - **`poem.py`** — Pydantic models (`Poem`, `Contest`, `Note`). Used
   by the backend at runtime for load-time validation, PATCH-merge
   validation, and response shaping. Applies the documented defaults
-  (`pinned=false`, `authors_notes=[]`, `notes=[]`) when optional
-  fields are absent.
+  (`pinned=false`, `socials=[]`, `authors_notes=[]`, `notes=[]`) when
+  optional fields are absent.
 
 ## Configuration
-
-One backend env var; one frontend env var.
 
 ### Backend
 
@@ -158,6 +158,7 @@ One backend env var; one frontend env var.
 | ---------------- | --------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
 | `POEMS_DATABASE` | `<repo>/database/Poems.json`                  | Path to the poems JSON file. Absolute paths used verbatim; relative paths resolved against the **current working directory**. |
 | `CORS_ORIGINS`   | `http://localhost:3000,http://127.0.0.1:3000` | Comma-separated list of allowed origins for browser calls.                                                                    |
+| `READ_ONLY`      | `true`                                        | When `true`, all mutation endpoints (POST/PATCH/DELETE) return `405 Method Not Allowed`.                                      |
 
 A `.env` file in the current working directory is auto-loaded (via
 `pydantic-settings`). Settings are exposed through
@@ -165,53 +166,94 @@ A `.env` file in the current working directory is auto-loaded (via
 
 ### Frontend
 
-| Variable                   | Default                 | Purpose                                          |
-| -------------------------- | ----------------------- | ------------------------------------------------ |
-| `NEXT_PUBLIC_API_BASE_URL` | `http://localhost:8000` | Origin the browser calls. Inlined at build time. |
+| Variable                   | Default                 | Purpose                                                                       |
+| -------------------------- | ----------------------- | ----------------------------------------------------------------------------- |
+| `NEXT_PUBLIC_API_BASE_URL` | `http://localhost:8000` | Origin the browser calls. Inlined at build time.                              |
+| `READ_ONLY`                | `true`                  | When `true`, hides all editing controls (pin, edit, delete, new poem). Read at server-component render time; not inlined at build. |
 
-Copy `.env.example` to `.env.local` to override.
+Both services default to read-only. Pass `READ_ONLY=false` to enable
+editing (see Local development and Docker sections below).
+
+Copy `.env.example` to `.env.local` to override frontend env vars.
 
 ## Local development
 
-Two terminals; two processes.
+Use `make setup` once to install all dependencies, then the `dev-ro` /
+`dev-rw` targets to start both services in parallel:
+
+```bash
+make setup          # create venv, uv sync, npm install (one-time)
+
+make dev-ro         # read-only  — backend + frontend, parallel
+make dev-rw         # read-write — backend + frontend, parallel
+```
+
+Or run backend and frontend separately:
+
+```bash
+make dev-server-ro  # READ_ONLY=true  uvicorn --reload  (port 8000)
+make dev-server-rw  # READ_ONLY=false uvicorn --reload  (port 8000)
+
+make dev-web-ro     # READ_ONLY=true  npm run dev       (port 3000)
+make dev-web-rw     # READ_ONLY=false npm run dev       (port 3000)
+```
+
+Or manually, without Make:
 
 ```bash
 # Backend
-uv venv .venv
-source .venv/bin/activate
+uv venv .venv && source .venv/bin/activate
 uv sync --group dev
-uv run uvicorn server.app:app --reload # http://localhost:8000
+READ_ONLY=false uv run uvicorn server.app:app --reload   # http://localhost:8000
 
-# Frontend
-cp .env.example .env.local
+# Frontend (separate terminal)
 npm install
-npm run dev # http://localhost:3000
+READ_ONLY=false npm run dev                              # http://localhost:3000
 ```
 
-The frontend will call the backend at `NEXT_PUBLIC_API_BASE_URL`; the
+The frontend calls the backend at `NEXT_PUBLIC_API_BASE_URL`; the
 backend's default CORS allows `http://localhost:3000`.
 
 ## Docker
 
 A two-service `docker-compose.yml` runs the whole stack. By default,
 the frontend is published on **host port `3005`** (container port 3000
-internally); the backend is published on `8000`.
+internally); the backend is published on `8000`. Both services default
+to `READ_ONLY=true`.
 
 ```bash
-docker compose up --build
-# Visit http://localhost:3005
+make docker-up-build-ro   # build + start, read-only  → http://localhost:3005
+make docker-up-build-rw   # build + start, read-write → http://localhost:3005
+```
+
+Or without Make:
+
+```bash
+READ_ONLY=false docker compose up --build
+```
+
+Other useful targets:
+
+```bash
+make docker-up-ro           # start (no build) read-only
+make docker-up-rw           # start (no build) read-write
+make docker-up-detached-ro  # detached, read-only
+make docker-up-detached-rw  # detached, read-write
+make docker-down            # stop and remove containers
+make docker-logs            # stream logs
+make docker-ps              # service status
+make docker-shell-server    # shell into running server container
+make docker-shell-web       # shell into running web container
 ```
 
 Details:
 
-- `server/Dockerfile` copies `requirements.txt`, `server/`, and
+- `Dockerfile.backend` copies `requirements.txt`, `server/`, and
   `database/` into the image; default `POEMS_DATABASE` resolves to
   `/app/database/Poems.json`.
-- The compose file **bind-mounts** `./database/Poems.json` into the
-  backend container so edits made through the UI persist back to the
-  host's checked-in JSON file. Drop the volume to get an ephemeral
-  container.
-
+- The compose file **bind-mounts** `./database/` into the backend
+  container so edits made through the UI persist back to the host's
+  checked-in JSON file. Drop the volume to get an ephemeral container.
 - The backend service publishes `${API_PORT:-8000}:8000`, so the browser can reach
   `http://localhost:8000` directly from the host.
 - The frontend image is a multi-stage Next.js build; the API base URL
@@ -236,8 +278,7 @@ Two endpoints, intentionally distinct.
 
 Case-insensitive substring match over a curated set of fields: `title`,
 body plain-text projection, `project`, all tag arrays, and both note
-arrays. Excluded: `copyright` (noisy provenance), URLs, `id`, numeric
-and boolean fields. `q` combines conjunctively with the same
+arrays. Excluded: URLs, `id`, numeric and boolean fields. `q` combines conjunctively with the same
 endpoint's tag and numeric filters (`themes=…`, `min_rating=…`, etc.).
 
 ### Advanced field search — `GET /api/poems/search`
@@ -250,8 +291,8 @@ If `q` is also supplied, it is applied first as the same free-text
 match used by `GET /api/poems`, so advanced search can further narrow
 an already filtered collection.
 
-Populated fields: `title`, `body`, `project`, `copyright`,
-`authors_notes`, `notes` (all case-insensitive substring); tag arrays
+Populated fields: `title`, `body`, `project`, `authors_notes`, `notes`
+(all case-insensitive substring); tag arrays
 (OR within field, case-insensitive exact-entry equality); `year`,
 `month` (integer equality on `date`); rating band (`min_rating` +
 `max_rating` together = one populated field); `awards`.
@@ -276,11 +317,13 @@ Authoritative ordering (same on both list endpoints):
 Search filters the set; it never re-ranks. There is no relevance
 scoring.
 
-Pagination contract: `offset ≥ 0`, `1 ≤ limit ≤ 200`. Default
-`offset=0` / `limit=3`, which matches the frontend's incremental-load
-UX (initial load shows 3, Load More fetches 3 more). Response
-metadata: `{ total, offset, limit, has_more }`. Ordering is applied
-before pagination; sequential windows never skip or duplicate.
+Pagination contract: `offset ≥ 0`, `1 ≤ limit ≤ 200`. Server default
+`offset=0` / `limit=3`; the frontend requests `limit=5` per page.
+The listing uses infinite scroll — an `IntersectionObserver` sentinel
+below the list triggers the next window automatically as the user
+scrolls. Response metadata: `{ total, offset, limit, has_more }`.
+Ordering is applied before pagination; sequential windows never skip
+or duplicate.
 
 Invalid dates cannot enter the store — they fail validation at load
 and mutation — so the `date` sort key is always a real timezone-aware
@@ -298,8 +341,8 @@ datetime, no fallback needed.
   (`PoemEditorForm` in compact density) and the detail page
   (comfortable density). Fields editable inline in both contexts:
   `title`, `project`, `body`, `rating`, `pinned`, `date`, `url`,
-  `copyright`, `themes`, `emotional_register`, `form_and_craft`,
-  `key_images`, `contest_fit`. PATCH sends only the diff; local
+  `themes`, `emotional_register`, `form_and_craft`, `key_images`,
+  `contest_fit`, `socials`. PATCH sends only the diff; local
   state is replaced from the server response; failure keeps edit
   mode open with an inline error.
 - **Creation** — dedicated page at `/poems/new`. Required inputs:
@@ -324,10 +367,23 @@ datetime, no fallback needed.
 ## Tests
 
 ```bash
-uv run pytest tests/server # 81 tests, ~4 s
-npx tsc --noEmit # Type-check
-npx next build # Production build
+make test           # READ_ONLY=false uv run pytest tests/server
+make test-verbose   # same, with -vv output
+make typecheck      # npx tsc --noEmit
+make lint           # npx next lint
+make check          # test + typecheck + lint
 ```
+
+Or manually:
+
+```bash
+READ_ONLY=false uv run pytest tests/server   # ~81 tests, ~4 s
+npx tsc --noEmit                             # TypeScript type-check
+npx next build                               # production build
+```
+
+`READ_ONLY=false` is required because several test fixtures exercise
+mutation endpoints that return `405` when `READ_ONLY=true`.
 
 Test files:
 
@@ -372,7 +428,7 @@ Test files:
   is always authoritative (pinned → date-desc → id-asc).
 - **`contests`, `authors_notes`, `notes` have no inline UI yet.**
   They are object arrays; the backend accepts PATCH, but the UI
-  surfaces these as read-only for now.
+  surfaces contests as read-only and has no editor for note arrays.
 - **Browser-native modals** are used for discard/confirm prompts
   (`window.confirm`, `beforeunload`). Fine for a first draft; a
   styled in-page prompt would match the literary aesthetic better.

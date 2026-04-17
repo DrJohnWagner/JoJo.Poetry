@@ -43,6 +43,10 @@ class Settings(BaseSettings):
         default=None,
         description="Path to the poems JSON file. Absolute or relative to CWD.",
     )
+    read_only: bool = Field(
+        default=True,
+        description="When true, all mutation endpoints (POST/PATCH/DELETE) return 405.",
+    )
 
     @property
     def poems_database_path(self) -> Path:
