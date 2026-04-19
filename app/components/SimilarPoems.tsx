@@ -12,11 +12,16 @@ const CATEGORIES: { key: keyof SimilarityBundle; label: string }[] = [
 function NeighbourList({ result, label }: { result: NeighbourListResult; label: string }) {
     if (result.neighbours.length === 0) return null
     return (
-        <section aria-label={`${label} similar poems`} className="p-4 bg-paper/50 rounded border border-ink/10">
-            <h2 className="eyebrow mb-4">{label}</h2>
-            <ul className="space-y-4">
+        <section aria-label={`${label} similar poems`} className="bg-paper/50">
+            <h2 className="eyebrow">{label}</h2>
+            <ul className="mt-3 space-y-4">
                 {result.neighbours.map((n) => (
-                    <PoemSummary key={n.id} id={String(n.id)} title={n.title} project={n.project} />
+                    <PoemSummary
+                        key={n.id}
+                        id={String(n.id)}
+                        title={n.title}
+                        project={n.project}
+                    />
                 ))}
             </ul>
         </section>

@@ -1,3 +1,6 @@
+import Page from "@/components/Page"
+import LColumn from "@/components/LColumn"
+import RColumn from "@/components/RColumn"
 import Header from "@/components/Header"
 import PoemListing from "@/components/PoemListing"
 import RecentPoems from "@/components/RecentPoems"
@@ -8,7 +11,16 @@ export const dynamic = "force-dynamic"
 export default async function Home() {
     const [initial, recent] = await Promise.all([
         fetchPoems(
-            { q: "", year: null, month: null, awards: [], title: "", body: "", project: "", notes: "" },
+            {
+                q: "",
+                year: null,
+                month: null,
+                awards: [],
+                title: "",
+                body: "",
+                project: "",
+                notes: "",
+            },
             0,
             3
         ),
@@ -16,8 +28,8 @@ export default async function Home() {
     ])
 
     return (
-        <article className="lg:grid lg:grid-cols-[auto_20rem] lg:gap-12 lg:justify-center items-start">
-            <div className="max-w-prose">
+        <Page>
+            <LColumn>
                 <Header />
                 <PoemListing
                     initial={{
@@ -26,10 +38,10 @@ export default async function Home() {
                         has_more: initial.pagination.has_more,
                     }}
                 />
-            </div>
-            <aside className="max-w-prose lg:max-w-none mt-12 lg:mt-0 lg:sticky lg:top-8">
+            </LColumn>
+            <RColumn>
                 <RecentPoems recent={recent} />
-            </aside>
-        </article>
+            </RColumn>
+        </Page>
     )
 }

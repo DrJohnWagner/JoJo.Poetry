@@ -67,6 +67,9 @@ Two services, one flat JSON data source:
 │   ├── layout.tsx, globals.css
 │   ├── components/
 │   │   ├── AppConfig.tsx             # React context provider for runtime config (readOnly)
+│   │   ├── Page.tsx                  # Two-column grid wrapper (lg: auto + 20rem, centred)
+│   │   ├── LColumn.tsx               # Left column: max-w-prose, mx-auto on narrow / mx-0 in grid
+│   │   ├── RColumn.tsx               # Right aside: sticky, 106px top padding in grid mode
 │   │   ├── Header.tsx                # Site header (title + "New poem" link); imported by each page
 │   │   ├── PoemListing.tsx           # Client: fetch, infinite scroll, row edit/delete
 │   │   ├── PoemEditorForm.tsx        # Shared editor (list row + detail)
@@ -90,7 +93,7 @@ Two services, one flat JSON data source:
 │   │   ├── DeleteButton.tsx          # Two-step confirmation control
 │   │   ├── NotesEditor.tsx           # Multi-line textarea for author's notes (one line = one note)
 │   │   ├── HorizontalRule.tsx        # Shared <div class="rule my-5" /> divider
-│   │   └── PoemBody.tsx              # Body -> plaintext projection display
+│   │   └── PoemBody.tsx              # Body rendered as HTML: <br/> line breaks + anchor links
 │   └── lib/
 │       ├── api.ts                    # Typed fetch wrappers (fetchPoems, fetchSimilarPoems → SimilarityBundle, fetchRecentPoems)
 │       ├── types.ts                  # Poem / PoemSummary / SearchState / NeighbourListResult / SimilarityBundle / RecentList
@@ -142,8 +145,12 @@ rejected on every read and every write.
 - **Projected** for search, `lines`/`words` derivation, display, and
   editing by one shared regex (`<br\s*/?>\n?` → `\n`) on both
   backend (`_body_to_plaintext`) and frontend (`bodyToPlainText`).
-- **Displayed** inside `white-space: pre-wrap`, so authored newlines
-  **and** leading-whitespace indentation survive byte-for-byte.
+- **Displayed** as HTML via `dangerouslySetInnerHTML` inside
+  `white-space: pre-wrap`, so authored newlines **and** leading-whitespace
+  indentation survive byte-for-byte. Anchor tags (`<a href="...">`) are
+  normalised on render: the href and text are extracted and the tag is
+  rewritten as `<a href="…" target="_blank" rel="noreferrer">text ↗</a>`,
+  opening in a new tab with a visual indicator.
 - **Edited** as the same plaintext projection — writers edit what
   they read. `plainTextToBody` rewrites each newline as `<br/>\n`
   when saving, reproducing the canonical stored form.
@@ -478,10 +485,12 @@ Each value is a full `NeighbourListResult` with its own `k`.
 
 ### Frontend panels
 
-Both the listing page and the single-poem page use a two-column layout:
-a `max-w-prose` left column and a sticky `20rem` right aside. The
-`Header` component (title + optional "New poem" link) sits at the top of
-the left column on every page.
+Both the listing page and the single-poem page use a two-column layout
+built from three shared components: `Page` (the grid wrapper),
+`LColumn` (left: `max-w-prose`, centred on narrow viewports), and
+`RColumn` (right aside: sticky, `20rem` wide, `106px` top padding in
+grid mode). The `Header` component (title + optional "New poem" link)
+sits at the top of the left column on every page.
 
 **Single-poem page** (`/poems/[id]`): the aside shows all five similarity
 axes via `SimilarPoems`. The page calls `GET /api/poems/{id}/similar`

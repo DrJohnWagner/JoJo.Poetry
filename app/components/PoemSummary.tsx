@@ -4,7 +4,7 @@ export default function PoemSummary({ id, title, project }: { id: string; title:
     return (
         <li>
             <h3 className="font-serif text-[1rem] leading-tight">
-                <Link href={`/poems/${id}`} className="text-ink hover:text-accent hover:underline">
+                <Link href={`/poems/${id}`} className="text-ink font-semibold hover:text-accent hover:underline">
                     {title}
                 </Link>
             </h3>
