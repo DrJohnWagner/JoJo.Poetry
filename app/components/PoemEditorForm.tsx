@@ -11,6 +11,12 @@ import {
     type PoemDraft,
 } from "@/lib/editable"
 import NotesEditor from "./NotesEditor"
+import PoemMetadataEditor, {
+    inputCls,
+    textareaCls,
+    Labelled,
+    type PoemMetadataValues,
+} from "./PoemMetadataEditor"
 
 /** Shared inline editor for a full poem — exactly the same editable
  *  field set wherever it is rendered. `density` tweaks the layout for
@@ -43,7 +49,6 @@ export default function PoemEditorForm({
 
     useEffect(() => onDirtyChange?.(dirty), [dirty, onDirtyChange])
 
-    // Guard page unload if unsaved changes exist.
     useEffect(() => {
         if (!dirty) return
         const handler = (e: BeforeUnloadEvent) => {
@@ -83,11 +88,6 @@ export default function PoemEditorForm({
 
     const rowGap = density === "compact" ? "space-y-3" : "space-y-5"
     const bodyRows = density === "compact" ? 10 : 22
-
-    const inputCls =
-        "mt-1 w-full bg-transparent border-b border-rule focus:border-accent outline-none py-1"
-    const textareaCls =
-        "mt-1 w-full bg-transparent border border-rule focus:border-accent outline-none p-3 font-serif leading-[1.65] resize-y"
 
     return (
         <div className={rowGap}>
@@ -130,65 +130,9 @@ export default function PoemEditorForm({
                 onChange={(v) => set("notes", v)}
             />
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-x-6 gap-y-4">
-                <Labelled label="Rating (0–100)">
-                    <input
-                        type="number"
-                        min={0}
-                        max={100}
-                        value={draft.rating}
-                        onChange={(e) => set("rating", Number(e.target.value))}
-                        className={inputCls}
-                    />
-                </Labelled>
-                <Labelled label="Date">
-                    <input
-                        type="text"
-                        value={draft.date}
-                        onChange={(e) => set("date", e.target.value)}
-                        placeholder="YYYY-MM-DDTHH:MM:SSZ"
-                        className={inputCls + " font-mono text-sm"}
-                    />
-                </Labelled>
-                <Labelled label="URL">
-                    <input
-                        type="url"
-                        value={draft.url}
-                        onChange={(e) => set("url", e.target.value)}
-                        className={inputCls + " font-mono text-sm"}
-                    />
-                </Labelled>
-            </div>
-
-            <TagInput
-                label="Themes"
-                value={draft.themes}
-                onChange={(v) => set("themes", v)}
-            />
-            <TagInput
-                label="Emotional register"
-                value={draft.emotional_register}
-                onChange={(v) => set("emotional_register", v)}
-            />
-            <TagInput
-                label="Form and craft"
-                value={draft.form_and_craft}
-                onChange={(v) => set("form_and_craft", v)}
-            />
-            <TagInput
-                label="Key images"
-                value={draft.key_images}
-                onChange={(v) => set("key_images", v)}
-            />
-            <TagInput
-                label="Contest fit"
-                value={draft.contest_fit}
-                onChange={(v) => set("contest_fit", v)}
-            />
-            <TagInput
-                label="Socials"
-                value={draft.socials}
-                onChange={(v) => set("socials", v)}
+            <PoemMetadataEditor
+                values={draft as PoemMetadataValues}
+                set={(k, v) => set(k as keyof PoemDraft, v as PoemDraft[keyof PoemDraft])}
             />
 
             <div className="pt-2 flex items-center gap-6 font-sans text-[0.72rem] uppercase tracking-wider2">
@@ -218,47 +162,5 @@ export default function PoemEditorForm({
                 )}
             </div>
         </div>
-    )
-}
-
-function Labelled({
-    label,
-    hint,
-    children,
-}: {
-    label: string
-    hint?: string
-    children: React.ReactNode
-}) {
-    return (
-        <label className="block">
-            <span className="eyebrow">{label}</span>
-            {children}
-            {hint && (
-                <span className="block text-[0.72rem] text-muted mt-1">
-                    {hint}
-                </span>
-            )}
-        </label>
-    )
-}
-
-function TagInput({
-    label,
-    value,
-    onChange,
-}: {
-    label: string
-    value: string
-    onChange: (v: string) => void
-}) {
-    return (
-        <Labelled label={label} hint="Comma-separated.">
-            <input
-                value={value}
-                onChange={(e) => onChange(e.target.value)}
-                className="mt-1 w-full bg-transparent border-b border-rule focus:border-accent outline-none py-1 font-sans text-sm"
-            />
-        </Labelled>
     )
 }

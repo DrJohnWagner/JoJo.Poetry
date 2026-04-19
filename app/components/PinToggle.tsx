@@ -44,7 +44,7 @@ export default function PinToggle({
             disabled={pending}
             aria-pressed={pinned}
             title={pinned ? "Unpin" : "Pin to top"}
-            className={`font-sans text-[0.72rem] uppercase tracking-wider2 transition-colors ${
+            className={`font-sans text-[0.76rem] uppercase tracking-wider2 transition-colors ${
                 pinned ? "text-accent" : "text-muted hover:text-ink"
             } disabled:opacity-60`}
         >

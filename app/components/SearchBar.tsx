@@ -4,7 +4,15 @@ import { useEffect, useMemo, useRef, useState } from "react"
 import { hasAdvanced, type SearchState } from "@/lib/types"
 import AdvancedSearchDialog from "./AdvancedSearchDialog"
 
-const EMPTY_ADVANCED = { year: null, month: null, awards: [] as string[] }
+const EMPTY_ADVANCED = {
+    year: null,
+    month: null,
+    awards: [] as string[],
+    title: "",
+    body: "",
+    project: "",
+    notes: "",
+}
 const MONTHS = [
     "",
     "January",
@@ -56,7 +64,11 @@ export default function SearchBar({
     const advancedCount =
         (value.year !== null ? 1 : 0) +
         (value.month !== null ? 1 : 0) +
-        value.awards.length
+        value.awards.length +
+        (value.title?.trim() ? 1 : 0) +
+        (value.body?.trim() ? 1 : 0) +
+        (value.project?.trim() ? 1 : 0) +
+        (value.notes?.trim() ? 1 : 0)
 
     const activeFilters = useMemo(() => {
         const filters: Array<{
@@ -99,6 +111,34 @@ export default function SearchBar({
                     }),
             })
         }
+        if (value.title?.trim()) {
+            filters.push({
+                key: "title",
+                label: `Title: ${value.title.trim()}`,
+                clear: () => onChange({ ...value, title: "" }),
+            })
+        }
+        if (value.body?.trim()) {
+            filters.push({
+                key: "body",
+                label: `Body: ${value.body.trim()}`,
+                clear: () => onChange({ ...value, body: "" }),
+            })
+        }
+        if (value.project?.trim()) {
+            filters.push({
+                key: "project",
+                label: `Project: ${value.project.trim()}`,
+                clear: () => onChange({ ...value, project: "" }),
+            })
+        }
+        if (value.notes?.trim()) {
+            filters.push({
+                key: "notes",
+                label: `Notes: ${value.notes.trim()}`,
+                clear: () => onChange({ ...value, notes: "" }),
+            })
+        }
         return filters
     }, [onChange, value])
 
@@ -106,16 +146,16 @@ export default function SearchBar({
 
     return (
         <section aria-label="Search">
-            <form onSubmit={submit} className="mb-8">
+            <form onSubmit={submit} className="mb-5">
                 <div className="flex items-end gap-3">
-                    <label className="flex-1 block">
+                    <label className="block flex-1">
                         <span className="eyebrow">Search</span>
                         <input
                             type="search"
                             value={draft}
                             onChange={(e) => setDraft(e.target.value)}
                             placeholder="Search poems…"
-                            className="mt-1 w-full bg-transparent border-b border-rule focus:border-accent outline-none py-2 font-serif text-lg"
+                            className="mt-1 w-full border-b border-rule bg-transparent py-2 font-serif text-lg outline-none focus:border-accent"
                             onKeyDown={(e) => {
                                 if (e.key === "Escape") {
                                     setDraft("")
@@ -129,8 +169,8 @@ export default function SearchBar({
                         onClick={() => setAdvancedOpen(true)}
                         className={`eyebrow border-b pb-1 transition-colors ${
                             hasAdvanced(value)
-                                ? "text-accent border-accent"
-                                : "text-muted border-muted hover:text-ink hover:border-ink"
+                                ? "border-accent text-accent"
+                                : "border-muted text-muted hover:border-ink hover:text-ink"
                         }`}
                     >
                         Advanced{advancedCount ? ` · ${advancedCount}` : ""}
@@ -138,9 +178,11 @@ export default function SearchBar({
                 </div>
 
                 <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2">
-                    {hasAnyFilter && <p className="eyebrow text-muted">
-                        {`${activeFilters.length} active filter${activeFilters.length === 1 ? "" : "s"}`}
-                    </p>}
+                    {hasAnyFilter && (
+                        <p className="eyebrow text-muted">
+                            {`${activeFilters.length} active filter${activeFilters.length === 1 ? "" : "s"}`}
+                        </p>
+                    )}
                     {hasAnyFilter && (
                         <button
                             type="button"

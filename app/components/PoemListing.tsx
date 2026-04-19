@@ -1,13 +1,14 @@
 "use client"
 
-import { useCallback, useEffect, useRef, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { deletePoem, fetchPoems } from "@/lib/api"
 import type { Poem, PoemSummary, SearchState } from "@/lib/types"
 import SearchBar from "./SearchBar"
+import SortBar, { DEFAULT_SORT, type SortState } from "./SortBar"
 import PoemRow from "./PoemRow"
 
 const PAGE_SIZE = 5
-const EMPTY: SearchState = { q: "", year: null, month: null, awards: [] }
+const EMPTY: SearchState = { q: "", year: null, month: null, awards: [], title: "", body: "", project: "", notes: "" }
 
 export default function PoemListing({
     initial,
@@ -20,6 +21,7 @@ export default function PoemListing({
     const [hasMore, setHasMore] = useState(initial.has_more)
     const [loading, setLoading] = useState(false)
     const [err, setErr] = useState<string | null>(null)
+    const [sort, setSort] = useState<SortState>(DEFAULT_SORT)
     const [editingId, setEditingId] = useState<string | null>(null)
     const [dirty, setDirty] = useState(false)
     const editingIdRef = useRef<string | null>(null)
@@ -144,6 +146,7 @@ export default function PoemListing({
                               form_and_craft: updated.form_and_craft,
                               contest_fit: updated.contest_fit,
                               has_contests: updated.contests.length > 0,
+                              contest_count: updated.contests.length,
                               project: updated.project,
                           }
                         : p
@@ -162,9 +165,25 @@ export default function PoemListing({
         }
     }
 
+    const sortedItems = useMemo(() => {
+        const { field, dir } = sort
+        return [...items].sort((a, b) => {
+            let cmp: number
+            if (field === "title") {
+                cmp = a.title.localeCompare(b.title)
+            } else if (field === "date") {
+                cmp = new Date(a.date).getTime() - new Date(b.date).getTime()
+            } else {
+                cmp = (a[field] as number) - (b[field] as number)
+            }
+            return dir === "asc" ? cmp : -cmp
+        })
+    }, [items, sort])
+
     return (
         <div>
             <SearchBar value={search} onChange={setSearch} />
+            <SortBar sort={sort} onChange={setSort} />
 
             {editingId && (
                 <p className="eyebrow mb-6 text-muted">
@@ -173,11 +192,11 @@ export default function PoemListing({
             )}
 
             {items.length === 0 && !loading && (
-                <p className="text-muted italic py-8">No poems match.</p>
+                <p className="py-8 italic text-muted">No poems match.</p>
             )}
 
             <ol className="space-y-8">
-                {items.map((p) => (
+                {sortedItems.map((p) => (
                     <li key={p.id}>
                         <PoemRow
                             poem={p}
@@ -224,7 +243,7 @@ export default function PoemListing({
                         End · {total} poem{total === 1 ? "" : "s"}
                     </span>
                 )}
-                {err && <span className="text-red-700 text-sm">{err}</span>}
+                {err && <span className="text-sm text-red-700">{err}</span>}
             </div>
         </div>
     )

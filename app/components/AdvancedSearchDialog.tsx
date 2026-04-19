@@ -80,6 +80,54 @@ export default function AdvancedSearchDialog({
                 </header>
 
                 <div className="grid grid-cols-2 gap-x-6 gap-y-5">
+                    <label className="block col-span-2">
+                        <span className="eyebrow">Title</span>
+                        <input
+                            type="text"
+                            value={value.title}
+                            onChange={(e) =>
+                                onChange({ ...value, title: e.target.value })
+                            }
+                            placeholder="Substring match…"
+                            className="mt-1 w-full bg-transparent border-b border-rule focus:border-accent outline-none py-1 font-serif"
+                        />
+                    </label>
+                    <label className="block col-span-2">
+                        <span className="eyebrow">Body</span>
+                        <input
+                            type="text"
+                            value={value.body}
+                            onChange={(e) =>
+                                onChange({ ...value, body: e.target.value })
+                            }
+                            placeholder="Substring match…"
+                            className="mt-1 w-full bg-transparent border-b border-rule focus:border-accent outline-none py-1 font-serif"
+                        />
+                    </label>
+                    <label className="block col-span-2">
+                        <span className="eyebrow">Project</span>
+                        <input
+                            type="text"
+                            value={value.project}
+                            onChange={(e) =>
+                                onChange({ ...value, project: e.target.value })
+                            }
+                            placeholder="Substring match…"
+                            className="mt-1 w-full bg-transparent border-b border-rule focus:border-accent outline-none py-1 font-serif"
+                        />
+                    </label>
+                    <label className="block col-span-2">
+                        <span className="eyebrow">Author&#39;s Notes</span>
+                        <input
+                            type="text"
+                            value={value.notes}
+                            onChange={(e) =>
+                                onChange({ ...value, notes: e.target.value })
+                            }
+                            placeholder="Substring match…"
+                            className="mt-1 w-full bg-transparent border-b border-rule focus:border-accent outline-none py-1 font-serif"
+                        />
+                    </label>
                     <label className="block">
                         <span className="eyebrow">Year</span>
                         <input

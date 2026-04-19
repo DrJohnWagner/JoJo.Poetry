@@ -82,6 +82,7 @@ class PoemSummary(BaseModel):
     form_and_craft: List[str]
     contest_fit: List[str]
     has_contests: bool
+    contest_count: int
     project: str
 
 
@@ -118,6 +119,7 @@ def _summary(p: Poem) -> PoemSummary:
         form_and_craft=list(p.form_and_craft),
         contest_fit=list(p.contest_fit),
         has_contests=len(p.contests) > 0,
+        contest_count=len(p.contests),
         project=p.project,
     )
 

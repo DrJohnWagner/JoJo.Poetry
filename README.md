@@ -66,10 +66,13 @@ Two services, one flat JSON data source:
 │   │   ├── PoemCreateForm.tsx        # Dedicated POST form with defaults + guards
 │   │   ├── PoemDetail.tsx            # Reading view + Edit toggle
 │   │   ├── SearchBar.tsx             # q + submit + Advanced modal trigger
+│   │   ├── SortBar.tsx               # Client-side sort buttons (title/date/lines/words/rating/medals)
 │   │   ├── AdvancedSearchDialog.tsx  # Native <dialog>-backed modal
 │   │   ├── PoemRow.tsx               # Single poem row (title, meta, collapsible body)
 │   │   ├── PinToggle.tsx             # Server-confirmed pin/unpin
 │   │   ├── DeleteButton.tsx          # Two-step confirmation control
+│   │   ├── NotesEditor.tsx           # Multi-line textarea for author's notes (one line = one note)
+│   │   ├── HorizontalRule.tsx        # Shared <div class="rule my-5" /> divider
 │   │   └── PoemBody.tsx              # Body -> plaintext projection display
 │   └── lib/
 │       ├── api.ts                    # Typed fetch wrappers
@@ -90,21 +93,23 @@ Two services, one flat JSON data source:
 The authoritative schema is `database/schemas/poem.schema.json`;
 `database/schemas/poem.py` is its Pydantic mirror.
 
-| Field                                                                         | Type                             | Required                   | Editable      | Searchable                      | Notes                                                                                            |
-| ----------------------------------------------------------------------------- | -------------------------------- | -------------------------- | ------------- | ------------------------------- | ------------------------------------------------------------------------------------------------ |
-| `id`                                                                          | UUID v4 string                   | yes                        | **immutable** | no                              | Sole identifier used everywhere.                                                                 |
-| `title`                                                                       | string                           | yes                        | yes           | yes                             |                                                                                                  |
-| `url`                                                                         | URI                              | yes                        | yes           | no                              | Canonical external link.                                                                         |
-| `body`                                                                        | string (HTML fragment)           | yes                        | yes           | yes\*                           | `<br/>` line breaks + literal whitespace for indentation. \*Search hits a plain-text projection. |
-| `contests`                                                                    | `[{url, award, title?}]`         | yes (may be empty)         | yes (API)     | via `awards` filter             | `award` is surfaced to search; `title` is an optional contest name displayed in the UI.          |
-| `date`                                                                        | ISO 8601 datetime                | yes                        | yes           | year/month in advanced search   | Timezone-aware; UTC in existing data.                                                            |
-| `themes`, `emotional_register`, `form_and_craft`, `key_images`, `contest_fit` | `string[]`                       | yes (may be empty)         | yes           | yes                             | Free-vocabulary tags.                                                                            |
-| `project`                                                                     | string                           | yes                        | yes           | yes                             | One-sentence authorial statement.                                                                |
-| `rating`                                                                      | int 0–100                        | yes                        | yes           | min/max band                    | Authorial self-rating.                                                                           |
-| `lines`, `words`                                                              | int ≥ 0                          | yes                        | **derived**   | no                              | Recomputed from `body` on every write.                                                           |
-| `pinned`                                                                      | bool                             | optional (default `false`) | yes           | no                              | Pinned poems lead listings.                                                                      |
-| `socials`                                                                     | `string[]`                       | optional (default `[]`)    | yes           | no                              | Social media URLs; displayed as links on the detail page.                                        |
-| `notes`                                                                       | `string[]`                       | optional (default `[]`)    | yes           | yes                             | One string per note; edited via multi-line textbox (one line = one note).                        |
+| Field                                                                                   | Type                       | Required                     | Editable            | Searchable                    | Notes                                                                                              |
+| --------------------------------------------------------------------------------------- | -------------------------- | ---------------------------- | ------------------- | ----------------------------- | -------------------------------------------------------------------------------------------------- |
+| `id`                                                                                  | UUID v4 string             | yes                          | **immutable** | no                            | Sole identifier used everywhere.                                                                   |
+| `title`                                                                               | string                     | yes                          | yes                 | yes                           |                                                                                                    |
+| `url`                                                                                 | URI                        | yes                          | yes                 | no                            | Canonical external link.                                                                           |
+| `body`                                                                                | string (HTML fragment)     | yes                          | yes                 | yes\*                         | `` line breaks + literal whitespace for indentation. \*Search hits a plain-text projection. |
+| `contests`                                                                            | `[{url, award, title?}]` | yes (may be empty)           | yes (API)           | via `awards` filter         | `award` is surfaced to search; `title` is an optional contest name displayed in the UI.        |
+| `date`                                                                                | ISO 8601 datetime          | yes                          | yes                 | year/month in advanced search | Timezone-aware; UTC in existing data.                                                              |
+| `themes`, `emotional_register`, `form_and_craft`, `key_images`, `contest_fit` | `string[]`               | yes (may be empty)           | yes                 | yes                           | Free-vocabulary tags.                                                                              |
+| `project`                                                                             | string                     | yes                          | yes                 | yes                           | One-sentence authorial statement.                                                                  |
+| `rating`                                                                              | int 0–100                 | yes                          | yes                 | min/max band                  | Authorial self-rating.                                                                             |
+| `lines`, `words`                                                                    | int ≥ 0                   | yes                          | **derived**   | no                            | Recomputed from `body` on every write.                                                           |
+| `pinned`                                                                              | bool                       | optional (default `false`) | yes                 | no                            | Pinned poems lead listings.                                                                        |
+| `socials`                                                                             | `string[]`               | optional (default `[]`)    | yes                 | no                            | Social media URLs; displayed as links on the detail page.                                          |
+| `notes`                                                                               | `string[]`               | optional (default `[]`)    | yes                 | yes                           | One string per note; edited via multi-line textbox (one line = one note).                          |
+
+The `PoemSummary` list projection adds a derived `contest_count: int` field (the length of `contests`) so the listing can display and sort by medal count without fetching full poem records.
 
 Strictness: `extra="forbid"` on the Pydantic model and
 `additionalProperties: false` on the JSON Schema. Unknown fields are
@@ -144,7 +149,7 @@ read or write them.
   outside the runtime for editor autocomplete, external validators,
   and CI checks. Rejects unknown fields and enforces UUID-v4 `id`,
   bounded rating, and required-vs-optional structure.
-- **`poem.py`** — Pydantic models (`Poem`, `Contest`, `Note`). Used
+- **`poem.py`** — Pydantic models (`Poem`, `Contest`). Used
   by the backend at runtime for load-time validation, PATCH-merge
   validation, and response shaping. Applies the documented defaults
   (`pinned=false`, `socials=[]`, `notes=[]`) when optional fields are absent.
@@ -153,11 +158,11 @@ read or write them.
 
 ### Backend
 
-| Variable         | Default                                       | Purpose                                                                                                                       |
-| ---------------- | --------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| `POEMS_DATABASE` | `<repo>/database/Poems.json`                  | Path to the poems JSON file. Absolute paths used verbatim; relative paths resolved against the **current working directory**. |
-| `CORS_ORIGINS`   | `http://localhost:3000,http://127.0.0.1:3000` | Comma-separated list of allowed origins for browser calls.                                                                    |
-| `READ_ONLY`      | `true`                                        | When `true`, all mutation endpoints (POST/PATCH/DELETE) return `405 Method Not Allowed`.                                      |
+| Variable           | Default                                         | Purpose                                                                                                                            |
+| ------------------ | ----------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| `POEMS_DATABASE` | `<repo>/database/Poems.json`                  | Path to the poems JSON file. Absolute paths used verbatim; relative paths resolved against the**current working directory**. |
+| `CORS_ORIGINS`   | `http://localhost:3000,http://127.0.0.1:3000` | Comma-separated list of allowed origins for browser calls.                                                                         |
+| `READ_ONLY`      | `true`                                        | When `true`, all mutation endpoints (POST/PATCH/DELETE) return `405 Method Not Allowed`.                                       |
 
 A `.env` file in the current working directory is auto-loaded (via
 `pydantic-settings`). Settings are exposed through
@@ -165,9 +170,9 @@ A `.env` file in the current working directory is auto-loaded (via
 
 ### Frontend
 
-| Variable                   | Default                 | Purpose                                                                       |
-| -------------------------- | ----------------------- | ----------------------------------------------------------------------------- |
-| `NEXT_PUBLIC_API_BASE_URL` | `http://localhost:8000` | Origin the browser calls. Inlined at build time.                              |
+| Variable                     | Default                   | Purpose                                                                                                                              |
+| ---------------------------- | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| `NEXT_PUBLIC_API_BASE_URL` | `http://localhost:8000` | Origin the browser calls. Inlined at build time.                                                                                     |
 | `READ_ONLY`                | `true`                  | When `true`, hides all editing controls (pin, edit, delete, new poem). Read at server-component render time; not inlined at build. |
 
 Both services default to read-only. Pass `READ_ONLY=false` to enable
@@ -268,6 +273,21 @@ Override host ports without editing files:
 WEB_PORT=3006 docker compose up --build
 API_PORT=8001 WEB_PORT=3006 docker compose up --build
 ```
+
+## Client-side sorting
+
+The listing page applies a second, client-side sort layer on top of the server's authoritative ordering. Poems already fetched (across all loaded pages) are re-sorted in the browser without a network round-trip:
+
+| Button | Default direction | Sort key                      |
+| ------ | ----------------- | ----------------------------- |
+| Title  | A → Z            | `title` (locale-aware)      |
+| Date   | newest first      | `date` (ISO 8601 timestamp) |
+| Lines  | most first        | `lines` (integer)           |
+| Words  | most first        | `words` (integer)           |
+| Rating | highest first     | `rating` (integer)          |
+| Medals | most first        | `contest_count` (integer)   |
+
+One button is always active (Date descending by default). Clicking the active button toggles direction; clicking an inactive button selects it at its default direction. The sort is re-applied automatically as new pages are loaded via infinite scroll.
 
 ## The search system
 

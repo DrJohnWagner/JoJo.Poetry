@@ -5,7 +5,7 @@ export const dynamic = "force-dynamic"
 
 export default async function Home() {
     const initial = await fetchPoems(
-        { q: "", year: null, month: null, awards: [] },
+        { q: "", year: null, month: null, awards: [], title: "", body: "", project: "", notes: "" },
         0,
         3
     )

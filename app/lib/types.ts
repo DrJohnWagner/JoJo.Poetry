@@ -20,6 +20,7 @@ export interface PoemSummary {
     form_and_craft: string[]
     contest_fit: string[]
     has_contests: boolean
+    contest_count: number
     project: string
 }
 
@@ -49,6 +50,10 @@ export interface SearchState {
     year: number | null
     month: number | null
     awards: string[] // Gold | Silver | Bronze | Honorable Mention | None
+    title: string
+    body: string
+    project: string
+    notes: string
 }
 
 export const AWARDS = [
@@ -60,7 +65,15 @@ export const AWARDS = [
 ] as const
 
 export function hasAdvanced(s: SearchState): boolean {
-    return s.year !== null || s.month !== null || s.awards.length > 0
+    return (
+        s.year !== null ||
+        s.month !== null ||
+        s.awards.length > 0 ||
+        !!s.title?.trim() ||
+        !!s.body?.trim() ||
+        !!s.project?.trim() ||
+        !!s.notes?.trim()
+    )
 }
 
 export function isEmptySearch(s: SearchState): boolean {

@@ -57,6 +57,19 @@ install: setup ## Alias for setup
 # Local development
 # ------------------------------------------------------------------------------
 
+.PHONY: dev-server
+dev-server: ## Run backend in reload mode (uvicorn)
+	$(UV) run uvicorn $(UVICORN_APP) --reload --host $(SERVER_HOST) --port $(SERVER_PORT)
+
+.PHONY: dev-web
+dev-web: ## Run Next.js development server
+	$(NPM) run dev
+
+.PHONY: dev
+dev: ## Run backend + frontend together (parallel)
+	$(MAKE) -j2 dev-server dev-web
+
+
 .PHONY: dev-server-ro
 dev-server-ro: ## Run backend in reload mode (uvicorn)
 	READ_ONLY=true $(UV) run uvicorn $(UVICORN_APP) --reload --host $(SERVER_HOST) --port $(SERVER_PORT)
@@ -75,18 +88,18 @@ dev-web-rw: ## Run Next.js development server
 
 .PHONY: dev-ro
 dev-ro: ## Run backend + frontend together (parallel)
-	$(MAKE) -j2 dev-server-ro dev-web-ro
+	READ_ONLY=true $(MAKE) -j2 dev-server-ro dev-web-ro
 
 .PHONY: dev-rw
 dev-rw: ## Run backend + frontend together (parallel)
-	$(MAKE) -j2 dev-server-rw dev-web-rw
+	READ_ONLY=false $(MAKE) -j2 dev-server-rw dev-web-rw
 
 .PHONY: start-web-ro
 start-web-ro: ## Run Next.js production server
 	READ_ONLY=true $(NPM) run start
 
- .PHONY: start-web-rw
- start-web-rw: ## Run Next.js production server
+.PHONY: start-web-rw
+start-web-rw: ## Run Next.js production server
 	READ_ONLY=false $(NPM) run start
 
 # ------------------------------------------------------------------------------
@@ -155,16 +168,16 @@ docker-up-build-rw: ## Build and start Docker services in foreground
 docker-up-detached-ro: ## Start Docker services in background
 	READ_ONLY=true $(COMPOSE) up -d
 
- .PHONY: docker-up-detached-rw
- docker-up-detached-rw: ## Start Docker services in background
+.PHONY: docker-up-detached-rw
+docker-up-detached-rw: ## Start Docker services in background
 	READ_ONLY=false $(COMPOSE) up -d
 
 .PHONY: docker-restart-ro
 docker-restart-ro: ## Restart Docker services
 	READ_ONLY=true $(COMPOSE) restart
 
- .PHONY: docker-restart-rw
- docker-restart-rw: ## Restart Docker services
+.PHONY: docker-restart-rw
+docker-restart-rw: ## Restart Docker services
 	READ_ONLY=false $(COMPOSE) restart
 
 .PHONY: docker-down
