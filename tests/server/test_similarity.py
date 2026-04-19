@@ -791,12 +791,20 @@ def test_similar_overall_returns_200(api_client):
     assert api_client.get(f"/api/poems/{pid}/similar").status_code == 200
 
 
-def test_similar_bare_and_overall_routes_are_equivalent(api_client):
+def test_similar_bundle_shape(api_client):
     pid = _listing_ids(api_client)[0]
-    r1 = api_client.get(f"/api/poems/{pid}/similar")
-    r2 = api_client.get(f"/api/poems/{pid}/similar/overall")
-    assert r1.status_code == 200
-    assert r1.json() == r2.json()
+    body = api_client.get(f"/api/poems/{pid}/similar").json()
+    assert set(body.keys()) == {"overall", "theme", "form", "register", "imagery"}
+    for key in ("overall", "theme", "form", "register", "imagery"):
+        assert "query_id" in body[key]
+        assert "neighbours" in body[key]
+
+
+def test_similar_bundle_overall_matches_overall_endpoint(api_client):
+    pid = _listing_ids(api_client)[0]
+    bundle = api_client.get(f"/api/poems/{pid}/similar").json()
+    overall = api_client.get(f"/api/poems/{pid}/similar/overall").json()
+    assert bundle["overall"] == overall
 
 
 def test_similar_theme_returns_200(api_client):
@@ -829,30 +837,30 @@ def test_similar_malformed_id_returns_422(api_client):
 
 def test_similar_k_zero_returns_422(api_client):
     pid = _listing_ids(api_client)[0]
-    assert api_client.get(f"/api/poems/{pid}/similar?k=0").status_code == 422
+    assert api_client.get(f"/api/poems/{pid}/similar?k_overall=0").status_code == 422
 
 
 def test_similar_k_51_returns_422(api_client):
     pid = _listing_ids(api_client)[0]
-    assert api_client.get(f"/api/poems/{pid}/similar?k=51").status_code == 422
+    assert api_client.get(f"/api/poems/{pid}/similar?k_overall=51").status_code == 422
 
 
 def test_similar_k_1_returns_at_most_one_result(api_client):
     pid = _listing_ids(api_client)[0]
-    r = api_client.get(f"/api/poems/{pid}/similar?k=1")
+    r = api_client.get(f"/api/poems/{pid}/similar/overall?k=1")
     assert r.status_code == 200
     assert len(r.json()["neighbours"]) <= 1
 
 
 def test_similar_response_has_query_id(api_client):
     pid = _listing_ids(api_client)[0]
-    body = api_client.get(f"/api/poems/{pid}/similar").json()
+    body = api_client.get(f"/api/poems/{pid}/similar/overall").json()
     assert body["query_id"] == pid
 
 
 def test_similar_response_shape(api_client):
     pid = _listing_ids(api_client)[0]
-    body = api_client.get(f"/api/poems/{pid}/similar").json()
+    body = api_client.get(f"/api/poems/{pid}/similar/overall").json()
     assert "query_id" in body
     assert "neighbours" in body
     if body["neighbours"]:
@@ -862,7 +870,7 @@ def test_similar_response_shape(api_client):
 
 def test_similar_response_excludes_full_poem_fields(api_client):
     pid = _listing_ids(api_client)[0]
-    body = api_client.get(f"/api/poems/{pid}/similar?k=50").json()
+    body = api_client.get(f"/api/poems/{pid}/similar/overall?k=50").json()
     for n in body["neighbours"]:
         assert "body" not in n
         assert "url" not in n
@@ -874,7 +882,7 @@ def test_similar_response_excludes_full_poem_fields(api_client):
 
 def test_similar_self_not_in_neighbours(api_client):
     pid = _listing_ids(api_client)[0]
-    body = api_client.get(f"/api/poems/{pid}/similar?k=50").json()
+    body = api_client.get(f"/api/poems/{pid}/similar/overall?k=50").json()
     assert pid not in {n["id"] for n in body["neighbours"]}
 
 
@@ -898,7 +906,7 @@ def test_similar_more_similar_poem_ranks_higher(api_client):
     if not (alpha_id and beta_id and gamma_id):
         pytest.skip("Expected test poems not found in db")
 
-    neighbours = api_client.get(f"/api/poems/{alpha_id}/similar?k=10").json()["neighbours"]
+    neighbours = api_client.get(f"/api/poems/{alpha_id}/similar/overall?k=10").json()["neighbours"]
     ids = [n["id"] for n in neighbours]
     assert beta_id in ids
     assert gamma_id in ids
@@ -907,7 +915,7 @@ def test_similar_more_similar_poem_ranks_higher(api_client):
 
 def test_similar_breakdown_fields_present(api_client):
     pid = _listing_ids(api_client)[0]
-    body = api_client.get(f"/api/poems/{pid}/similar?k=10").json()
+    body = api_client.get(f"/api/poems/{pid}/similar/overall?k=10").json()
     if not body["neighbours"]:
         pytest.skip("No neighbours to inspect")
     breakdown = body["neighbours"][0]["breakdown"]
@@ -922,7 +930,7 @@ def test_similar_breakdown_fields_present(api_client):
 
 def test_similar_structured_overlap_fields_present(api_client):
     pid = _listing_ids(api_client)[0]
-    body = api_client.get(f"/api/poems/{pid}/similar?k=10").json()
+    body = api_client.get(f"/api/poems/{pid}/similar/overall?k=10").json()
     if not body["neighbours"]:
         pytest.skip("No neighbours to inspect")
     structured = body["neighbours"][0]["breakdown"]["structured"]
@@ -983,7 +991,7 @@ def test_new_poem_appears_as_neighbour_after_post(rw_client):
     )
     assert r.status_code == 201
     new_id = r.json()["id"]
-    neighbours = rw_client.get(f"/api/poems/{existing_id}/similar?k=10").json()["neighbours"]
+    neighbours = rw_client.get(f"/api/poems/{existing_id}/similar/overall?k=10").json()["neighbours"]
     assert new_id in {n["id"] for n in neighbours}
 
 
@@ -1003,7 +1011,7 @@ def test_deleted_poem_does_not_appear_in_similarity(rw_client):
     ids = _listing_ids(rw_client)
     query_id, victim_id = ids[0], ids[1]
     assert rw_client.delete(f"/api/poems/{victim_id}").status_code == 204
-    neighbours = rw_client.get(f"/api/poems/{query_id}/similar?k=10").json()["neighbours"]
+    neighbours = rw_client.get(f"/api/poems/{query_id}/similar/overall?k=10").json()["neighbours"]
     assert victim_id not in {n["id"] for n in neighbours}
 
 
@@ -1027,6 +1035,6 @@ def test_service_rebuilt_after_post_contains_new_poem(rw_client):
     assert r.status_code == 201
     new_id = r.json()["id"]
     # The new poem must itself return a valid (possibly empty) neighbour list
-    r2 = rw_client.get(f"/api/poems/{new_id}/similar")
+    r2 = rw_client.get(f"/api/poems/{new_id}/similar/overall")
     assert r2.status_code == 200
     assert "neighbours" in r2.json()

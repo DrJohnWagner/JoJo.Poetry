@@ -31,7 +31,6 @@ export default function RootLayout({
     children: React.ReactNode
 }) {
     const readOnly = process.env.READ_ONLY !== "false"
-
     return (
         <html
             lang="en"
@@ -39,28 +38,9 @@ export default function RootLayout({
         >
             <body suppressHydrationWarning>
                 <AppConfigProvider readOnly={readOnly}>
-                    <div className="mx-auto max-w-prose px-6 pb-24 pt-16">
-                        <header className="mb-10 flex items-end justify-between gap-6">
-                            <Link
-                                href="/"
-                                className="inline-block text-ink no-underline hover:no-underline"
-                            >
-                                <h1 className="font-display text-3xl leading-none tracking-tight md:text-4xl">
-                                    JoJo.Poetry
-                                </h1>
-                                <p className="eyebrow mt-2">Collected poems</p>
-                            </Link>
-                            {!readOnly && (
-                                <Link
-                                    href="/poems/new"
-                                    className="eyebrow border-b border-muted pb-1 transition-colors hover:border-ink hover:text-ink hover:no-underline"
-                                >
-                                    New poem
-                                </Link>
-                            )}
-                        </header>
+                    <div className="px-6 pb-24 pt-16">
                         <main>{children}</main>
-                        <footer className="eyebrow mt-12 border-t border-rule pt-8">
+                        <footer className="mx-auto max-w-prose eyebrow mt-12 border-t border-rule pt-8">
                             © JoJo · <Link href="/">Index</Link>
                         </footer>
                     </div>

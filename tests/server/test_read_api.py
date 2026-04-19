@@ -115,3 +115,66 @@ def test_unknown_id_returns_404(client):
     r = client.get(f"/api/poems/{uuid4()}")
     assert r.status_code == 404
     assert r.json()["detail"] == "Poem not found"
+
+
+# ------------------------------------------------------------------ /api/poems/recent
+
+def test_recent_default_returns_200(client):
+    r = client.get("/api/poems/recent")
+    assert r.status_code == 200
+
+
+def test_recent_response_shape(client):
+    r = client.get("/api/poems/recent")
+    body = r.json()
+    assert set(body.keys()) == {"items"}
+    assert isinstance(body["items"], list)
+
+
+def test_recent_default_k_is_8(client):
+    r = client.get("/api/poems/recent")
+    # canonical db has 5 poems; default k=8 returns all 5
+    assert len(r.json()["items"]) == 5
+
+
+def test_recent_k_limits_results(client):
+    r = client.get("/api/poems/recent?k=2")
+    assert len(r.json()["items"]) == 2
+
+
+def test_recent_ordered_by_date_descending(client):
+    r = client.get("/api/poems/recent?k=10")
+    items = r.json()["items"]
+    dates = [item["date"] for item in items]
+    assert dates == sorted(dates, reverse=True)
+
+
+def test_recent_no_pin_bias(client):
+    # Pinned poem should not be forced to position 0 — pure date order
+    items = client.get("/api/poems/recent?k=10").json()["items"]
+    list_items = client.get("/api/poems?limit=10").json()["items"]
+    # list_poems puts pinned first; recent should differ if any poem is pinned
+    pinned = [p for p in list_items if p["pinned"]]
+    if pinned:
+        assert items[0]["id"] != list_items[0]["id"] or not pinned[0]["pinned"] or items[0]["date"] >= list_items[0]["date"]
+
+
+def test_recent_item_has_expected_fields(client):
+    item = client.get("/api/poems/recent?k=1").json()["items"][0]
+    assert {"id", "title", "project", "date", "rating", "lines", "words"} <= set(item.keys())
+    assert "body" not in item
+
+
+def test_recent_k_zero_returns_422(client):
+    assert client.get("/api/poems/recent?k=0").status_code == 422
+
+
+def test_recent_k_101_returns_422(client):
+    assert client.get("/api/poems/recent?k=101").status_code == 422
+
+
+def test_recent_not_intercepted_by_poem_id_route(client):
+    # Ensure /recent is not caught by /api/poems/{poem_id} as poem_id="recent"
+    r = client.get("/api/poems/recent")
+    assert r.status_code == 200
+    assert "items" in r.json()

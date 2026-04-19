@@ -1,10 +1,13 @@
 import Link from "next/link"
+import Header from "@/components/Header"
 import PoemCreateForm from "@/components/PoemCreateForm"
 
 export const dynamic = "force-dynamic"
 
 export default function NewPoemPage() {
     return (
+        <div className="mx-auto max-w-prose">
+        <Header />
         <article>
             <nav className="mb-10 eyebrow">
                 <Link href="/">← Index</Link>
@@ -16,5 +19,6 @@ export default function NewPoemPage() {
             </header>
             <PoemCreateForm />
         </article>
+        </div>
     )
 }
