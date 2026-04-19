@@ -1,30 +1,37 @@
-import Link from "next/link"
-import type { NeighbourListResult } from "@/lib/types"
+import type { NeighbourListResult, SimilarityBundle } from "@/lib/types"
+import PoemSummary from "@/components/PoemSummary"
 
-export default function SimilarPoems({ similarities }: { similarities: NeighbourListResult }) {
-    if (!similarities || !similarities.neighbours || similarities.neighbours.length === 0) {
-        return null
-    }
+const CATEGORIES: { key: keyof SimilarityBundle; label: string }[] = [
+    { key: "overall",  label: "Overall" },
+    { key: "theme",    label: "Theme" },
+    { key: "form",     label: "Form & Craft" },
+    { key: "register", label: "Register" },
+    { key: "imagery",  label: "Imagery" },
+]
 
+function NeighbourList({ result, label }: { result: NeighbourListResult; label: string }) {
+    if (result.neighbours.length === 0) return null
     return (
-        <section aria-label="Similar Poems" className="p-4 bg-paper/50 rounded border border-ink/10">
-            <h2 className="eyebrow mb-4">Similar Poems</h2>
+        <section aria-label={`${label} similar poems`} className="p-4 bg-paper/50 rounded border border-ink/10">
+            <h2 className="eyebrow mb-4">{label}</h2>
             <ul className="space-y-4">
-                {similarities.neighbours.map(neighbour => (
-                    <li key={neighbour.id}>
-                        <Link href={`/poems/${neighbour.id}`} className="block group">
-                            <h3 className="font-serif text-[1rem] leading-tight text-ink group-hover:text-accent group-hover:underline">
-                                {neighbour.title}
-                            </h3>
-                            {neighbour.project && (
-                                <p className="font-sans text-[0.8rem] text-muted mt-1 truncate">
-                                    {neighbour.project}
-                                </p>
-                            )}
-                        </Link>
-                    </li>
+                {result.neighbours.map((n) => (
+                    <PoemSummary key={n.id} id={String(n.id)} title={n.title} project={n.project} />
                 ))}
             </ul>
         </section>
+    )
+}
+
+export default function SimilarPoems({ bundle }: { bundle: SimilarityBundle }) {
+    const hasAny = CATEGORIES.some((c) => bundle[c.key].neighbours.length > 0)
+    if (!hasAny) return null
+    return (
+        <div className="space-y-6">
+            <h2 className="eyebrow text-center">Similar Poems</h2>
+            {CATEGORIES.map(({ key, label }) => (
+                <NeighbourList key={key} result={bundle[key]} label={label} />
+            ))}
+        </div>
     )
 }

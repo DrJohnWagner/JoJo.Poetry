@@ -103,6 +103,12 @@ class PoemList(BaseModel):
     pagination: Pagination
 
 
+class RecentList(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    items: List[PoemSummary]
+
+
 # --------------------------------------------------------------- request models
 
 class PoemCreate(BaseModel):
@@ -466,6 +472,16 @@ def advanced_search(
     )
 
 
+@router.get("/api/poems/recent", response_model=RecentList, tags=["poems"])
+def recent_poems(
+    repo: PoemRepository = Depends(get_repository),
+    k: int = Query(8, ge=1, le=100, description="Number of poems to return."),
+) -> RecentList:
+    """k most recent poems ordered by date descending, with no pin-first bias."""
+    poems = sorted(repo.list(), key=lambda p: (-p.date.timestamp(), str(p.id)))
+    return RecentList(items=[_summary(p) for p in poems[:k]])
+
+
 @router.get("/api/poems/{poem_id}", response_model=Poem, tags=["poems"])
 def get_poem(poem_id: UUID, repo: PoemRepository = Depends(get_repository)) -> Poem:
     """Full poem record. 404 for unknown id, 422 for malformed UUID."""
@@ -563,7 +579,39 @@ def delete_poem(
 
 # --------------------------------------------------------- similarity endpoints
 
-@router.get("/api/poems/{poem_id}/similar", response_model=NeighbourListResult, tags=["similarity"])
+class SimilarityBundle(BaseModel):
+    """All similarity dimensions in a single response."""
+    overall: NeighbourListResult
+    theme: NeighbourListResult
+    form: NeighbourListResult
+    register: NeighbourListResult
+    imagery: NeighbourListResult
+
+
+@router.get("/api/poems/{poem_id}/similar", response_model=SimilarityBundle, tags=["similarity"])
+def get_similar_bundle(
+    poem_id: UUID,
+    k_overall: int = Query(5, ge=1, le=50),
+    k_theme: int = Query(3, ge=1, le=50),
+    k_form: int = Query(3, ge=1, le=50),
+    k_register: int = Query(3, ge=1, le=50),
+    k_imagery: int = Query(3, ge=1, le=50),
+) -> SimilarityBundle:
+    """All similarity dimensions in one call, with per-category k values."""
+    from server.similarity.service import get_similarity_service
+    svc = get_similarity_service()
+    results = {
+        "overall": svc.get_overall_similar(poem_id, k_overall),
+        "theme":   svc.get_theme_similar(poem_id, k_theme),
+        "form":    svc.get_form_similar(poem_id, k_form),
+        "register": svc.get_register_similar(poem_id, k_register),
+        "imagery": svc.get_imagery_similar(poem_id, k_imagery),
+    }
+    if any(v is None for v in results.values()):
+        raise HTTPException(status_code=404, detail="Poem not found")
+    return SimilarityBundle(**results)
+
+
 @router.get("/api/poems/{poem_id}/similar/overall", response_model=NeighbourListResult, tags=["similarity"])
 def get_similar_overall(
     poem_id: UUID,

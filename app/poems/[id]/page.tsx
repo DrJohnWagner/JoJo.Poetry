@@ -24,7 +24,7 @@ export default async function PoemPage({
     }
 
     try {
-        similarities = await fetchSimilarPoems(id, 5)
+        similarities = await fetchSimilarPoems(id)
     } catch {
         // Silently fail similarity so page still loads
         similarities = null
@@ -41,7 +41,7 @@ export default async function PoemPage({
             </div>
             
             <aside className="max-w-prose lg:max-w-none mt-12 lg:mt-0 lg:sticky lg:top-8">
-                {similarities && <SimilarPoems similarities={similarities} />}
+                {similarities && <SimilarPoems bundle={similarities} />}
             </aside>
         </article>
     )

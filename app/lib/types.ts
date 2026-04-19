@@ -90,3 +90,15 @@ export interface NeighbourListResult {
     query_id: UUID
     neighbours: NeighbourResult[]
 }
+
+export interface RecentList {
+    items: PoemSummary[]
+}
+
+export interface SimilarityBundle {
+    overall: NeighbourListResult
+    theme: NeighbourListResult
+    form: NeighbourListResult
+    register: NeighbourListResult
+    imagery: NeighbourListResult
+}

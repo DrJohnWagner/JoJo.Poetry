@@ -59,20 +59,23 @@ Two services, one flat JSON data source:
 │   └── Dockerfile                    # Python 3.11-slim image
 ├── requirements.txt                  # Production Python deps
 ├── requirements-dev.txt              # Adds pytest, httpx, jsonschema
-├── tests/server/                     # pytest suite (153 tests)
+├── tests/server/                     # pytest suite (183 tests)
 ├── app/
-│   ├── page.tsx                      # Landing: listing + search + incremental load
+│   ├── page.tsx                      # Landing: listing + search + incremental load + recent poems aside
 │   ├── poems/[id]/page.tsx           # Detail + inline editing + similar poems panel
 │   ├── poems/new/page.tsx            # Dedicated create page
 │   ├── layout.tsx, globals.css
 │   ├── components/
 │   │   ├── AppConfig.tsx             # React context provider for runtime config (readOnly)
+│   │   ├── Header.tsx                # Site header (title + "New poem" link); imported by each page
 │   │   ├── PoemListing.tsx           # Client: fetch, infinite scroll, row edit/delete
 │   │   ├── PoemEditorForm.tsx        # Shared editor (list row + detail)
 │   │   ├── PoemRowEditor.tsx         # Thin wrapper around PoemEditorForm for rows
 │   │   ├── PoemCreateForm.tsx        # Dedicated POST form with defaults + guards
 │   │   ├── PoemDetail.tsx            # Reading view + Edit toggle
-│   │   ├── SimilarPoems.tsx          # Similar poems panel (overall axis, ~5 items, null-safe)
+│   │   ├── SimilarPoems.tsx          # Similar poems aside: all 5 axes (overall/theme/form/register/imagery) grouped
+│   │   ├── RecentPoems.tsx           # Recent poems aside: k most recent by date, title + project
+│   │   ├── PoemSummary.tsx           # Shared list item: title link + project line; used in both asides
 │   │   ├── SearchBar.tsx             # q + submit + Advanced modal trigger
 │   │   ├── SortBar.tsx               # Client-side sort buttons (title/date/lines/words/rating/awards)
 │   │   ├── AdvancedSearchDialog.tsx  # Native <dialog>-backed modal (title/body/project/notes/year/month/awards/tags)
@@ -89,8 +92,8 @@ Two services, one flat JSON data source:
 │   │   ├── HorizontalRule.tsx        # Shared <div class="rule my-5" /> divider
 │   │   └── PoemBody.tsx              # Body -> plaintext projection display
 │   └── lib/
-│       ├── api.ts                    # Typed fetch wrappers (includes fetchSimilarPoems)
-│       ├── types.ts                  # Poem / PoemSummary / SearchState / NeighbourListResult
+│       ├── api.ts                    # Typed fetch wrappers (fetchPoems, fetchSimilarPoems → SimilarityBundle, fetchRecentPoems)
+│       ├── types.ts                  # Poem / PoemSummary / SearchState / NeighbourListResult / SimilarityBundle / RecentList
 │       ├── editable.ts               # Canonical editable-field contract
 │       └── format.ts                 # body <-> plaintext, date formatting
 ├── database/
@@ -416,23 +419,25 @@ identical inputs always produce identical output across restarts.
 
 ### API endpoints
 
-All similarity endpoints accept an optional `k` parameter (`1 ≤ k ≤ 50`,
-default 5). They return `NeighbourListResult` — never a `Poem` or
-`Poem[]`. The query poem is always excluded from its own results.
+All similarity endpoints return `404` for an unknown `id`, `422` for a
+malformed `id` or an out-of-range `k`. They work in read-only mode. The
+query poem is always excluded from its own results.
 
-| Method | Path | Description |
-| ------ | ---- | ----------- |
-| GET | `/api/poems/{id}/similar` | Overall similarity (alias for `/overall`) |
-| GET | `/api/poems/{id}/similar/overall` | Overall weighted score |
-| GET | `/api/poems/{id}/similar/theme` | Theme axis only |
-| GET | `/api/poems/{id}/similar/form` | Form axis only |
-| GET | `/api/poems/{id}/similar/register` | Register axis only |
-| GET | `/api/poems/{id}/similar/imagery` | Imagery axis only |
+| Method | Path | `k` params | Returns | Description |
+| ------ | ---- | ---------- | ------- | ----------- |
+| GET | `/api/poems/{id}/similar` | `k_overall=5`, `k_theme=3`, `k_form=3`, `k_register=3`, `k_imagery=3` | `SimilarityBundle` | All 5 axes in one response |
+| GET | `/api/poems/{id}/similar/overall` | `k=5` | `NeighbourListResult` | Overall weighted score |
+| GET | `/api/poems/{id}/similar/theme` | `k=5` | `NeighbourListResult` | Theme axis only |
+| GET | `/api/poems/{id}/similar/form` | `k=5` | `NeighbourListResult` | Form axis only |
+| GET | `/api/poems/{id}/similar/register` | `k=5` | `NeighbourListResult` | Register axis only |
+| GET | `/api/poems/{id}/similar/imagery` | `k=5` | `NeighbourListResult` | Imagery axis only |
 
-All endpoints return `404` for an unknown `id`, `422` for a malformed
-`id` or an out-of-range `k`. They work in read-only mode.
+Each per-category `k` in `/similar` is independently bounded `1 ≤ k ≤ 50`.
+The single-axis endpoints share a single `k` (`1 ≤ k ≤ 50`, default 5).
 
 ### Response shape
+
+`NeighbourListResult` (returned by the single-axis endpoints and `/similar/overall`):
 
 ```jsonc
 {
@@ -457,19 +462,62 @@ All endpoints return `404` for an unknown `id`, `422` for a malformed
 }
 ```
 
-### Frontend panel
+`SimilarityBundle` (returned by `/similar`):
 
-The single-poem page (`/poems/[id]`) fetches overall similarity
-alongside the poem itself. If the call fails or returns no results, the
-panel is silently omitted and the page renders normally.
+```jsonc
+{
+  "overall":  { "query_id": "<uuid>", "neighbours": [ ... ] },
+  "theme":    { "query_id": "<uuid>", "neighbours": [ ... ] },
+  "form":     { "query_id": "<uuid>", "neighbours": [ ... ] },
+  "register": { "query_id": "<uuid>", "neighbours": [ ... ] },
+  "imagery":  { "query_id": "<uuid>", "neighbours": [ ... ] }
+}
+```
 
-- **Wide viewport** (≥ `lg`): similarities appear in a sticky right
-  column alongside the poem.
-- **Narrow viewport**: similarities appear below the poem.
+Each value is a full `NeighbourListResult` with its own `k`.
 
-The panel shows up to 5 results: title and project statement, each
-linking to `/poems/{id}`. Scores, breakdowns, and non-overall axes are
-not exposed in the UI.
+### Frontend panels
+
+Both the listing page and the single-poem page use a two-column layout:
+a `max-w-prose` left column and a sticky `20rem` right aside. The
+`Header` component (title + optional "New poem" link) sits at the top of
+the left column on every page.
+
+**Single-poem page** (`/poems/[id]`): the aside shows all five similarity
+axes via `SimilarPoems`. The page calls `GET /api/poems/{id}/similar`
+(default per-category `k` values) and groups results under **Overall**,
+**Theme**, **Form & Craft**, **Register**, and **Imagery** headings.
+Empty axes are silently omitted. If the entire call fails, the aside is
+omitted and the page renders normally. Each result shows only the poem
+title as a link; scores and breakdowns are not exposed.
+
+**Listing page** (`/`): the aside shows the 12 most recent poems via
+`RecentPoems`, fetched server-side with `GET /api/poems/recent?k=12`.
+Each item shows the title (link) and project statement.
+
+Both asides use the shared `PoemSummary` component (title link + project
+line) and the same card styling.
+
+- **Wide viewport** (≥ `lg`): aside is sticky alongside the main column.
+- **Narrow viewport**: aside appears below the main column, capped at
+  `max-w-prose`.
+
+## Recent poems endpoint
+
+`GET /api/poems/recent?k=12`
+
+Returns the `k` most recent poems ordered by `date` descending (most
+recent first), with `id` ascending as a tiebreaker. No pin-first bias —
+pinned status has no effect on this ordering.
+
+| Parameter | Default | Constraints |
+| --------- | ------- | ----------- |
+| `k` | `12` | `1 ≤ k ≤ 100` |
+
+Response: `RecentList` — a flat list of `PoemSummary` objects (same
+projection used by all listing endpoints: `id`, `title`, `project`, and
+the other summary fields). Returns `422` for an out-of-range `k`. Works
+in read-only mode.
 
 ## Ordering and pagination
 
@@ -543,7 +591,7 @@ make check          # test + typecheck + lint
 Or manually:
 
 ```bash
-READ_ONLY=false uv run pytest tests/server   # ~153 tests, ~8 s
+READ_ONLY=false uv run pytest tests/server   # ~183 tests, ~8 s
 npx tsc --noEmit                             # TypeScript type-check
 npx next build                               # production build
 ```
@@ -557,7 +605,9 @@ Test files:
   duplicate-id and invalid-UUID rejection; immutability; atomic
   persistence; alternate-file configurability.
 - `tests/server/test_read_api.py` — `/health`; summary shape; pagination; search;
-  pinned-first ordering; 422 malformed id; 404 unknown id.
+  pinned-first ordering; 422 malformed id; 404 unknown id; `/api/poems/recent`
+  (200 shape, default k, k limits, date-desc ordering, no pin bias, 422 for
+  out-of-range k, route not intercepted by `/{poem_id}`).
 - `tests/server/test_mutations.py` — PATCH partial semantics; derived recompute;
   unknown-field/id rejection; DELETE; **persistence-failure
   atomicity** (injected `OSError` keeps memory and disk consistent).
@@ -572,14 +622,15 @@ Test files:
   `id`/`lines`/`words`; required-field-missing rejection; ordering
   visibility after create; failed-persistence atomicity; body
   round-trip.
-- `tests/server/test_similarity.py` — 68 tests across the full similarity
+- `tests/server/test_similarity.py` — tests across the full similarity
   stack: normalisation (case-fold, dedup, synonyms), Jaccard edge
   cases, TF-IDF index (unfitted zeros, rebuild, empty corpus),
   fusion arithmetic (weight sum, axis blending, no semantic bleed),
   service (self-exclusion, k limits, score-desc + id-asc ordering,
-  module globals), all six API endpoints (200/404/422, k bounds,
-  response shape, excluded Poem fields, read-only mode, ranking),
-  and mutation → rebuild integration (POST/PATCH/DELETE each
+  module globals), all API endpoints including `/similar` bundle shape
+  (200/404/422, per-category k bounds, `SimilarityBundle` response,
+  excluded Poem fields, read-only mode, ranking), all five single-axis
+  endpoints, and mutation → rebuild integration (POST/PATCH/DELETE each
   reflected in subsequent similarity queries).
 
 ## Limitations and assumptions
@@ -616,9 +667,6 @@ Test files:
   `server/similarity/normalise.py` is a stub. Tags that mean the same
   thing (`"grief"` / `"loss"`) will not be matched unless entries are
   added manually.
-- **Only overall similarity is shown in the UI.** The five axis scores
-  (theme, form, register, imagery, fit) are computed and returned by
-  the API but not exposed in the frontend panel.
 
 ## Sensible next steps
 
@@ -644,9 +692,6 @@ Test files:
 9. **Similarity synonym vocabulary** — populate `SYNONYMS` in
    `server/similarity/normalise.py` as the tag vocabulary grows to
    improve recall across near-synonymous terms.
-10. **Similarity axis tabs in the UI** — expose the theme, form,
-    register, and imagery axes on the detail page for readers who want
-    to explore a specific dimension of likeness.
-11. **Incremental similarity rebuild** — for larger collections,
+10. **Incremental similarity rebuild** — for larger collections,
     replace the full-corpus rebuild on mutation with a targeted
     update that only re-scores poems whose tags changed.

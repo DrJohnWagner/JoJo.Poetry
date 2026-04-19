@@ -1,4 +1,4 @@
-import type { NeighbourListResult } from './types'
+import type { RecentList, SimilarityBundle } from './types'
 import type { Poem, PoemList, SearchState } from "./types"
 import { hasAdvanced } from "./types"
 
@@ -105,6 +105,10 @@ export function deletePoem(id: string): Promise<void> {
         method: "DELETE",
     })
 }
-export function fetchSimilarPoems(id: string, k: number = 5): Promise<NeighbourListResult> {
-    return req<NeighbourListResult>(`/api/poems/${encodeURIComponent(id)}/similar/overall?k=${k}`)
+export function fetchRecentPoems(k: number = 12): Promise<RecentList> {
+    return req<RecentList>(`/api/poems/recent?k=${k}`)
+}
+
+export function fetchSimilarPoems(id: string): Promise<SimilarityBundle> {
+    return req<SimilarityBundle>(`/api/poems/${encodeURIComponent(id)}/similar`)
 }
