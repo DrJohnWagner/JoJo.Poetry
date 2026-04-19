@@ -49,7 +49,7 @@ Two services, one flat JSON data source:
 │   ├── api.py                        # All routes (read, search, POST/PATCH/DELETE)
 │   ├── config.py                     # Settings: POEMS_DATABASE, .env, paths
 │   ├── repository.py                 # In-memory, file-backed PoemRepository
-│   └── Dockerfile                    # Python 3.12-slim image
+│   └── Dockerfile                    # Python 3.11-slim image
 ├── requirements.txt                  # Production Python deps
 ├── requirements-dev.txt              # Adds pytest, httpx, jsonschema
 ├── tests/server/                     # pytest suite (85 tests)
@@ -66,9 +66,15 @@ Two services, one flat JSON data source:
 │   │   ├── PoemCreateForm.tsx        # Dedicated POST form with defaults + guards
 │   │   ├── PoemDetail.tsx            # Reading view + Edit toggle
 │   │   ├── SearchBar.tsx             # q + submit + Advanced modal trigger
-│   │   ├── SortBar.tsx               # Client-side sort buttons (title/date/lines/words/rating/medals)
-│   │   ├── AdvancedSearchDialog.tsx  # Native <dialog>-backed modal
+│   │   ├── SortBar.tsx               # Client-side sort buttons (title/date/lines/words/rating/awards)
+│   │   ├── AdvancedSearchDialog.tsx  # Native <dialog>-backed modal (title/body/project/notes/year/month/awards/tags)
 │   │   ├── PoemRow.tsx               # Single poem row (title, meta, collapsible body)
+│   │   ├── PoemTitle.tsx             # Shared <h2> with optional Link wrapper
+│   │   ├── PoemStatistics.tsx        # Shared metadata line (date · rating · lines · words · awards)
+│   │   ├── PoemProject.tsx           # Italic project statement, null-safe
+│   │   ├── PoemContest.tsx           # Medal icon + award label + optional contest link
+│   │   ├── PoemSocial.tsx            # Social URL rendered as hostname link
+│   │   ├── PoemMetadataEditor.tsx    # Shared rating/date/url grid + all six TagInput fields
 │   │   ├── PinToggle.tsx             # Server-confirmed pin/unpin
 │   │   ├── DeleteButton.tsx          # Two-step confirmation control
 │   │   ├── NotesEditor.tsx           # Multi-line textarea for author's notes (one line = one note)
@@ -84,7 +90,8 @@ Two services, one flat JSON data source:
 │   ├── <Title>.json                  # Per-poem mirror files (reference only)
 │   └── schemas/
 │       ├── poem.schema.json          # JSON Schema (Draft 2020-12)
-│       └── poem.py                   # Pydantic Poem / Contest / Note
+│       └── poem.py                   # Pydantic Poem / Contest
+├── Dockerfile                        # Combined multi-stage image (Node 22 + Python 3.11, Debian bookworm-slim, no CMD)
 └── docker-compose.yml                # Orchestrates backend + frontend
 ```
 
@@ -250,9 +257,12 @@ make docker-shell-server    # shell into running server container
 make docker-shell-web       # shell into running web container
 ```
 
+The combined `Dockerfile` is a three-stage Debian bookworm-slim build (no `CMD`) that can be used as a base or composed into custom orchestrations. The `docker-compose.yml` builds on top of it.
+
 Details:
 
-- `Dockerfile.backend` copies `requirements.txt`, `server/`, and
+- `Dockerfile` builds the Next.js standalone output (stage 1), installs Python deps (stage 2), and produces a combined runtime image with Node 22 + Python 3.11 (stage 3). No `CMD` — use as a base or supply one in `docker-compose.yml`.
+- The compose file's backend service copies `requirements.txt`, `server/`, and
   `database/` into the image; default `POEMS_DATABASE` resolves to
   `/app/database/Poems.json`.
 - The compose file **bind-mounts** `./database/` into the backend
@@ -285,7 +295,7 @@ The listing page applies a second, client-side sort layer on top of the server's
 | Lines  | most first        | `lines` (integer)           |
 | Words  | most first        | `words` (integer)           |
 | Rating | highest first     | `rating` (integer)          |
-| Medals | most first        | `contest_count` (integer)   |
+| Awards | most first        | `contest_count` (integer)   |
 
 One button is always active (Date descending by default). Clicking the active button toggles direction; clicking an inactive button selects it at its default direction. The sort is re-applied automatically as new pages are loaded via infinite scroll.
 
