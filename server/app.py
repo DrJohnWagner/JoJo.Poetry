@@ -32,6 +32,8 @@ def create_app(settings: Optional[Settings] = None) -> FastAPI:
     @asynccontextmanager
     async def lifespan(app: FastAPI):
         repo: PoemRepository = init_repository(db_path)
+        from server.similarity.service import init_similarity_service, rebuild_similarity_service
+        init_similarity_service(repo.list())
         app.state.settings = settings
         app.state.repository = repo
         try:

@@ -45,17 +45,24 @@ Two services, one flat JSON data source:
 ```
 .
 ├── server/
-│   ├── app.py                        # FastAPI factory, CORS, lifespan load
-│   ├── api.py                        # All routes (read, search, POST/PATCH/DELETE)
+│   ├── app.py                        # FastAPI factory, CORS, lifespan load + similarity init
+│   ├── api.py                        # All routes (read, search, POST/PATCH/DELETE, similarity)
 │   ├── config.py                     # Settings: POEMS_DATABASE, .env, paths
 │   ├── repository.py                 # In-memory, file-backed PoemRepository
+│   ├── similarity/
+│   │   ├── types.py                  # NormalisedPoemFeatures, score breakdowns, NeighbourResult
+│   │   ├── normalise.py              # Poem → NormalisedPoemFeatures (lowercase, dedup, synonyms)
+│   │   ├── structured.py             # Jaccard similarity over tag sets; StructuredScoreBreakdown
+│   │   ├── semantic.py               # SemanticSimilarityIndex: TF-IDF on project/form/image text
+│   │   ├── fusion.py                 # Weighted blend of structured + semantic; axis weights
+│   │   └── service.py                # PoemSimilarityService; module-level init/rebuild helpers
 │   └── Dockerfile                    # Python 3.11-slim image
 ├── requirements.txt                  # Production Python deps
 ├── requirements-dev.txt              # Adds pytest, httpx, jsonschema
-├── tests/server/                     # pytest suite (85 tests)
+├── tests/server/                     # pytest suite (153 tests)
 ├── app/
 │   ├── page.tsx                      # Landing: listing + search + incremental load
-│   ├── poems/[id]/page.tsx           # Detail + inline editing
+│   ├── poems/[id]/page.tsx           # Detail + inline editing + similar poems panel
 │   ├── poems/new/page.tsx            # Dedicated create page
 │   ├── layout.tsx, globals.css
 │   ├── components/
@@ -65,6 +72,7 @@ Two services, one flat JSON data source:
 │   │   ├── PoemRowEditor.tsx         # Thin wrapper around PoemEditorForm for rows
 │   │   ├── PoemCreateForm.tsx        # Dedicated POST form with defaults + guards
 │   │   ├── PoemDetail.tsx            # Reading view + Edit toggle
+│   │   ├── SimilarPoems.tsx          # Similar poems panel (overall axis, ~5 items, null-safe)
 │   │   ├── SearchBar.tsx             # q + submit + Advanced modal trigger
 │   │   ├── SortBar.tsx               # Client-side sort buttons (title/date/lines/words/rating/awards)
 │   │   ├── AdvancedSearchDialog.tsx  # Native <dialog>-backed modal (title/body/project/notes/year/month/awards/tags)
@@ -81,8 +89,8 @@ Two services, one flat JSON data source:
 │   │   ├── HorizontalRule.tsx        # Shared <div class="rule my-5" /> divider
 │   │   └── PoemBody.tsx              # Body -> plaintext projection display
 │   └── lib/
-│       ├── api.ts                    # Typed fetch wrappers
-│       ├── types.ts                  # Poem / PoemSummary / SearchState
+│       ├── api.ts                    # Typed fetch wrappers (includes fetchSimilarPoems)
+│       ├── types.ts                  # Poem / PoemSummary / SearchState / NeighbourListResult
 │       ├── editable.ts               # Canonical editable-field contract
 │       └── format.ts                 # body <-> plaintext, date formatting
 ├── database/
@@ -90,7 +98,8 @@ Two services, one flat JSON data source:
 │   ├── <Title>.json                  # Per-poem mirror files (reference only)
 │   └── schemas/
 │       ├── poem.schema.json          # JSON Schema (Draft 2020-12)
-│       └── poem.py                   # Pydantic Poem / Contest
+│       ├── poem.py                   # Pydantic Poem / Contest
+│       └── similarity.py             # Re-exports similarity response types for API use
 ├── Dockerfile                        # Combined multi-stage image (Node 22 + Python 3.11, Debian bookworm-slim, no CMD)
 └── docker-compose.yml                # Orchestrates backend + frontend
 ```
@@ -334,6 +343,134 @@ multiple awards is OR (e.g. `awards=Gold&awards=None`). Unknown awards
 Both endpoints return the same `PoemList` wrapper and apply the same
 ordering and pagination.
 
+## The similarity system
+
+The similarity system runs entirely in memory — nothing is persisted and
+the `Poem` schema is not modified. It is built from `repo.list()` at
+startup and rebuilt in full after every mutation (POST, PATCH, DELETE).
+
+### Architecture
+
+```
+repo.list()
+    │
+    ▼
+normalise.py  ──  Poem → NormalisedPoemFeatures
+    │              (lowercase, dedup, synonym expansion)
+    ├── structured.py  ──  Jaccard over tag sets (themes, register,
+    │                       form, imagery, fit)  → StructuredScoreBreakdown
+    └── semantic.py    ──  TF-IDF cosine on separate text fields
+                            (project, form_text, image_text)  → SemanticScoreBreakdown
+                │
+                ▼
+            fusion.py  ──  weighted blend → FusedScoreBreakdown
+                │
+                ▼
+            service.py ──  PoemSimilarityService.get_*_similar()
+                            → NeighbourListResult
+```
+
+### Scoring
+
+Similarity is **multi-axis**. Each axis has a named score in [0, 1]:
+
+| Axis       | Structured input    | Semantic input  | Structured weight | Semantic weight |
+| ---------- | ------------------- | --------------- | ----------------- | --------------- |
+| theme      | `themes` Jaccard    | —               | 1.0               | 0.0             |
+| form       | `form_and_craft` J. | `form_text`     | 0.8               | 0.2             |
+| register   | `emotional_register`| —               | 1.0               | 0.0             |
+| imagery    | `key_images` J.     | `image_text`    | 0.8               | 0.2             |
+
+The **overall score** is a weighted average across all axes plus `fit`
+(structured only) and `project` (semantic only):
+
+| Component   | Weight |
+| ----------- | ------ |
+| theme       | 0.30   |
+| form        | 0.20   |
+| register    | 0.15   |
+| imagery     | 0.15   |
+| fit         | 0.10   |
+| project     | 0.10   |
+
+Structured metadata dominates; TF-IDF fills in where tag overlap is
+thin. Fields excluded from scoring: `rating`, `lines`, `words`, `date`.
+No generative model is used.
+
+### Normalisation and synonyms
+
+Before scoring, each `Poem` is converted to `NormalisedPoemFeatures`:
+tag lists are lowercased, whitespace-stripped, deduplicated, and
+(optionally) expanded through a one-to-one / one-to-many synonym table
+in `server/similarity/normalise.py`. The table is empty by default;
+add entries as the vocabulary grows.
+
+`form_text` and `image_text` are the sorted, space-joined
+`form_and_craft` and `key_images` sets respectively, used as TF-IDF
+inputs. `project_text` is the lowercased project statement.
+
+### Determinism
+
+Results are ordered **score descending, `id` ascending** as a tiebreaker —
+identical inputs always produce identical output across restarts.
+
+### API endpoints
+
+All similarity endpoints accept an optional `k` parameter (`1 ≤ k ≤ 50`,
+default 5). They return `NeighbourListResult` — never a `Poem` or
+`Poem[]`. The query poem is always excluded from its own results.
+
+| Method | Path | Description |
+| ------ | ---- | ----------- |
+| GET | `/api/poems/{id}/similar` | Overall similarity (alias for `/overall`) |
+| GET | `/api/poems/{id}/similar/overall` | Overall weighted score |
+| GET | `/api/poems/{id}/similar/theme` | Theme axis only |
+| GET | `/api/poems/{id}/similar/form` | Form axis only |
+| GET | `/api/poems/{id}/similar/register` | Register axis only |
+| GET | `/api/poems/{id}/similar/imagery` | Imagery axis only |
+
+All endpoints return `404` for an unknown `id`, `422` for a malformed
+`id` or an out-of-range `k`. They work in read-only mode.
+
+### Response shape
+
+```jsonc
+{
+  "query_id": "<uuid>",
+  "neighbours": [
+    {
+      "id": "<uuid>",
+      "title": "...",
+      "project": "...",
+      "score": 0.72,
+      "breakdown": {
+        "overall_score": 0.72,
+        "theme_score": 0.80,
+        "form_score": 0.65,
+        "register_score": 0.50,
+        "imagery_score": 0.60,
+        "structured": { "theme_sim": 0.80, "theme_overlap": ["nature"], ... },
+        "semantic":   { "project_tfidf_sim": 0.30, ... }
+      }
+    }
+  ]
+}
+```
+
+### Frontend panel
+
+The single-poem page (`/poems/[id]`) fetches overall similarity
+alongside the poem itself. If the call fails or returns no results, the
+panel is silently omitted and the page renders normally.
+
+- **Wide viewport** (≥ `lg`): similarities appear in a sticky right
+  column alongside the poem.
+- **Narrow viewport**: similarities appear below the poem.
+
+The panel shows up to 5 results: title and project statement, each
+linking to `/poems/{id}`. Scores, breakdowns, and non-overall axes are
+not exposed in the UI.
+
 ## Ordering and pagination
 
 Authoritative ordering (same on both list endpoints):
@@ -406,7 +543,7 @@ make check          # test + typecheck + lint
 Or manually:
 
 ```bash
-READ_ONLY=false uv run pytest tests/server   # ~85 tests, ~4 s
+READ_ONLY=false uv run pytest tests/server   # ~153 tests, ~8 s
 npx tsc --noEmit                             # TypeScript type-check
 npx next build                               # production build
 ```
@@ -435,6 +572,15 @@ Test files:
   `id`/`lines`/`words`; required-field-missing rejection; ordering
   visibility after create; failed-persistence atomicity; body
   round-trip.
+- `tests/server/test_similarity.py` — 68 tests across the full similarity
+  stack: normalisation (case-fold, dedup, synonyms), Jaccard edge
+  cases, TF-IDF index (unfitted zeros, rebuild, empty corpus),
+  fusion arithmetic (weight sum, axis blending, no semantic bleed),
+  service (self-exclusion, k limits, score-desc + id-asc ordering,
+  module globals), all six API endpoints (200/404/422, k bounds,
+  response shape, excluded Poem fields, read-only mode, ranking),
+  and mutation → rebuild integration (POST/PATCH/DELETE each
+  reflected in subsequent similarity queries).
 
 ## Limitations and assumptions
 
@@ -462,6 +608,17 @@ Test files:
   styled in-page prompt would match the literary aesthetic better.
 - **No end-to-end UI tests.** Frontend is validated via `tsc` and
   `next build`; interactive flows are exercised manually.
+- **Similarity rebuilds on every mutation.** The full corpus is
+  re-normalised and TF-IDF matrices are refitted after each POST,
+  PATCH, or DELETE. Acceptable for a small collection; a larger one
+  would benefit from incremental updates or a background rebuild queue.
+- **Similarity synonyms are empty by default.** The synonym table in
+  `server/similarity/normalise.py` is a stub. Tags that mean the same
+  thing (`"grief"` / `"loss"`) will not be matched unless entries are
+  added manually.
+- **Only overall similarity is shown in the UI.** The five axis scores
+  (theme, form, register, imagery, fit) are computed and returned by
+  the API but not exposed in the frontend panel.
 
 ## Sensible next steps
 
@@ -484,3 +641,12 @@ Test files:
    NOT modifier on the advanced endpoint for exclusion filters.
 8. **End-to-end tests** (Playwright) covering the edit, pin, delete,
    and create flows against a disposable backend.
+9. **Similarity synonym vocabulary** — populate `SYNONYMS` in
+   `server/similarity/normalise.py` as the tag vocabulary grows to
+   improve recall across near-synonymous terms.
+10. **Similarity axis tabs in the UI** — expose the theme, form,
+    register, and imagery axes on the detail page for readers who want
+    to explore a specific dimension of likeness.
+11. **Incremental similarity rebuild** — for larger collections,
+    replace the full-corpus rebuild on mutation with a targeted
+    update that only re-scores poems whose tags changed.

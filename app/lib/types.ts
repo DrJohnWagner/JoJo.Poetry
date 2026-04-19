@@ -79,3 +79,14 @@ export function hasAdvanced(s: SearchState): boolean {
 export function isEmptySearch(s: SearchState): boolean {
     return !s.q.trim() && !hasAdvanced(s)
 }
+
+export interface NeighbourResult {
+    id: UUID
+    title: string
+    project: string
+    score: number
+}
+export interface NeighbourListResult {
+    query_id: UUID
+    neighbours: NeighbourResult[]
+}

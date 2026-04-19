@@ -568,7 +568,10 @@ def create_poem(
         raise HTTPException(status_code=422, detail=f"Validation failed: {e}") from None
 
     try:
-        return repo.add(poem)
+        res = repo.add(poem)
+        from server.similarity.service import rebuild_similarity_service
+        rebuild_similarity_service(repo.list())
+        return res
     except Exception as e:  # persistence / uniqueness / etc.
         raise HTTPException(status_code=500, detail=str(e)) from None
 
@@ -609,7 +612,10 @@ def patch_poem(
         except PoemNotFoundError:
             raise HTTPException(status_code=404, detail="Poem not found") from None
     try:
-        return repo.update(poem_id, updates)
+        res = repo.update(poem_id, updates)
+        from server.similarity.service import rebuild_similarity_service
+        rebuild_similarity_service(repo.list())
+        return res
     except PoemNotFoundError:
         raise HTTPException(status_code=404, detail="Poem not found") from None
     except ImmutableFieldError as e:
@@ -636,5 +642,49 @@ def delete_poem(
     """
     try:
         repo.delete(poem_id)
+        from server.similarity.service import rebuild_similarity_service
+        rebuild_similarity_service(repo.list())
     except PoemNotFoundError:
         raise HTTPException(status_code=404, detail="Poem not found") from None
+from database.schemas.similarity import NeighbourListResult
+@router.get('/api/poems/{poem_id}/similar', response_model=NeighbourListResult, tags=['similarity'])
+@router.get('/api/poems/{poem_id}/similar/overall', response_model=NeighbourListResult, tags=['similarity'])
+def get_similar_overall(poem_id: UUID, k: int = Query(5, ge=1, le=50)):
+    from server.similarity.service import get_similarity_service
+    service = get_similarity_service()
+    res = service.get_overall_similar(poem_id, k)
+    if res is None:
+        raise HTTPException(status_code=404, detail='Poem not found')
+    return res
+@router.get('/api/poems/{poem_id}/similar/theme', response_model=NeighbourListResult, tags=['similarity'])
+def get_similar_theme(poem_id: UUID, k: int = Query(5, ge=1, le=50)):
+    from server.similarity.service import get_similarity_service
+    service = get_similarity_service()
+    res = service.get_theme_similar(poem_id, k)
+    if res is None:
+        raise HTTPException(status_code=404, detail='Poem not found')
+    return res
+@router.get('/api/poems/{poem_id}/similar/form', response_model=NeighbourListResult, tags=['similarity'])
+def get_similar_form(poem_id: UUID, k: int = Query(5, ge=1, le=50)):
+    from server.similarity.service import get_similarity_service
+    service = get_similarity_service()
+    res = service.get_form_similar(poem_id, k)
+    if res is None:
+        raise HTTPException(status_code=404, detail='Poem not found')
+    return res
+@router.get('/api/poems/{poem_id}/similar/register', response_model=NeighbourListResult, tags=['similarity'])
+def get_similar_register(poem_id: UUID, k: int = Query(5, ge=1, le=50)):
+    from server.similarity.service import get_similarity_service
+    service = get_similarity_service()
+    res = service.get_register_similar(poem_id, k)
+    if res is None:
+        raise HTTPException(status_code=404, detail='Poem not found')
+    return res
+@router.get('/api/poems/{poem_id}/similar/imagery', response_model=NeighbourListResult, tags=['similarity'])
+def get_similar_imagery(poem_id: UUID, k: int = Query(5, ge=1, le=50)):
+    from server.similarity.service import get_similarity_service
+    service = get_similarity_service()
+    res = service.get_imagery_similar(poem_id, k)
+    if res is None:
+        raise HTTPException(status_code=404, detail='Poem not found')
+    return res

@@ -1,3 +1,4 @@
+import type { NeighbourListResult } from './types'
 import type { Poem, PoemList, SearchState } from "./types"
 import { hasAdvanced } from "./types"
 
@@ -103,4 +104,7 @@ export function deletePoem(id: string): Promise<void> {
     return req<void>(`/api/poems/${encodeURIComponent(id)}`, {
         method: "DELETE",
     })
+}
+export function fetchSimilarPoems(id: string, k: number = 5): Promise<NeighbourListResult> {
+    return req<NeighbourListResult>(`/api/poems/${encodeURIComponent(id)}/similar/overall?k=${k}`)
 }
