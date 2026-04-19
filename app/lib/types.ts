@@ -99,6 +99,6 @@ export interface SimilarityBundle {
     overall: NeighbourListResult
     theme: NeighbourListResult
     form: NeighbourListResult
-    register: NeighbourListResult
+    emotion: NeighbourListResult
     imagery: NeighbourListResult
 }

@@ -584,7 +584,7 @@ class SimilarityBundle(BaseModel):
     overall: NeighbourListResult
     theme: NeighbourListResult
     form: NeighbourListResult
-    register: NeighbourListResult
+    emotion: NeighbourListResult
     imagery: NeighbourListResult
 
 
@@ -594,7 +594,7 @@ def get_similar_bundle(
     k_overall: int = Query(5, ge=1, le=50),
     k_theme: int = Query(3, ge=1, le=50),
     k_form: int = Query(3, ge=1, le=50),
-    k_register: int = Query(3, ge=1, le=50),
+    k_emotion: int = Query(3, ge=1, le=50),
     k_imagery: int = Query(3, ge=1, le=50),
 ) -> SimilarityBundle:
     """All similarity dimensions in one call, with per-category k values."""
@@ -604,7 +604,7 @@ def get_similar_bundle(
         "overall": svc.get_overall_similar(poem_id, k_overall),
         "theme":   svc.get_theme_similar(poem_id, k_theme),
         "form":    svc.get_form_similar(poem_id, k_form),
-        "register": svc.get_register_similar(poem_id, k_register),
+        "emotion": svc.get_emotion_similar(poem_id, k_emotion),
         "imagery": svc.get_imagery_similar(poem_id, k_imagery),
     }
     if any(v is None for v in results.values()):
@@ -651,14 +651,14 @@ def get_similar_form(
     return res
 
 
-@router.get("/api/poems/{poem_id}/similar/register", response_model=NeighbourListResult, tags=["similarity"])
-def get_similar_register(
+@router.get("/api/poems/{poem_id}/similar/emotion", response_model=NeighbourListResult, tags=["similarity"])
+def get_similar_emotion(
     poem_id: UUID,
     k: int = Query(5, ge=1, le=50),
 ) -> NeighbourListResult:
     """Similarity by emotional register."""
     from server.similarity.service import get_similarity_service
-    res = get_similarity_service().get_register_similar(poem_id, k)
+    res = get_similarity_service().get_emotion_similar(poem_id, k)
     if res is None:
         raise HTTPException(status_code=404, detail="Poem not found")
     return res

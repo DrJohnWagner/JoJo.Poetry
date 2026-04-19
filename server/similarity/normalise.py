@@ -30,22 +30,21 @@ def _normalise_list(terms: Iterable[str]) -> Set[str]:
 
 def normalise_poem(poem: Poem) -> NormalisedPoemFeatures:
     themes = _normalise_list(poem.themes)
-    register = _normalise_list(poem.emotional_register)
+    emotion = _normalise_list(poem.emotional_register)
     form = _normalise_list(poem.form_and_craft)
     images = _normalise_list(poem.key_images)
     fit = _normalise_list(poem.contest_fit)
-    
-    # Text representations
+
     project_text = poem.project.strip().lower()
     form_text = " ".join(sorted(form))
     image_text = " ".join(sorted(images))
-    
+
     return NormalisedPoemFeatures(
         id=poem.id,
         title=poem.title,
         project=poem.project,
         themes=themes,
-        register=register,
+        emotion=emotion,
         form=form,
         images=images,
         fit=fit,

@@ -63,8 +63,8 @@ class PoemSimilarityService:
     def get_form_similar(self, query_id: UUID, k: int = 5) -> Optional[NeighbourListResult]:
         return self._get_neighbours(query_id, lambda f: f.form_score, k)
 
-    def get_register_similar(self, query_id: UUID, k: int = 5) -> Optional[NeighbourListResult]:
-        return self._get_neighbours(query_id, lambda f: f.register_score, k)
+    def get_emotion_similar(self, query_id: UUID, k: int = 5) -> Optional[NeighbourListResult]:
+        return self._get_neighbours(query_id, lambda f: f.emotion_score, k)
 
     def get_imagery_similar(self, query_id: UUID, k: int = 5) -> Optional[NeighbourListResult]:
         return self._get_neighbours(query_id, lambda f: f.imagery_score, k)

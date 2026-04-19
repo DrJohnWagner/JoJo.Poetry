@@ -13,19 +13,19 @@ def jaccard_similarity(set1: Set[str], set2: Set[str]) -> Tuple[float, list[str]
 
 def compute_structured_similarity(p1: NormalisedPoemFeatures, p2: NormalisedPoemFeatures) -> StructuredScoreBreakdown:
     theme_sim, theme_overlap = jaccard_similarity(p1.themes, p2.themes)
-    register_sim, register_overlap = jaccard_similarity(p1.register, p2.register)
+    emotion_sim, emotion_overlap = jaccard_similarity(p1.emotion, p2.emotion)
     form_sim, form_overlap = jaccard_similarity(p1.form, p2.form)
     imagery_sim, imagery_overlap = jaccard_similarity(p1.images, p2.images)
     fit_sim, fit_overlap = jaccard_similarity(p1.fit, p2.fit)
-    
+
     return StructuredScoreBreakdown(
         theme_sim=theme_sim,
-        register_sim=register_sim,
+        emotion_sim=emotion_sim,
         form_sim=form_sim,
         imagery_sim=imagery_sim,
         fit_sim=fit_sim,
         theme_overlap=theme_overlap,
-        register_overlap=register_overlap,
+        emotion_overlap=emotion_overlap,
         form_overlap=form_overlap,
         imagery_overlap=imagery_overlap,
         fit_overlap=fit_overlap

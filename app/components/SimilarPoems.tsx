@@ -5,7 +5,7 @@ const CATEGORIES: { key: keyof SimilarityBundle; label: string }[] = [
     { key: "overall",  label: "Overall" },
     { key: "theme",    label: "Theme" },
     { key: "form",     label: "Form & Craft" },
-    { key: "register", label: "Register" },
+    { key: "emotion",  label: "Emotion" },
     { key: "imagery",  label: "Imagery" },
 ]
 

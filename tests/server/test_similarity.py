@@ -105,12 +105,12 @@ def _make_db(tmp_path: Path, poems) -> Path:
 def _make_structured(**overrides) -> StructuredScoreBreakdown:
     defaults = dict(
         theme_sim=0.0,
-        register_sim=0.0,
+        emotion_sim=0.0,
         form_sim=0.0,
         imagery_sim=0.0,
         fit_sim=0.0,
         theme_overlap=[],
-        register_overlap=[],
+        emotion_overlap=[],
         form_overlap=[],
         imagery_overlap=[],
         fit_overlap=[],
@@ -179,7 +179,7 @@ def test_normalise_all_empty_tag_arrays_give_empty_sets():
     )
     feat = _norm(poem)
     assert feat.themes == set()
-    assert feat.register == set()
+    assert feat.emotion == set()
     assert feat.form == set()
     assert feat.images == set()
     assert feat.fit == set()
@@ -221,7 +221,7 @@ def test_normalise_maps_all_five_tag_fields():
     )
     feat = _norm(poem)
     assert feat.themes == {"a"}
-    assert feat.register == {"b"}
+    assert feat.emotion == {"b"}
     assert feat.form == {"c"}
     assert feat.images == {"d"}
     assert feat.fit == {"e"}
@@ -316,7 +316,7 @@ def test_structured_identical_poems_max_scores_on_all_axes():
     )
     result = compute_structured_similarity(p1, p2)
     assert result.theme_sim == pytest.approx(1.0)
-    assert result.register_sim == pytest.approx(1.0)
+    assert result.emotion_sim == pytest.approx(1.0)
     assert result.form_sim == pytest.approx(1.0)
     assert result.imagery_sim == pytest.approx(1.0)
     assert result.fit_sim == pytest.approx(1.0)
@@ -476,11 +476,11 @@ def test_fusion_theme_score_is_pure_structured_no_semantic_bleed():
     assert result.theme_score == pytest.approx(0.5)
 
 
-def test_fusion_register_score_is_pure_structured():
-    struct = _make_structured(register_sim=0.7)
+def test_fusion_emotion_score_is_pure_structured():
+    struct = _make_structured(emotion_sim=0.7)
     sem = _make_semantic(project_tfidf_sim=1.0, form_tfidf_sim=1.0, image_tfidf_sim=1.0)
     result = compute_fused_similarity(struct, sem)
-    assert result.register_score == pytest.approx(0.7)
+    assert result.emotion_score == pytest.approx(0.7)
 
 
 def test_fusion_form_score_blends_structured_and_semantic():
@@ -502,12 +502,12 @@ def test_fusion_imagery_score_blends_structured_and_semantic():
 def test_fusion_overall_arithmetic():
     struct = _make_structured(
         theme_sim=1.0,
-        register_sim=0.5,
+        emotion_sim=0.5,
         form_sim=0.8,
         imagery_sim=0.6,
         fit_sim=0.4,
         theme_overlap=["a"],
-        register_overlap=["b"],
+        emotion_overlap=["b"],
         form_overlap=["c"],
         imagery_overlap=["d"],
         fit_overlap=["e"],
@@ -517,14 +517,14 @@ def test_fusion_overall_arithmetic():
 
     theme_score = 1.0
     form_score = 0.8 * 0.8 + 0.2 * 0.4
-    register_score = 0.5
+    emotion_score = 0.5
     imagery_score = 0.8 * 0.6 + 0.2 * 0.5
     fit_score = 0.4
     project_score = 0.3
     expected = (
         theme_score * 0.30
         + form_score * 0.20
-        + register_score * 0.15
+        + emotion_score * 0.15
         + imagery_score * 0.15
         + fit_score * 0.10
         + project_score * 0.10
@@ -547,7 +547,7 @@ def test_fusion_scores_are_non_negative():
     assert result.overall_score >= 0.0
     assert result.theme_score >= 0.0
     assert result.form_score >= 0.0
-    assert result.register_score >= 0.0
+    assert result.emotion_score >= 0.0
     assert result.imagery_score >= 0.0
 
 
@@ -670,9 +670,9 @@ def test_service_register_axis_score_field_matches_breakdown():
     poems = [_make_poem(emotional_register=["melancholic"]) for _ in range(3)]
     svc = PoemSimilarityService()
     svc.rebuild(poems)
-    result = svc.get_register_similar(poems[0].id, k=10)
+    result = svc.get_emotion_similar(poems[0].id, k=10)
     for n in result.neighbours:
-        assert n.score == pytest.approx(n.breakdown.register_score)
+        assert n.score == pytest.approx(n.breakdown.emotion_score)
 
 
 def test_service_imagery_axis_score_field_matches_breakdown():
@@ -794,8 +794,8 @@ def test_similar_overall_returns_200(api_client):
 def test_similar_bundle_shape(api_client):
     pid = _listing_ids(api_client)[0]
     body = api_client.get(f"/api/poems/{pid}/similar").json()
-    assert set(body.keys()) == {"overall", "theme", "form", "register", "imagery"}
-    for key in ("overall", "theme", "form", "register", "imagery"):
+    assert set(body.keys()) == {"overall", "theme", "form", "emotion", "imagery"}
+    for key in ("overall", "theme", "form", "emotion", "imagery"):
         assert "query_id" in body[key]
         assert "neighbours" in body[key]
 
@@ -819,7 +819,7 @@ def test_similar_form_returns_200(api_client):
 
 def test_similar_register_returns_200(api_client):
     pid = _listing_ids(api_client)[0]
-    assert api_client.get(f"/api/poems/{pid}/similar/register").status_code == 200
+    assert api_client.get(f"/api/poems/{pid}/similar/emotion").status_code == 200
 
 
 def test_similar_imagery_returns_200(api_client):
@@ -922,7 +922,7 @@ def test_similar_breakdown_fields_present(api_client):
     assert "overall_score" in breakdown
     assert "theme_score" in breakdown
     assert "form_score" in breakdown
-    assert "register_score" in breakdown
+    assert "emotion_score" in breakdown
     assert "imagery_score" in breakdown
     assert "structured" in breakdown
     assert "semantic" in breakdown
@@ -936,7 +936,7 @@ def test_similar_structured_overlap_fields_present(api_client):
     structured = body["neighbours"][0]["breakdown"]["structured"]
     assert "theme_overlap" in structured
     assert "form_overlap" in structured
-    assert "register_overlap" in structured
+    assert "emotion_overlap" in structured
     assert "imagery_overlap" in structured
     assert "fit_overlap" in structured
 
