@@ -41,6 +41,7 @@ export default function SearchBar({
     const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
     useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setDraft(value.q)
     }, [value.q])
 

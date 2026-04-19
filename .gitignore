@@ -1,3 +1,6 @@
+# Miscellaneous files to ignore in git
+verify.sh
+
 # ---- Python ----
 .venv/
 __pycache__/

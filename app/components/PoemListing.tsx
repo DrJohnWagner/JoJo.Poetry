@@ -25,8 +25,10 @@ export default function PoemListing({
     const [editingId, setEditingId] = useState<string | null>(null)
     const [dirty, setDirty] = useState(false)
     const editingIdRef = useRef<string | null>(null)
+    // eslint-disable-next-line react-hooks/refs
     editingIdRef.current = editingId
     const dirtyRef = useRef(false)
+    // eslint-disable-next-line react-hooks/refs
     dirtyRef.current = dirty
 
     /** Called when the user would lose unsaved edits. Returns true if
@@ -37,6 +39,7 @@ export default function PoemListing({
     }
 
     const searchRef = useRef(search)
+    // eslint-disable-next-line react-hooks/refs
     searchRef.current = search
 
     /** Fetch page 0 for the current search. Used on search change and
@@ -71,6 +74,7 @@ export default function PoemListing({
     }, [])
 
     const prevItemsRef = useRef<PoemSummary[]>(items)
+    // eslint-disable-next-line react-hooks/immutability, react-hooks/refs
     prevItemsRef.current = items
 
     // Search changes *never* clobber the editor: the refetch keeps the
