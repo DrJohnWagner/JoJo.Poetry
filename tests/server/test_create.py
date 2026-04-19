@@ -139,6 +139,19 @@ def test_caller_supplied_pinned_is_kept(client):
     assert r.json()["pinned"] is True
 
 
+def test_socials_defaults_to_empty_list(client):
+    r = client.post("/api/poems", json=_minimal())
+    assert r.status_code == 201
+    assert r.json()["socials"] == []
+
+
+def test_caller_supplied_socials_are_kept(client):
+    urls = ["https://www.instagram.com/p/abc123/", "https://twitter.com/jojo/status/1"]
+    r = client.post("/api/poems", json={**_minimal(), "socials": urls})
+    assert r.status_code == 201
+    assert r.json()["socials"] == urls
+
+
 # ---------------------------------------------------------- ordering / visibility
 
 def test_new_poem_appears_in_listings_and_search(client):

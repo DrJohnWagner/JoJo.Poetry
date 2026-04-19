@@ -91,6 +91,24 @@ def test_patch_array_is_replaced_not_merged(client):
     assert r.json()["themes"] == ["one", "two"]
 
 
+def test_patch_socials_roundtrip(client, db):
+    pid = _first_id(client)
+    urls = ["https://www.instagram.com/p/DXUaeWoDvyr/"]
+    r = client.patch(f"/api/poems/{pid}", json={"socials": urls})
+    assert r.status_code == 200
+    assert r.json()["socials"] == urls
+    on_disk = {p["id"]: p for p in json.loads(db.read_text())}
+    assert on_disk[pid]["socials"] == urls
+
+
+def test_patch_socials_cleared_with_empty_array(client):
+    pid = _first_id(client)
+    client.patch(f"/api/poems/{pid}", json={"socials": ["https://example.com/"]})
+    r = client.patch(f"/api/poems/{pid}", json={"socials": []})
+    assert r.status_code == 200
+    assert r.json()["socials"] == []
+
+
 def test_patch_notes_roundtrip(client, db):
     pid = _first_id(client)
     new_notes = ["First note.", "Second note."]

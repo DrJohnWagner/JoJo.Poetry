@@ -149,6 +149,7 @@ class PoemCreate(BaseModel):
     key_images: List[str] = Field(default_factory=list)
     contest_fit: List[str] = Field(default_factory=list)
     pinned: bool = False
+    socials: List[str] = Field(default_factory=list)
     notes: List[str] = Field(default_factory=list)
 
 
@@ -180,6 +181,7 @@ class PoemPatch(BaseModel):
     contest_fit: Optional[List[str]] = None
     rating: Optional[int] = Field(None, ge=0, le=100)
     pinned: Optional[bool] = None
+    socials: Optional[List[str]] = None
     notes: Optional[List[str]] = None
 
 
