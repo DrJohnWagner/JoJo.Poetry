@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation"
 import Link from "next/link"
+import Header from "@/components/Header"
 import PoemDetail from "@/components/PoemDetail"
 import SimilarPoems from "@/components/SimilarPoems"
 import { fetchPoem, fetchSimilarPoems } from "@/lib/api"
@@ -30,15 +31,16 @@ export default async function PoemPage({
     }
 
     return (
-        <article className="lg:grid lg:grid-cols-[1fr_20rem] lg:gap-12 items-start">
-            <div>
+        <article className="lg:grid lg:grid-cols-[auto_20rem] lg:gap-12 lg:justify-center items-start">
+            <div className="max-w-prose">
+                <Header />
                 <nav className="mb-10 eyebrow">
                     <Link href="/" className="hover:text-ink hover:no-underline">← Index</Link>
                 </nav>
                 <PoemDetail poem={poem} />
             </div>
             
-            <aside className="mt-12 lg:mt-0 lg:sticky lg:top-8">
+            <aside className="max-w-prose lg:max-w-none mt-12 lg:mt-0 lg:sticky lg:top-8">
                 {similarities && <SimilarPoems similarities={similarities} />}
             </aside>
         </article>
