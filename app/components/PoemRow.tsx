@@ -7,7 +7,6 @@ import { fetchPoem } from "@/lib/api"
 import PoemStatistics from "./PoemStatistics"
 import PoemProject from "./PoemProject"
 import PoemTitle from "./PoemTitle"
-import PinToggle from "./PinToggle"
 import PoemBody from "./PoemBody"
 import PoemRowEditor from "./PoemRowEditor"
 
@@ -61,16 +60,7 @@ export default function PoemRow({
 
     return (
         <article>
-            <div className="flex items-baseline gap-4">
-                <div className="flex-1">
-                    <PoemTitle poem={poem} link={true} />
-                </div>
-                <PinToggle
-                    id={poem.id}
-                    initialPinned={poem.pinned}
-                    onChange={onPinChanged}
-                />
-            </div>
+            <PoemTitle poem={poem} link={true} onPinChange={onPinChanged} />
             <PoemStatistics poem={poem} />
             <PoemProject poem={poem} />
             <div className="mt-3">

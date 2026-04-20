@@ -26,6 +26,14 @@ export function plainTextToBody(text: string): string {
     return text.replace(/\n/g, "<br/>\n")
 }
 
+export function poemToMarkdown(poem: import("./types").Poem): string {
+    const body = bodyToPlainText(poem.body)
+    const parts: string[] = [`# ${poem.title}`]
+    if (poem.project) parts.push(`*${poem.project}*`)
+    parts.push(body)
+    return parts.join("\n\n")
+}
+
 export function formatDate(iso: string): string {
     const d = new Date(iso)
     if (isNaN(d.getTime())) return iso
