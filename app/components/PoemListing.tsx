@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { deletePoem, fetchPoems } from "@/lib/api"
-import type { Poem, PoemSummary, SearchState } from "@/lib/types"
+import type { Poem, SearchState } from "@/lib/types"
 import SearchBar from "./SearchBar"
 import SortBar, { DEFAULT_SORT, type SortState } from "./SortBar"
 import PoemRow from "./PoemRow"
@@ -13,10 +13,10 @@ const EMPTY: SearchState = { q: "", year: null, month: null, awards: [], title: 
 export default function PoemListing({
     initial,
 }: {
-    initial: { items: PoemSummary[]; total: number; has_more: boolean }
+    initial: { items: Poem[]; total: number; has_more: boolean }
 }) {
     const [search, setSearch] = useState<SearchState>(EMPTY)
-    const [items, setItems] = useState<PoemSummary[]>(initial.items)
+    const [items, setItems] = useState<Poem[]>(initial.items)
     const [total, setTotal] = useState(initial.total)
     const [hasMore, setHasMore] = useState(initial.has_more)
     const [loading, setLoading] = useState(false)
@@ -73,7 +73,7 @@ export default function PoemListing({
             })
     }, [])
 
-    const prevItemsRef = useRef<PoemSummary[]>(items)
+    const prevItemsRef = useRef<Poem[]>(items)
     // eslint-disable-next-line react-hooks/immutability, react-hooks/refs
     prevItemsRef.current = items
 
@@ -124,7 +124,7 @@ export default function PoemListing({
     /** Apply a confirmed Poem update to the current list. Updates in place
      *  when the order-relevant fields are unchanged; otherwise refetches. */
     const applyUpdated = useCallback(
-        (updated: Poem, previous: PoemSummary) => {
+        (updated: Poem, previous: Poem) => {
             const orderChanged =
                 updated.pinned !== previous.pinned ||
                 updated.date !== previous.date
@@ -134,27 +134,7 @@ export default function PoemListing({
                 return
             }
             setItems((prev) =>
-                prev.map((p) =>
-                    p.id === updated.id
-                        ? {
-                              ...p,
-                              title: updated.title,
-                              url: updated.url,
-                              date: updated.date,
-                              rating: updated.rating,
-                              lines: updated.lines,
-                              words: updated.words,
-                              pinned: updated.pinned,
-                              themes: updated.themes,
-                              emotional_register: updated.emotional_register,
-                              form_and_craft: updated.form_and_craft,
-                              contest_fit: updated.contest_fit,
-                              has_contests: updated.contests.length > 0,
-                              contest_count: updated.contests.length,
-                              project: updated.project,
-                          }
-                        : p
-                )
+                prev.map((p) => (p.id === updated.id ? updated : p))
             )
         },
         [refetchFromTop]
@@ -177,6 +157,8 @@ export default function PoemListing({
                 cmp = a.title.localeCompare(b.title)
             } else if (field === "date") {
                 cmp = new Date(a.date).getTime() - new Date(b.date).getTime()
+            } else if (field === "contest_count") {
+                cmp = a.contests.length - b.contests.length
             } else {
                 cmp = (a[field] as number) - (b[field] as number)
             }

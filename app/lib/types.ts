@@ -6,7 +6,7 @@ export interface Contest {
     title?: string
 }
 
-export interface PoemSummary {
+export interface Poem {
     id: UUID
     title: string
     url: string
@@ -19,12 +19,7 @@ export interface PoemSummary {
     emotional_register: string[]
     form_and_craft: string[]
     contest_fit: string[]
-    has_contests: boolean
-    contest_count: number
     project: string
-}
-
-export interface Poem extends Omit<PoemSummary, "has_contests"> {
     body: string
     contests: Contest[]
     key_images: string[]
@@ -40,7 +35,7 @@ export interface Pagination {
 }
 
 export interface PoemList {
-    items: PoemSummary[]
+    items: Poem[]
     pagination: Pagination
 }
 
@@ -92,7 +87,7 @@ export interface NeighbourListResult {
 }
 
 export interface RecentList {
-    items: PoemSummary[]
+    items: Poem[]
 }
 
 export interface SimilarityBundle {

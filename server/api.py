@@ -61,32 +61,6 @@ class HealthResponse(BaseModel):
     source: str
 
 
-class PoemSummary(BaseModel):
-    """List-view projection of a poem.
-
-    Intentionally omits the large ``body`` and the note arrays, so list
-    payloads stay compact and cache-friendly. Clients fetch the full
-    record via ``GET /api/poems/{id}`` when needed.
-    """
-    model_config = ConfigDict(extra="forbid")
-
-    id: UUID
-    title: str
-    url: str
-    date: datetime
-    rating: int
-    lines: int
-    words: int
-    pinned: bool
-    themes: List[str]
-    emotional_register: List[str]
-    form_and_craft: List[str]
-    contest_fit: List[str]
-    has_contests: bool
-    contest_count: int
-    project: str
-
-
 class Pagination(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
@@ -99,14 +73,14 @@ class Pagination(BaseModel):
 class PoemList(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
-    items: List[PoemSummary]
+    items: List[Poem]
     pagination: Pagination
 
 
 class RecentList(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
-    items: List[PoemSummary]
+    items: List[Poem]
 
 
 # --------------------------------------------------------------- request models
@@ -186,26 +160,6 @@ class PoemPatch(BaseModel):
 
 
 # -------------------------------------------------------------------- helpers
-
-def _summary(p: Poem) -> PoemSummary:
-    return PoemSummary(
-        id=p.id,
-        title=p.title,
-        url=str(p.url),
-        date=p.date,
-        rating=p.rating,
-        lines=p.lines,
-        words=p.words,
-        pinned=p.pinned,
-        themes=list(p.themes),
-        emotional_register=list(p.emotional_register),
-        form_and_craft=list(p.form_and_craft),
-        contest_fit=list(p.contest_fit),
-        has_contests=len(p.contests) > 0,
-        contest_count=len(p.contests),
-        project=p.project,
-    )
-
 
 def _ordered(poems: List[Poem]) -> List[Poem]:
     """Authoritative ordering: pinned first, date descending, id ascending."""
@@ -325,9 +279,7 @@ def list_poems(
     **Ordering.** Pinned poems first, then ``date`` descending, with
     ``id`` ascending as a deterministic tiebreaker.
 
-    **Shape.** Returns :class:`PoemSummary` records — not full poems —
-    so list payloads stay small. Fetch the full record via
-    :func:`get_poem`.
+    **Shape.** Returns full :class:`Poem` records.
 
     **Search semantics.** ``q`` is a case-insensitive substring match
     over title, a plain-text projection of the body (``<br/>`` stripped),
@@ -347,7 +299,7 @@ def list_poems(
     total = len(filtered)
     window = filtered[offset : offset + limit]
     return PoemList(
-        items=[_summary(p) for p in window],
+        items=list(window),
         pagination=Pagination(
             total=total,
             offset=offset,
@@ -464,7 +416,7 @@ def advanced_search(
     total = len(filtered)
     window = filtered[offset : offset + limit]
     return PoemList(
-        items=[_summary(p) for p in window],
+        items=list(window),
         pagination=Pagination(
             total=total,
             offset=offset,
@@ -481,7 +433,7 @@ def recent_poems(
 ) -> RecentList:
     """k most recent poems ordered by date descending, with no pin-first bias."""
     poems = sorted(repo.list(), key=lambda p: (-p.date.timestamp(), str(p.id)))
-    return RecentList(items=[_summary(p) for p in poems[:k]])
+    return RecentList(items=poems[:k])
 
 
 @router.get("/api/poems/{poem_id}", response_model=Poem, tags=["poems"])

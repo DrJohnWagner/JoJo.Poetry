@@ -41,13 +41,13 @@ def test_list_default_shape_and_pagination(client):
     body = r.json()
     assert set(body) == {"items", "pagination"}
     assert body["pagination"] == {"total": 5, "offset": 0, "limit": 3, "has_more": True}
-    summary = body["items"][0]
-    # summary omits body and notes
-    assert "body" not in summary and "copyright" not in summary
-    assert set(summary) >= {
+    item = body["items"][0]
+    assert "copyright" not in item
+    assert set(item) >= {
         "id", "title", "url", "date", "rating", "lines", "words",
         "pinned", "themes", "emotional_register", "form_and_craft",
-        "contest_fit", "has_contests", "project",
+        "contest_fit", "project", "body", "contests", "key_images",
+        "notes", "socials",
     }
 
 
@@ -161,8 +161,7 @@ def test_recent_no_pin_bias(client):
 
 def test_recent_item_has_expected_fields(client):
     item = client.get("/api/poems/recent?k=1").json()["items"][0]
-    assert {"id", "title", "project", "date", "rating", "lines", "words"} <= set(item.keys())
-    assert "body" not in item
+    assert {"id", "title", "project", "body", "date", "rating", "lines", "words", "contests"} <= set(item.keys())
 
 
 def test_recent_k_zero_returns_422(client):

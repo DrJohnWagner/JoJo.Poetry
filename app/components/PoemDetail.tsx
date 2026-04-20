@@ -39,18 +39,13 @@ export default function PoemDetail({ poem: initial }: { poem: Poem }) {
     return (
         <div>
             <header className="mb-5">
-                <div className="flex items-baseline justify-between gap-6">
-                    <div className="flex-1">
-                        <PoemTitle poem={poem} link={false} />
-                    </div>
-                    <PinToggle
-                        id={poem.id}
-                        initialPinned={poem.pinned}
-                        onChange={(p) =>
-                            setPoem((prev) => ({ ...prev, pinned: p }))
-                        }
-                    />
-                </div>
+                <PoemTitle
+                    poem={poem}
+                    link={false}
+                    onPinChange={(p) =>
+                        setPoem((prev) => ({ ...prev, pinned: p }))
+                    }
+                />
                 <PoemStatistics poem={poem} />
                 <PoemProject poem={poem} />
             </header>

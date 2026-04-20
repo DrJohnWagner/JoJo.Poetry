@@ -1,9 +1,8 @@
-import type { Poem, PoemSummary } from "@/lib/types"
+import type { Poem } from "@/lib/types"
 import { formatDate } from "@/lib/format"
 
-export default function PoemStatistics({ poem }: { poem: Poem | PoemSummary }) {
-    const contestCount =
-        "contests" in poem ? poem.contests.length : poem.contest_count
+export default function PoemStatistics({ poem }: { poem: Poem }) {
+    const contestCount = poem.contests.length
     return (
         <div className="eyebrow mt-1 flex flex-wrap gap-x-1 gap-y-1">
             <span>{formatDate(poem.date)}</span>

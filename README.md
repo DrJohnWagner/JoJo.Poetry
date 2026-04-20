@@ -59,7 +59,7 @@ Two services, one flat JSON data source:
 │   └── Dockerfile                    # Python 3.11-slim image
 ├── requirements.txt                  # Production Python deps
 ├── requirements-dev.txt              # Adds pytest, httpx, jsonschema
-├── tests/server/                     # pytest suite (183 tests)
+├── tests/server/                     # pytest suite (187 tests)
 ├── app/
 │   ├── page.tsx                      # Landing: listing + search + incremental load + recent poems aside
 │   ├── poems/[id]/page.tsx           # Detail + inline editing + similar poems panel
@@ -76,7 +76,7 @@ Two services, one flat JSON data source:
 │   │   ├── PoemRowEditor.tsx         # Thin wrapper around PoemEditorForm for rows
 │   │   ├── PoemCreateForm.tsx        # Dedicated POST form with defaults + guards
 │   │   ├── PoemDetail.tsx            # Reading view + Edit toggle
-│   │   ├── SimilarPoems.tsx          # Similar poems aside: all 5 axes (overall/theme/form/register/imagery) grouped
+│   │   ├── SimilarPoems.tsx          # Similar poems aside: all 5 axes (overall/theme/form/emotion/imagery) grouped
 │   │   ├── RecentPoems.tsx           # Recent poems aside: k most recent by date, title + project
 │   │   ├── PoemSummary.tsx           # Shared list item: title link + project line; used in both asides
 │   │   ├── SearchBar.tsx             # q + submit + Advanced modal trigger
@@ -96,7 +96,7 @@ Two services, one flat JSON data source:
 │   │   └── PoemBody.tsx              # Body rendered as HTML: <br/> line breaks + anchor links
 │   └── lib/
 │       ├── api.ts                    # Typed fetch wrappers (fetchPoems, fetchSimilarPoems → SimilarityBundle, fetchRecentPoems)
-│       ├── types.ts                  # Poem / PoemSummary / SearchState / NeighbourListResult / SimilarityBundle / RecentList
+│       ├── types.ts                  # Poem / SearchState / NeighbourListResult / SimilarityBundle / RecentList
 │       ├── editable.ts               # Canonical editable-field contract
 │       └── format.ts                 # body <-> plaintext, date formatting
 ├── database/
@@ -130,8 +130,6 @@ The authoritative schema is `database/schemas/poem.schema.json`;
 | `pinned`                                                                              | bool                       | optional (default `false`) | yes                 | no                            | Pinned poems lead listings.                                                                        |
 | `socials`                                                                             | `string[]`               | optional (default `[]`)    | yes                 | no                            | Social media URLs; displayed as links on the detail page.                                          |
 | `notes`                                                                               | `string[]`               | optional (default `[]`)    | yes                 | yes                           | One string per note; edited via multi-line textbox (one line = one note).                          |
-
-The `PoemSummary` list projection adds a derived `contest_count: int` field (the length of `contests`) so the listing can display and sort by medal count without fetching full poem records.
 
 Strictness: `extra="forbid"` on the Pydantic model and
 `additionalProperties: false` on the JSON Schema. Unknown fields are
@@ -314,7 +312,7 @@ The listing page applies a second, client-side sort layer on top of the server's
 | Lines  | most first        | `lines` (integer)           |
 | Words  | most first        | `words` (integer)           |
 | Rating | highest first     | `rating` (integer)          |
-| Awards | most first        | `contest_count` (integer)   |
+| Awards | most first        | `contests.length` (integer) |
 
 One button is always active (Date descending by default). Clicking the active button toggles direction; clicking an inactive button selects it at its default direction. The sort is re-applied automatically as new pages are loaded via infinite scroll.
 
@@ -350,8 +348,8 @@ Populated fields: `title`, `body`, `project`, `notes`
 multiple awards is OR (e.g. `awards=Gold&awards=None`). Unknown awards
 → 422.
 
-Both endpoints return the same `PoemList` wrapper and apply the same
-ordering and pagination.
+Both endpoints return the same `PoemList` wrapper (full `Poem` objects)
+and apply the same ordering and pagination.
 
 ## The similarity system
 
@@ -367,7 +365,7 @@ repo.list()
     ▼
 normalise.py  ──  Poem → NormalisedPoemFeatures
     │              (lowercase, dedup, synonym expansion)
-    ├── structured.py  ──  Jaccard over tag sets (themes, register,
+    ├── structured.py  ──  Jaccard over tag sets (themes, emotion,
     │                       form, imagery, fit)  → StructuredScoreBreakdown
     └── semantic.py    ──  TF-IDF cosine on separate text fields
                             (project, form_text, image_text)  → SemanticScoreBreakdown
@@ -388,7 +386,7 @@ Similarity is **multi-axis**. Each axis has a named score in [0, 1]:
 | ---------- | ------------------- | --------------- | ----------------- | --------------- |
 | theme      | `themes` Jaccard    | —               | 1.0               | 0.0             |
 | form       | `form_and_craft` J. | `form_text`     | 0.8               | 0.2             |
-| register   | `emotional_register`| —               | 1.0               | 0.0             |
+| emotion    | `emotional_register`| —               | 1.0               | 0.0             |
 | imagery    | `key_images` J.     | `image_text`    | 0.8               | 0.2             |
 
 The **overall score** is a weighted average across all axes plus `fit`
@@ -398,7 +396,7 @@ The **overall score** is a weighted average across all axes plus `fit`
 | ----------- | ------ |
 | theme       | 0.30   |
 | form        | 0.20   |
-| register    | 0.15   |
+| emotion     | 0.15   |
 | imagery     | 0.15   |
 | fit         | 0.10   |
 | project     | 0.10   |
@@ -432,11 +430,11 @@ query poem is always excluded from its own results.
 
 | Method | Path | `k` params | Returns | Description |
 | ------ | ---- | ---------- | ------- | ----------- |
-| GET | `/api/poems/{id}/similar` | `k_overall=5`, `k_theme=3`, `k_form=3`, `k_register=3`, `k_imagery=3` | `SimilarityBundle` | All 5 axes in one response |
+| GET | `/api/poems/{id}/similar` | `k_overall=5`, `k_theme=3`, `k_form=3`, `k_emotion=3`, `k_imagery=3` | `SimilarityBundle` | All 5 axes in one response |
 | GET | `/api/poems/{id}/similar/overall` | `k=5` | `NeighbourListResult` | Overall weighted score |
 | GET | `/api/poems/{id}/similar/theme` | `k=5` | `NeighbourListResult` | Theme axis only |
 | GET | `/api/poems/{id}/similar/form` | `k=5` | `NeighbourListResult` | Form axis only |
-| GET | `/api/poems/{id}/similar/register` | `k=5` | `NeighbourListResult` | Register axis only |
+| GET | `/api/poems/{id}/similar/emotion` | `k=5` | `NeighbourListResult` | Emotion axis only |
 | GET | `/api/poems/{id}/similar/imagery` | `k=5` | `NeighbourListResult` | Imagery axis only |
 
 Each per-category `k` in `/similar` is independently bounded `1 ≤ k ≤ 50`.
@@ -459,7 +457,7 @@ The single-axis endpoints share a single `k` (`1 ≤ k ≤ 50`, default 5).
         "overall_score": 0.72,
         "theme_score": 0.80,
         "form_score": 0.65,
-        "register_score": 0.50,
+        "emotion_score": 0.50,
         "imagery_score": 0.60,
         "structured": { "theme_sim": 0.80, "theme_overlap": ["nature"], ... },
         "semantic":   { "project_tfidf_sim": 0.30, ... }
@@ -476,7 +474,7 @@ The single-axis endpoints share a single `k` (`1 ≤ k ≤ 50`, default 5).
   "overall":  { "query_id": "<uuid>", "neighbours": [ ... ] },
   "theme":    { "query_id": "<uuid>", "neighbours": [ ... ] },
   "form":     { "query_id": "<uuid>", "neighbours": [ ... ] },
-  "register": { "query_id": "<uuid>", "neighbours": [ ... ] },
+  "emotion":  { "query_id": "<uuid>", "neighbours": [ ... ] },
   "imagery":  { "query_id": "<uuid>", "neighbours": [ ... ] }
 }
 ```
@@ -495,7 +493,7 @@ sits at the top of the left column on every page.
 **Single-poem page** (`/poems/[id]`): the aside shows all five similarity
 axes via `SimilarPoems`. The page calls `GET /api/poems/{id}/similar`
 (default per-category `k` values) and groups results under **Overall**,
-**Theme**, **Form & Craft**, **Register**, and **Imagery** headings.
+**Theme**, **Form & Craft**, **Emotion**, and **Imagery** headings.
 Empty axes are silently omitted. If the entire call fails, the aside is
 omitted and the page renders normally. Each result shows only the poem
 title as a link; scores and breakdowns are not exposed.
@@ -523,10 +521,9 @@ pinned status has no effect on this ordering.
 | --------- | ------- | ----------- |
 | `k` | `12` | `1 ≤ k ≤ 100` |
 
-Response: `RecentList` — a flat list of `PoemSummary` objects (same
-projection used by all listing endpoints: `id`, `title`, `project`, and
-the other summary fields). Returns `422` for an out-of-range `k`. Works
-in read-only mode.
+Response: `RecentList` — a flat list of full `Poem` objects, ordered by
+date descending. Returns `422` for an out-of-range `k`. Works in
+read-only mode.
 
 ## Ordering and pagination
 
@@ -600,7 +597,7 @@ make check          # test + typecheck + lint
 Or manually:
 
 ```bash
-READ_ONLY=false uv run pytest tests/server   # ~183 tests, ~8 s
+READ_ONLY=false uv run pytest tests/server   # ~187 tests, ~8 s
 npx tsc --noEmit                             # TypeScript type-check
 npx next build                               # production build
 ```
@@ -613,7 +610,7 @@ Test files:
 - `tests/server/test_repository.py` — configuration resolution; load/validate;
   duplicate-id and invalid-UUID rejection; immutability; atomic
   persistence; alternate-file configurability.
-- `tests/server/test_read_api.py` — `/health`; summary shape; pagination; search;
+- `tests/server/test_read_api.py` — `/health`; full-poem list shape; pagination; search;
   pinned-first ordering; 422 malformed id; 404 unknown id; `/api/poems/recent`
   (200 shape, default k, k limits, date-desc ordering, no pin bias, 422 for
   out-of-range k, route not intercepted by `/{poem_id}`).

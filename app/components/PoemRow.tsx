@@ -1,9 +1,8 @@
 "use client"
 
 import { useState } from "react"
-import type { Poem, PoemSummary } from "@/lib/types"
+import type { Poem } from "@/lib/types"
 import { useAppConfig } from "./AppConfig"
-import { fetchPoem } from "@/lib/api"
 import PoemStatistics from "./PoemStatistics"
 import PoemProject from "./PoemProject"
 import PoemTitle from "./PoemTitle"
@@ -20,7 +19,7 @@ export default function PoemRow({
     onDelete,
     onPinChanged,
 }: {
-    poem: PoemSummary
+    poem: Poem
     editing: boolean
     onEdit: () => void
     onCancel: () => void
@@ -32,24 +31,12 @@ export default function PoemRow({
     const { readOnly } = useAppConfig()
     const [armedDelete, setArmedDelete] = useState(false)
     const [bodyOpen, setBodyOpen] = useState(false)
-    const [body, setBody] = useState<string | null>(null)
-    const [bodyLoading, setBodyLoading] = useState(false)
-
-    function toggleBody() {
-        if (!bodyOpen && body === null) {
-            setBodyLoading(true)
-            fetchPoem(poem.id)
-                .then((p) => setBody(p.body))
-                .finally(() => setBodyLoading(false))
-        }
-        setBodyOpen((o) => !o)
-    }
 
     if (editing) {
         return (
             <article>
                 <PoemRowEditor
-                    summary={poem}
+                    poem={poem}
                     onSaved={onSaved}
                     onCancel={onCancel}
                     onDirtyChange={onDirtyChange}
@@ -64,16 +51,12 @@ export default function PoemRow({
             <PoemStatistics poem={poem} />
             <PoemProject poem={poem} />
             <div className="mt-3">
-                <button onClick={toggleBody} className="eyebrow hover:text-ink">
+                <button onClick={() => setBodyOpen((o) => !o)} className="eyebrow hover:text-ink">
                     {bodyOpen ? "Hide poem" : "Show poem"}
                 </button>
                 {bodyOpen && (
                     <div className="mt-4">
-                        {bodyLoading ? (
-                            <span className="eyebrow text-muted">Loading…</span>
-                        ) : body !== null ? (
-                            <PoemBody body={body} />
-                        ) : null}
+                        <PoemBody body={poem.body} />
                     </div>
                 )}
             </div>
@@ -96,9 +79,7 @@ export default function PoemRow({
                             }
                             onDelete()
                         }}
-                        className={
-                            armedDelete ? "text-red-700" : "hover:text-ink"
-                        }
+                        className={armedDelete ? "text-red-700" : "hover:text-ink"}
                     >
                         {armedDelete ? "confirm delete" : "delete"}
                     </button>

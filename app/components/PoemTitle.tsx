@@ -1,6 +1,5 @@
 import Link from "next/link"
-import type { Poem, PoemSummary } from "@/lib/types"
-import { fetchPoem } from "@/lib/api"
+import type { Poem } from "@/lib/types"
 import PinToggle from "./PinToggle"
 import CopyButton from "./CopyButton"
 import { poemToMarkdown } from "@/lib/format"
@@ -10,13 +9,11 @@ export default function PoemTitle({
     link,
     onPinChange,
 }: {
-    poem: Poem | PoemSummary
+    poem: Poem
     link: boolean
     onPinChange?: (pinned: boolean) => void
 }) {
-    const getText = "body" in poem
-        ? () => Promise.resolve(poemToMarkdown(poem))
-        : () => fetchPoem(poem.id).then(poemToMarkdown)
+    const getText = () => Promise.resolve(poemToMarkdown(poem))
 
     return (
         <div className="flex items-baseline justify-between gap-6">
