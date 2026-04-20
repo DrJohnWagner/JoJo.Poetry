@@ -13,11 +13,12 @@ export default function PoemTitle({
     link: boolean
     onPinChange?: (pinned: boolean) => void
 }) {
-    const getText = () => Promise.resolve(poemToMarkdown(poem))
+    const getText = () => Promise.resolve(poemToMarkdown(poem, false))
+    const getFullText = () => Promise.resolve(poemToMarkdown(poem, true))
 
     return (
         <div className="flex items-baseline justify-between gap-6">
-            <div className="flex items-baseline gap-3 flex-1">
+            <div className="flex flex-1 items-baseline gap-3">
                 <h2 className="font-display text-2xl leading-snug tracking-tight">
                     {link ? (
                         <Link
@@ -30,7 +31,8 @@ export default function PoemTitle({
                         poem.title
                     )}
                 </h2>
-                <CopyButton getText={getText} />
+                <CopyButton getText={getText} variant="outline" />
+                <CopyButton getText={getFullText} variant="filled" />
             </div>
             <PinToggle
                 id={poem.id}

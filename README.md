@@ -67,7 +67,7 @@ Two services, one flat JSON data source:
 │   ├── layout.tsx, globals.css
 │   ├── components/
 │   │   ├── AppConfig.tsx             # React context provider for runtime config (readOnly)
-│   │   ├── Page.tsx                  # Two-column grid wrapper (lg: auto + 20rem, centred)
+│   │   ├── Page.tsx                  # Two-column grid wrapper (lg: auto + clamp(20rem,…,30rem), centred)
 │   │   ├── LColumn.tsx               # Left column: max-w-prose, mx-auto on narrow / mx-0 in grid
 │   │   ├── RColumn.tsx               # Right aside: sticky, 106px top padding in grid mode
 │   │   ├── Header.tsx                # Site header (title + "New poem" link); imported by each page
@@ -83,7 +83,8 @@ Two services, one flat JSON data source:
 │   │   ├── SortBar.tsx               # Client-side sort buttons (title/date/lines/words/rating/awards)
 │   │   ├── AdvancedSearchDialog.tsx  # Native <dialog>-backed modal (title/body/project/notes/year/month/awards/tags)
 │   │   ├── PoemRow.tsx               # Single poem row (title, meta, collapsible body)
-│   │   ├── PoemTitle.tsx             # Shared <h2> with optional Link wrapper
+│   │   ├── CopyButton.tsx            # Copy-to-clipboard icon button; variant="outline"|"filled" selects icon set
+│   │   ├── PoemTitle.tsx             # Shared <h2> with optional Link wrapper + two copy buttons (partial / full markdown)
 │   │   ├── PoemStatistics.tsx        # Shared metadata line (date · rating · lines · words · awards)
 │   │   ├── PoemProject.tsx           # Italic project statement, null-safe
 │   │   ├── PoemContest.tsx           # Medal icon + award label + optional contest link
@@ -96,15 +97,15 @@ Two services, one flat JSON data source:
 │   │   └── PoemBody.tsx              # Body rendered as HTML: <br/> line breaks + anchor links
 │   └── lib/
 │       ├── api.ts                    # Typed fetch wrappers (fetchPoems, fetchSimilarPoems → SimilarityBundle, fetchRecentPoems)
-│       ├── types.ts                  # Poem / SearchState / NeighbourListResult / SimilarityBundle / RecentList
+│       ├── types.ts                  # Author / Poem / SearchState / NeighbourListResult / SimilarityBundle / RecentList
 │       ├── editable.ts               # Canonical editable-field contract
-│       └── format.ts                 # body <-> plaintext, date formatting
+│       └── format.ts                 # body ↔ plaintext, date formatting, cleanPoetryUrl, poemToMarkdown(full)
 ├── database/
 │   ├── Poems.json                    # Canonical collection
 │   ├── <Title>.json                  # Per-poem mirror files (reference only)
 │   └── schemas/
 │       ├── poem.schema.json          # JSON Schema (Draft 2020-12)
-│       ├── poem.py                   # Pydantic Poem / Contest
+│       ├── poem.py                   # Pydantic Poem / Contest / Author
 │       └── similarity.py             # Re-exports similarity response types for API use
 ├── Dockerfile                        # Combined multi-stage image (Node 22 + Python 3.11, Debian bookworm-slim, no CMD)
 └── docker-compose.yml                # Orchestrates backend + frontend
@@ -130,6 +131,7 @@ The authoritative schema is `database/schemas/poem.schema.json`;
 | `pinned`                                                                              | bool                       | optional (default `false`) | yes                 | no                            | Pinned poems lead listings.                                                                        |
 | `socials`                                                                             | `string[]`               | optional (default `[]`)    | yes                 | no                            | Social media URLs; displayed as links on the detail page.                                          |
 | `notes`                                                                               | `string[]`               | optional (default `[]`)    | yes                 | yes                           | One string per note; edited via multi-line textbox (one line = one note).                          |
+| `author`                                                                              | `{pen_name, full_name}`  | optional (default `null`)  | yes (API)           | no                            | Author identity. Displayed on the detail page; no inline editor (structured object).               |
 
 Strictness: `extra="forbid"` on the Pydantic model and
 `additionalProperties: false` on the JSON Schema. Unknown fields are
@@ -156,12 +158,22 @@ rejected on every read and every write.
 ## The role of `database/Poems.json`
 
 `database/Poems.json` is a single JSON array of poem objects. It is
-the only persistent data store. The backend loads it once at startup,
+the only persistent data store. The backend loads it at startup,
 validates every record against the Pydantic model, and serves reads
 from memory. Every mutation (POST, PATCH, DELETE) writes the full
 array back atomically (temp file + `fsync` + `os.replace`) **before**
 swapping the new state into memory, so a failed disk write leaves
 memory and disk identically untouched.
+
+**External edits are picked up automatically.** Every GET endpoint
+runs a lightweight `os.stat()` check; if the file's mtime has changed
+since the last load or write, the file is reloaded and the similarity
+index is rebuilt before the response is served. Mutations additionally
+re-check the mtime under the write lock *before* computing the next
+state, so an external edit is merged in rather than silently
+overwritten. After each successful write the stored mtime is refreshed
+from the newly written file, preventing the server's own writes from
+triggering a spurious reload on the next GET.
 
 The per-title files in `database/` (e.g. `Not a Metaphor.json`) are
 historical mirror files kept for convenience; the backend does not
@@ -173,10 +185,10 @@ read or write them.
   outside the runtime for editor autocomplete, external validators,
   and CI checks. Rejects unknown fields and enforces UUID-v4 `id`,
   bounded rating, and required-vs-optional structure.
-- **`poem.py`** — Pydantic models (`Poem`, `Contest`). Used
+- **`poem.py`** — Pydantic models (`Poem`, `Contest`, `Author`). Used
   by the backend at runtime for load-time validation, PATCH-merge
   validation, and response shaping. Applies the documented defaults
-  (`pinned=false`, `socials=[]`, `notes=[]`) when optional fields are absent.
+  (`pinned=false`, `socials=[]`, `notes=[]`, `author=null`) when optional fields are absent.
 
 ## Configuration
 
@@ -651,9 +663,11 @@ Test files:
 - **Last-write-wins.** No optimistic concurrency (`ETag` /
   `If-Match`) — two near-simultaneous PATCHes overwrite each other
   in arrival order. Acceptable for a single-author workflow.
-- **External edits aren't picked up live.** Editing `Poems.json` by
-  hand while the server runs will be overwritten by the next
-  mutation; restart to pick up manual changes.
+- **External edits are safe but not instant.** Changes to `Poems.json`
+  made by another process are picked up on the next GET request via an
+  `os.stat()` mtime check. There is a small window between an external
+  write completing and the next GET where in-flight requests see stale
+  data.
 - **No schema versioning field.** Additive changes work; breaking
   changes will need a `schema_version` and a one-shot migration.
 - **No relevance ranking.** Search filters but does not rank; order
@@ -683,21 +697,32 @@ Test files:
 3. **Schema versioning** (`schema_version` on each record) plus a
    one-shot migration harness, preparing for the first breaking
    change.
-4. **Background file-watch** that safely reloads `Poems.json` when
-   touched externally, with a cooperative lock file.
-5. **Styled in-page confirm dialogs** replacing `window.confirm` and
+4. **Styled in-page confirm dialogs** replacing `window.confirm` and
    `beforeunload`, keeping the aesthetic coherent with the rest of
    the site.
-6. **Authentication + authorisation** (even a single shared-secret
+5. **Authentication + authorisation** (even a single shared-secret
    bearer) before exposing mutation endpoints beyond a trusted
    network.
-7. **Search improvements**: stemming / diacritic folding, and a
+6. **Search improvements**: stemming / diacritic folding, and a
    NOT modifier on the advanced endpoint for exclusion filters.
-8. **End-to-end tests** (Playwright) covering the edit, pin, delete,
+7. **End-to-end tests** (Playwright) covering the edit, pin, delete,
    and create flows against a disposable backend.
-9. **Similarity synonym vocabulary** — populate `SYNONYMS` in
+8. **Similarity synonym vocabulary** — populate `SYNONYMS` in
    `server/similarity/normalise.py` as the tag vocabulary grows to
    improve recall across near-synonymous terms.
-10. **Incremental similarity rebuild** — for larger collections,
-    replace the full-corpus rebuild on mutation with a targeted
-    update that only re-scores poems whose tags changed.
+9. **Incremental similarity rebuild** — for larger collections,
+   replace the full-corpus rebuild on mutation with a targeted
+   update that only re-scores poems whose tags changed.
+10. **LLM-assisted Author's Notes** — integrate an LLM into the edit
+    and new-poem forms to help draft and refine notes:
+    - Generate multiple candidate notes and present them side-by-side;
+      highlight diffs against the current note so the choice is obvious.
+    - Expose tone sliders (e.g. concrete ↔ abstract, flat ↔ lyrical)
+      that are passed directly into the prompt — dialling rather than
+      regenerating blind.
+    - One-click hybridise: feed two candidates back to the model with
+      instructions to merge the best of each (e.g. "keep the concrete
+      detail from A, the tone from B, shorter overall").
+    - Save approved notes as voice fingerprints and use them as
+      conditioning for future generations ("match the tone and restraint
+      of this note"), converging on a consistent authorial voice over time.

@@ -1,5 +1,10 @@
 export type UUID = string
 
+export interface Author {
+    pen_name: string
+    full_name: string
+}
+
 export interface Contest {
     url: string
     award: string
@@ -25,6 +30,7 @@ export interface Poem {
     key_images: string[]
     notes: string[]
     socials: string[]
+    author?: Author
 }
 
 export interface Pagination {

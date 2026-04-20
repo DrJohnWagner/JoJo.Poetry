@@ -7,12 +7,12 @@ import PoemBody from "./PoemBody"
 import PoemStatistics from "./PoemStatistics"
 import PoemProject from "./PoemProject"
 import PoemTitle from "./PoemTitle"
-import PinToggle from "./PinToggle"
 import DeleteButton from "./DeleteButton"
 import PoemContest from "./PoemContest"
 import PoemSocial from "./PoemSocial"
 import PoemEditorForm from "./PoemEditorForm"
 import HorizontalRule from "./HorizontalRule"
+import { cleanPoetryUrl } from "@/lib/format"
 
 export default function PoemDetail({ poem: initial }: { poem: Poem }) {
     const { readOnly } = useAppConfig()
@@ -56,24 +56,32 @@ export default function PoemDetail({ poem: initial }: { poem: Poem }) {
                 <PoemBody body={poem.body} />
             </section>
 
-            <section aria-label="Author's Notes" className="my-5">
-                <p className="eyebrow mb-2">Author&#39;s Notes</p>
-                {poem.notes.length > 0 ? (
-                    <ul className="space-y-1 font-sans text-[0.85rem] text-ink/80">
-                        {poem.notes.map((n, i) => (
-                            <li key={i}>{n}</li>
-                        ))}
-                    </ul>
-                ) : (
-                    <p className="font-sans text-[0.85rem] text-muted">
-                        [No notes.]
-                    </p>
-                )}
-            </section>
-
             <HorizontalRule />
 
             <dl className="grid grid-cols-1 gap-x-0 gap-y-2 text-[0.95rem] md:grid-cols-[8rem_1fr]">
+                {poem.author && (
+                    <>
+                        <dt className="eyebrow pt-1">Author</dt>
+                        <dd className="font-sans text-[0.78rem] text-ink/80">
+                            {poem.author.pen_name}{" "}
+                            <span className="text-muted">
+                                ({poem.author.full_name})
+                            </span>
+                        </dd>
+                    </>
+                )}
+                {poem.notes.length > 0 && (
+                    <>
+                        <dt className="eyebrow pt-1">Notes</dt>
+                        <dd>
+                            <ul className="space-y-1 font-sans text-[0.85rem] text-ink/80">
+                                {poem.notes.map((n, i) => (
+                                    <li key={i}>{n}</li>
+                                ))}
+                            </ul>
+                        </dd>
+                    </>
+                )}
                 <MetaRow label="Themes" values={poem.themes} />
                 <MetaRow label="Register" values={poem.emotional_register} />
                 <MetaRow label="Form" values={poem.form_and_craft} />
@@ -107,8 +115,12 @@ export default function PoemDetail({ poem: initial }: { poem: Poem }) {
 
                 <dt className="eyebrow pt-1">Link</dt>
                 <dd>
-                    <a href={poem.url} target="_blank" rel="noreferrer">
-                        allpoetry.com ↗
+                    <a
+                        href={cleanPoetryUrl(poem.url)}
+                        target="_blank"
+                        rel="noreferrer"
+                    >
+                        {cleanPoetryUrl(poem.url)} ↗
                     </a>
                 </dd>
             </dl>

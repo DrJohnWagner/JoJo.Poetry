@@ -19,7 +19,7 @@ _SCHEMAS_DIR = _Path(__file__).resolve().parent.parent / "database" / "schemas"
 if str(_SCHEMAS_DIR) not in sys.path:
     sys.path.insert(0, str(_SCHEMAS_DIR))
 
-from poem import Contest, Poem  # noqa: E402
+from poem import Author, Contest, Poem  # noqa: E402
 
 from server.config import get_settings
 from server.repository import (
@@ -48,6 +48,20 @@ def require_write_access() -> None:
             status_code=status.HTTP_405_METHOD_NOT_ALLOWED,
             detail="This instance is read-only.",
         )
+
+
+def check_for_external_changes(
+    repo: PoemRepository = Depends(get_repository),
+) -> None:
+    """Dependency attached to all GET endpoints.
+
+    Reloads the database file if its mtime has changed since the last
+    load or write, then rebuilds the similarity index. One ``os.stat``
+    syscall per request; the reload itself only happens when the file
+    actually changed.
+    """
+    if repo.maybe_reload():
+        rebuild_similarity_service(repo.list())
 
 
 # --------------------------------------------------------------- response models
@@ -125,6 +139,7 @@ class PoemCreate(BaseModel):
     pinned: bool = False
     socials: List[str] = Field(default_factory=list)
     notes: List[str] = Field(default_factory=list)
+    author: Optional[Author] = None
 
 
 class PoemPatch(BaseModel):
@@ -157,6 +172,7 @@ class PoemPatch(BaseModel):
     pinned: Optional[bool] = None
     socials: Optional[List[str]] = None
     notes: Optional[List[str]] = None
+    author: Optional[Author] = None
 
 
 # -------------------------------------------------------------------- helpers
@@ -251,7 +267,10 @@ router = APIRouter()
 # ------------------------------------------------------------------ endpoints
 
 @router.get("/health", response_model=HealthResponse, tags=["meta"])
-def health(repo: PoemRepository = Depends(get_repository)) -> HealthResponse:
+def health(
+    repo: PoemRepository = Depends(get_repository),
+    _: None = Depends(check_for_external_changes),
+) -> HealthResponse:
     """Liveness + data-layer readiness."""
     return HealthResponse(
         status="ok", poems_loaded=len(repo.list()), source=str(repo.path)
@@ -261,6 +280,7 @@ def health(repo: PoemRepository = Depends(get_repository)) -> HealthResponse:
 @router.get("/api/poems", response_model=PoemList, tags=["poems"])
 def list_poems(
     repo: PoemRepository = Depends(get_repository),
+    _: None = Depends(check_for_external_changes),
     q: Optional[str] = Query(None, description="Full-text search across title, body, project, tags, and notes. Case-insensitive substring match."),
     themes: List[str] = Query(default_factory=list, description="Require ALL supplied themes (AND). Repeatable."),
     emotional_register: List[str] = Query(default_factory=list, description="Require ALL supplied emotional_register tags (AND). Repeatable."),
@@ -312,6 +332,7 @@ def list_poems(
 @router.get("/api/poems/search", response_model=PoemList, tags=["poems"])
 def advanced_search(
     repo: PoemRepository = Depends(get_repository),
+    _: None = Depends(check_for_external_changes),
     q: Optional[str] = Query(None, description="Full-text pre-filter across title, body, project, tags, and notes. Case-insensitive substring match."),
     title: Optional[str] = Query(None, description="Case-insensitive substring of title."),
     body: Optional[str] = Query(None, description="Case-insensitive substring of body (plain-text projection)."),
@@ -429,6 +450,7 @@ def advanced_search(
 @router.get("/api/poems/recent", response_model=RecentList, tags=["poems"])
 def recent_poems(
     repo: PoemRepository = Depends(get_repository),
+    _: None = Depends(check_for_external_changes),
     k: int = Query(8, ge=1, le=100, description="Number of poems to return."),
 ) -> RecentList:
     """k most recent poems ordered by date descending, with no pin-first bias."""
@@ -437,7 +459,11 @@ def recent_poems(
 
 
 @router.get("/api/poems/{poem_id}", response_model=Poem, tags=["poems"])
-def get_poem(poem_id: UUID, repo: PoemRepository = Depends(get_repository)) -> Poem:
+def get_poem(
+    poem_id: UUID,
+    repo: PoemRepository = Depends(get_repository),
+    _: None = Depends(check_for_external_changes),
+) -> Poem:
     """Full poem record. 404 for unknown id, 422 for malformed UUID."""
     try:
         return repo.get(poem_id)
@@ -545,6 +571,7 @@ class SimilarityBundle(BaseModel):
 @router.get("/api/poems/{poem_id}/similar", response_model=SimilarityBundle, tags=["similarity"])
 def get_similar_bundle(
     poem_id: UUID,
+    _: None = Depends(check_for_external_changes),
     k_overall: int = Query(5, ge=1, le=50),
     k_theme: int = Query(3, ge=1, le=50),
     k_form: int = Query(3, ge=1, le=50),
@@ -569,6 +596,7 @@ def get_similar_bundle(
 @router.get("/api/poems/{poem_id}/similar/overall", response_model=NeighbourListResult, tags=["similarity"])
 def get_similar_overall(
     poem_id: UUID,
+    _: None = Depends(check_for_external_changes),
     k: int = Query(5, ge=1, le=50),
 ) -> NeighbourListResult:
     """Overall similarity across all dimensions."""
@@ -582,6 +610,7 @@ def get_similar_overall(
 @router.get("/api/poems/{poem_id}/similar/theme", response_model=NeighbourListResult, tags=["similarity"])
 def get_similar_theme(
     poem_id: UUID,
+    _: None = Depends(check_for_external_changes),
     k: int = Query(5, ge=1, le=50),
 ) -> NeighbourListResult:
     """Similarity by theme tags."""
@@ -595,6 +624,7 @@ def get_similar_theme(
 @router.get("/api/poems/{poem_id}/similar/form", response_model=NeighbourListResult, tags=["similarity"])
 def get_similar_form(
     poem_id: UUID,
+    _: None = Depends(check_for_external_changes),
     k: int = Query(5, ge=1, le=50),
 ) -> NeighbourListResult:
     """Similarity by form and craft."""
@@ -608,6 +638,7 @@ def get_similar_form(
 @router.get("/api/poems/{poem_id}/similar/emotion", response_model=NeighbourListResult, tags=["similarity"])
 def get_similar_emotion(
     poem_id: UUID,
+    _: None = Depends(check_for_external_changes),
     k: int = Query(5, ge=1, le=50),
 ) -> NeighbourListResult:
     """Similarity by emotional register."""
@@ -621,6 +652,7 @@ def get_similar_emotion(
 @router.get("/api/poems/{poem_id}/similar/imagery", response_model=NeighbourListResult, tags=["similarity"])
 def get_similar_imagery(
     poem_id: UUID,
+    _: None = Depends(check_for_external_changes),
     k: int = Query(5, ge=1, le=50),
 ) -> NeighbourListResult:
     """Similarity by key imagery."""

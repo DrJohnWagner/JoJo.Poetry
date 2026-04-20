@@ -1,11 +1,20 @@
 "use client"
 
 import { useState } from "react"
-import { IoCopyOutline, IoCheckmarkOutline, IoEllipsisHorizontalOutline } from "react-icons/io5"
+import {
+    IoCopyOutline, IoCheckmarkOutline, IoEllipsisHorizontalOutline,
+    IoCopy, IoCheckmark, IoEllipsisHorizontal,
+} from "react-icons/io5"
 
 type State = "idle" | "loading" | "copied"
 
-export default function CopyButton({ getText }: { getText: () => Promise<string> }) {
+export default function CopyButton({
+    getText,
+    variant = "outline",
+}: {
+    getText: () => Promise<string>
+    variant?: "outline" | "filled"
+}) {
     const [state, setState] = useState<State>("idle")
 
     async function handleCopy() {
@@ -21,6 +30,10 @@ export default function CopyButton({ getText }: { getText: () => Promise<string>
         }
     }
 
+    const Copy     = variant === "filled" ? IoCopy                : IoCopyOutline
+    const Check    = variant === "filled" ? IoCheckmark           : IoCheckmarkOutline
+    const Ellipsis = variant === "filled" ? IoEllipsisHorizontal  : IoEllipsisHorizontalOutline
+
     return (
         <button
             type="button"
@@ -28,9 +41,9 @@ export default function CopyButton({ getText }: { getText: () => Promise<string>
             title="Copy poem as markdown"
             className="text-muted hover:text-ink transition-colors"
         >
-            {state === "copied"  && <IoCheckmarkOutline className="text-[1rem]" />}
-            {state === "loading" && <IoEllipsisHorizontalOutline className="text-[1rem]" />}
-            {state === "idle"    && <IoCopyOutline className="text-[1rem]" />}
+            {state === "copied"  && <Check    className="text-[1rem]" />}
+            {state === "loading" && <Ellipsis className="text-[1rem]" />}
+            {state === "idle"    && <Copy     className="text-[1rem]" />}
         </button>
     )
 }

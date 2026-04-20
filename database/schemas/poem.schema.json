@@ -114,9 +114,22 @@
       "type": "array",
       "default": [],
       "items": { "type": "string" }
+    },
+    "author": {
+      "description": "Optional. Author identity (pen name and legal name).",
+      "$ref": "#/$defs/Author"
     }
   },
   "$defs": {
+    "Author": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["pen_name", "full_name"],
+      "properties": {
+        "pen_name": { "type": "string", "minLength": 1 },
+        "full_name": { "type": "string", "minLength": 1 }
+      }
+    },
     "Contest": {
       "type": "object",
       "additionalProperties": false,

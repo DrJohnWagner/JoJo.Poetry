@@ -2,22 +2,27 @@
 
 Lifecycle
 ---------
-- Poems are loaded **once at application startup** via
-  :meth:`PoemRepository.load`. After that, the in-memory list is the
-  working copy of truth for the running process.
+- Poems are loaded at application startup via :meth:`PoemRepository.load`.
+  After that, the in-memory list is the working copy of truth for the
+  running process.
 - Every mutation (``add`` / ``update`` / ``delete``) writes the full
   collection back to disk before returning, so the on-disk file is
   always consistent with the last successful mutation.
-- The file is never re-read while the process runs. External edits to
-  ``Poems.json`` are **not** picked up until restart — this is a
-  deliberate choice to keep the concurrency model simple and to avoid
-  clobbering in-flight edits.
+- **External edits are picked up automatically.** GET requests call
+  :meth:`maybe_reload`, which compares the file's mtime against the time
+  of the last load; if it has changed the file is reloaded before
+  serving the response. Mutations call :meth:`_check_external_change`
+  under the lock before building their next state, so an external edit
+  is merged in rather than silently overwritten.
 
 Persistence safety
 ------------------
 - Writes are atomic: the new contents are written to a sibling temp
   file and then ``os.replace``-d into place. A crash mid-write leaves
   the previous file intact.
+- After each successful write, the stored mtime is refreshed from the
+  newly written file so that the next GET does not trigger a spurious
+  reload of data the server just wrote.
 - A single ``threading.RLock`` serialises reads and writes, so
   FastAPI's threadpool (used for sync endpoints) and any background
   tasks see a consistent view.
@@ -112,6 +117,7 @@ class PoemRepository:
         self._poems: Dict[UUID, Poem] = {}
         self._order: List[UUID] = []  # preserves source-file order
         self._loaded = False
+        self._file_mtime: float = 0.0
 
     # ---------------------------------------------------------------- load
 
@@ -119,47 +125,90 @@ class PoemRepository:
     def path(self) -> Path:
         return self._path
 
+    def _load_from_disk(self) -> None:
+        """Read, validate, and swap the collection into memory.
+
+        Must be called under ``self._lock``. Updates ``_file_mtime`` to
+        the mtime of the file just read so subsequent change-checks are
+        accurate.
+        """
+        if not self._path.exists():
+            raise InvalidDatabaseError(f"Poems file not found: {self._path}")
+        try:
+            raw = json.loads(self._path.read_text(encoding="utf-8"))
+        except json.JSONDecodeError as e:
+            raise InvalidDatabaseError(
+                f"Poems file is not valid JSON ({self._path}): {e}"
+            ) from e
+        if not isinstance(raw, list):
+            raise InvalidDatabaseError(
+                f"Poems file must contain a JSON array, got {type(raw).__name__}"
+            )
+
+        poems: Dict[UUID, Poem] = {}
+        order: List[UUID] = []
+        for i, record in enumerate(raw):
+            try:
+                poem = Poem.model_validate(record)
+            except Exception as e:  # pydantic.ValidationError
+                title = (
+                    record.get("title", "<no title>")
+                    if isinstance(record, dict)
+                    else "<non-object>"
+                )
+                raise InvalidDatabaseError(
+                    f"Poem #{i} ({title!r}) failed validation: {e}"
+                ) from e
+            if poem.id in poems:
+                raise DuplicateIdError(
+                    f"Duplicate id {poem.id} in {self._path} "
+                    f"(poems #{order.index(poem.id)} and #{i})"
+                )
+            poems[poem.id] = poem
+            order.append(poem.id)
+
+        self._poems = poems
+        self._order = order
+        self._file_mtime = os.stat(self._path).st_mtime
+
     def load(self) -> None:
         """Read, validate, and index the JSON file. Idempotent."""
         with self._lock:
-            if not self._path.exists():
-                raise InvalidDatabaseError(f"Poems file not found: {self._path}")
-            try:
-                raw = json.loads(self._path.read_text(encoding="utf-8"))
-            except json.JSONDecodeError as e:
-                raise InvalidDatabaseError(
-                    f"Poems file is not valid JSON ({self._path}): {e}"
-                ) from e
-            if not isinstance(raw, list):
-                raise InvalidDatabaseError(
-                    f"Poems file must contain a JSON array, got {type(raw).__name__}"
-                )
-
-            poems: Dict[UUID, Poem] = {}
-            order: List[UUID] = []
-            for i, record in enumerate(raw):
-                try:
-                    poem = Poem.model_validate(record)
-                except Exception as e:  # pydantic.ValidationError
-                    title = (
-                        record.get("title", "<no title>")
-                        if isinstance(record, dict)
-                        else "<non-object>"
-                    )
-                    raise InvalidDatabaseError(
-                        f"Poem #{i} ({title!r}) failed validation: {e}"
-                    ) from e
-                if poem.id in poems:
-                    raise DuplicateIdError(
-                        f"Duplicate id {poem.id} in {self._path} "
-                        f"(poems #{order.index(poem.id)} and #{i})"
-                    )
-                poems[poem.id] = poem
-                order.append(poem.id)
-
-            self._poems = poems
-            self._order = order
+            self._load_from_disk()
             self._loaded = True
+
+    def maybe_reload(self) -> bool:
+        """Reload from disk if the file has changed since last load.
+
+        Called by GET-endpoint dependencies so external edits are
+        reflected without a restart. Returns ``True`` if a reload
+        occurred (so the caller can rebuild any derived state such as
+        the similarity index).
+        """
+        with self._lock:
+            if not self._loaded:
+                return False
+            try:
+                if os.stat(self._path).st_mtime != self._file_mtime:
+                    self._load_from_disk()
+                    return True
+            except OSError:
+                pass  # file temporarily unavailable; serve stale data
+            return False
+
+    def _check_external_change(self) -> None:
+        """Reload if the file changed since last load/write.
+
+        Must be called under ``self._lock``, at the top of every
+        mutation method, before the mutation's next-state is computed.
+        This ensures an external edit is merged in rather than silently
+        overwritten.
+        """
+        try:
+            if os.stat(self._path).st_mtime != self._file_mtime:
+                self._load_from_disk()
+        except OSError:
+            pass
 
     # ---------------------------------------------------------------- read
 
@@ -189,6 +238,7 @@ class PoemRepository:
     def add(self, poem: Poem) -> Poem:
         with self._lock:
             self._ensure_loaded()
+            self._check_external_change()
             if poem.id in self._poems:
                 raise DuplicateIdError(str(poem.id))
             normalised = self._with_derived(poem)
@@ -203,6 +253,7 @@ class PoemRepository:
         """Replace a poem with a modified copy. ``id`` cannot change."""
         with self._lock:
             self._ensure_loaded()
+            self._check_external_change()
             existing = self.get(poem_id)
             if "id" in updates and UUID(str(updates["id"])) != poem_id:
                 raise ImmutableFieldError("id is immutable")
@@ -221,6 +272,7 @@ class PoemRepository:
     def delete(self, poem_id: UUID) -> None:
         with self._lock:
             self._ensure_loaded()
+            self._check_external_change()
             if poem_id not in self._poems:
                 raise PoemNotFoundError(str(poem_id))
             next_poems = dict(self._poems)
@@ -268,6 +320,7 @@ class PoemRepository:
                 f.flush()
                 os.fsync(f.fileno())
             os.replace(tmp_path, self._path)
+            self._file_mtime = os.stat(self._path).st_mtime
         except Exception:
             tmp_path.unlink(missing_ok=True)
             raise

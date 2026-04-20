@@ -17,6 +17,13 @@ from uuid import UUID
 from pydantic import BaseModel, ConfigDict, Field, HttpUrl, field_validator
 
 
+class Author(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    pen_name: str = Field(min_length=1)
+    full_name: str = Field(min_length=1)
+
+
 class Contest(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
@@ -61,6 +68,7 @@ class Poem(BaseModel):
     pinned: bool = False
     notes: List[str] = Field(default_factory=list)
     socials: List[str] = Field(default_factory=list)
+    author: Optional[Author] = None
 
     @field_validator("id")
     @classmethod

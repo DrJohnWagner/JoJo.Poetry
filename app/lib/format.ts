@@ -26,12 +26,83 @@ export function plainTextToBody(text: string): string {
     return text.replace(/\n/g, "<br/>\n")
 }
 
-export function poemToMarkdown(poem: import("./types").Poem): string {
+export function poemToMarkdown(
+    poem: import("./types").Poem,
+    full: boolean
+): string {
     const body = bodyToPlainText(poem.body)
+
+    if (!full) {
+        const parts: string[] = [`# ${poem.title}`]
+        if (poem.author) parts.push(`by ${poem.author.pen_name}`)
+        parts.push(body)
+        parts.push("---")
+        if (poem.notes.length)
+            parts.push(
+                `Author's Notes:\n${poem.notes.map((n) => `${n}`).join("\n")}`
+            )
+        if (poem.author)
+            parts.push(
+                `Copyright: ${poem.author.pen_name} (${poem.author.full_name})`
+            )
+        return parts.join("\n\n")
+    }
+
+    // Full export: every field
     const parts: string[] = [`# ${poem.title}`]
-    if (poem.project) parts.push(`*${poem.project}*`)
+    if (poem.author) parts.push(`by ${poem.author.pen_name}`)
     parts.push(body)
+
+    parts.push("---")
+
+    if (poem.notes.length)
+        parts.push(
+            `**Author's Notes:**\n${poem.notes.map((n) => `- ${n}`).join("\n")}`
+        )
+
+    const tags: string[] = []
+    if (poem.project) tags.push(`**Project:** ${poem.project}`)
+    if (poem.themes.length) tags.push(`**Themes:** ${poem.themes.join(", ")}`)
+    if (poem.emotional_register.length)
+        tags.push(`**Register:** ${poem.emotional_register.join(", ")}`)
+    if (poem.form_and_craft.length)
+        tags.push(`**Form & Craft:** ${poem.form_and_craft.join(", ")}`)
+    if (poem.key_images.length)
+        tags.push(`**Key Images:** ${poem.key_images.join(", ")}`)
+    if (poem.contest_fit.length)
+        tags.push(`**Contest Fit:** ${poem.contest_fit.join(", ")}`)
+    if (tags.length) parts.push(tags.join("\n"))
+
+    parts.push(
+        `**Rating:** ${poem.rating}  \n**Date:** ${formatDate(poem.date)}  \n**Lines:** ${poem.lines} · **Words:** ${poem.words}`
+    )
+    if (poem.contests.length)
+        parts.push(
+            `**Contests:**\n${poem.contests.map((c) => `- ${c.award}: ${c.url}${c.title ? ` (${c.title})` : ""}`).join("\n")}`
+        )
+    if (poem.socials.length)
+        parts.push(
+            `**Socials:**\n${poem.socials.map((s) => `- ${s}`).join("\n")}`
+        )
+
+    parts.push(`**URL:** ${cleanPoetryUrl(poem.url)}`)
+    if (poem.author)
+        parts.push(
+            `**Copyright:** ${poem.author.pen_name} (${poem.author.full_name})`
+        )
+
     return parts.join("\n\n")
+}
+
+/** Strip the human-readable slug from an AllPoetry-style URL, keeping only
+ *  the numeric ID segment. Safe to call on any URL — non-matching URLs are
+ *  returned unchanged.
+ *
+ *  https://allpoetry.com/poem/19039436-Margin-by-Insta-JoJo
+ *  → https://allpoetry.com/poem/19039436
+ */
+export function cleanPoetryUrl(url: string): string {
+    return url.replace(/(\/\d+)[^/]*$/, "$1")
 }
 
 export function formatDate(iso: string): string {
