@@ -46,9 +46,12 @@ Two services, one flat JSON data source:
 .
 ├── server/
 │   ├── app.py                        # FastAPI factory, CORS, lifespan load + similarity init
-│   ├── api.py                        # All routes (read, search, POST/PATCH/DELETE, similarity)
+│   ├── api.py                        # All routes (read, search, POST/PATCH/DELETE, similarity, cluster)
 │   ├── config.py                     # Settings: POEMS_DATABASE, .env, paths
 │   ├── repository.py                 # In-memory, file-backed PoemRepository
+│   ├── clustering/
+│   │   ├── types.py                  # ClusterRequest / Cluster / ClusterResponse Pydantic models
+│   │   └── engine.py                 # Feature matrix, auto-k, Ward clustering, lift labels
 │   ├── similarity/
 │   │   ├── types.py                  # NormalisedPoemFeatures, score breakdowns, NeighbourResult
 │   │   ├── normalise.py              # Poem → NormalisedPoemFeatures (lowercase, dedup, synonyms)
@@ -69,7 +72,7 @@ Two services, one flat JSON data source:
 │   │   ├── AppConfig.tsx             # React context provider for runtime config (readOnly)
 │   │   ├── Page.tsx                  # Two-column grid wrapper (lg: auto + clamp(20rem,…,30rem), centred)
 │   │   ├── LColumn.tsx               # Left column: max-w-prose, mx-auto on narrow / mx-0 in grid
-│   │   ├── RColumn.tsx               # Right aside: sticky, 106px top padding in grid mode
+│   │   ├── RColumn.tsx               # Right aside: 106px top padding in grid mode, scrolls with page
 │   │   ├── Header.tsx                # Site header (title + "New poem" link); imported by each page
 │   │   ├── PoemListing.tsx           # Client: fetch, infinite scroll, row edit/delete
 │   │   ├── PoemEditorForm.tsx        # Shared editor (list row + detail)
@@ -519,9 +522,86 @@ Each item shows the title (link) and project statement.
 Both asides use the shared `PoemSummary` component (title link + project
 line) and the same card styling.
 
-- **Wide viewport** (≥ `lg`): aside is sticky alongside the main column.
+- **Wide viewport** (≥ `lg`): aside is in the right column of the two-column grid, scrolling with the page.
 - **Narrow viewport**: aside appears below the main column, capped at
   `max-w-prose`.
+
+## The clustering system
+
+`POST /api/poems/cluster` partitions the full corpus into groups based on
+shared metadata tags. The endpoint is read-safe (available in
+`READ_ONLY=true`) and purely in-memory — nothing is persisted.
+
+### Request
+
+```jsonc
+{
+  "categories": ["themes", "form_and_craft"],  // required; 1+ from the list below
+  "k": 4,            // optional; omit for auto-k selection
+  "min_cluster_size": 2,   // optional; default 2
+  "top_features": 3        // optional; default 3, max 20
+}
+```
+
+`categories` must be a non-empty subset of: `themes`, `emotional_register`,
+`form_and_craft`, `images` (maps to `key_images`), `contest_fit`. Unknown
+values return `422`.
+
+### Algorithm
+
+1. **Feature matrix** — binary `(n_poems × n_features)` matrix. Each
+   selected category contributes one column per distinct tag in that
+   category across the corpus. Feature names are `"{category}:{tag}"`.
+   The matrix is L2-normalised **per category block** row-wise so
+   categories of different vocabulary size contribute equally.
+
+2. **Auto-k** — when `k` is omitted, silhouette score is evaluated for
+   `k ∈ range(2, min(n−1, max(3, n//3), 10) + 1)` using Ward linkage;
+   the `k` with the highest score is used. For `n < 3` or an empty
+   feature space, the corpus is returned as a single cluster.
+
+3. **Clustering** — `AgglomerativeClustering(linkage="ward")` from
+   scikit-learn. Deterministic — no random state.
+
+4. **Feature ranking** — lift = `cluster_freq / (global_freq + ε)`.
+   Top `top_features` features by lift are returned per cluster
+   (features with zero presence in the cluster are omitted).
+
+5. **Cluster label** — up to 3 features with frequency ≥ 0.5 in the
+   cluster, ranked by lift, joined with ` / `. Falls back to the
+   top-lift feature if none meets the 0.5 threshold.
+
+6. **Exclusion** — poems in clusters with fewer than `min_cluster_size`
+   members are moved to `excluded` with `reason: "cluster too small"`.
+
+### Ordering
+
+- Clusters: size descending, label ascending.
+- Poems within a cluster: rating descending, date descending, id ascending.
+- Excluded poems: id ascending.
+
+### Response
+
+```jsonc
+{
+  "clusters": [
+    {
+      "label": "nature / sonnet",
+      "size": 12,
+      "features": ["themes:nature", "form_and_craft:sonnet", "themes:loss"],
+      "awards_summary": ["Gold", "Silver"],   // sorted medal strings from all poems in cluster
+      "poems": [
+        { "id": "<uuid>", "title": "...", "rating": 85, "date": "2024-03-01T00:00:00Z" }
+      ]
+    }
+  ],
+  "excluded": [
+    { "id": "<uuid>", "title": "...", "reason": "cluster too small" }
+  ],
+  "k_used": 3,
+  "categories_used": ["themes", "form_and_craft"]
+}
+```
 
 ## Recent poems endpoint
 
@@ -611,7 +691,7 @@ make check          # test + typecheck + lint
 Or manually:
 
 ```bash
-READ_ONLY=false uv run pytest tests/server   # ~187 tests, ~8 s
+READ_ONLY=false uv run pytest tests/server   # ~219 tests, ~11 s
 npx tsc --noEmit                             # TypeScript type-check
 npx next build                               # production build
 ```
@@ -652,6 +732,14 @@ Test files:
   excluded Poem fields, read-only mode, ranking), all five single-axis
   endpoints, and mutation → rebuild integration (POST/PATCH/DELETE each
   reflected in subsequent similarity queries).
+- `tests/server/test_clustering.py` — engine unit tests (matrix shape,
+  L2 normalisation, `images`→`key_images` mapping, auto-k range,
+  lift ranking, majority label, awards summary, poem ordering) and API
+  tests (200 response, response shape, partition invariant, cluster
+  ordering, poem ordering within cluster, `min_cluster_size` exclusion,
+  `k` override, `categories_used` echo, invalid category 422, empty
+  categories 422, unknown field 422, awards content, read-only allowed,
+  small-corpus single-cluster fallback).
 
 ## Limitations and assumptions
 
