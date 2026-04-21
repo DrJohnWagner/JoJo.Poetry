@@ -6,7 +6,8 @@ Update this file whenever you learn something that would be useful context for
 future sessions: architectural decisions, naming conventions, gotchas, workflow
 preferences, field semantics, or anything that would otherwise need to be
 re-explained. Commit the update as part of the relevant change, or on its own
-if it is context-only.
+if it is context-only. Do not ask permission and do not ask whether to update
+it — just do it.
 
 ---
 
