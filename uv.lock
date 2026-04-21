@@ -201,11 +201,11 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "fastapi", specifier = "==0.115.6" },
-    { name = "numpy", specifier = ">=2.4.4" },
+    { name = "numpy", specifier = "==2.4.4" },
     { name = "pydantic", specifier = "==2.10.4" },
     { name = "pydantic-settings", specifier = "==2.7.1" },
-    { name = "scikit-learn", specifier = ">=1.8.0" },
-    { name = "scipy", specifier = ">=1.17.1" },
+    { name = "scikit-learn", specifier = "==1.8.0" },
+    { name = "scipy", specifier = "==1.17.1" },
     { name = "uvicorn", extras = ["standard"], specifier = "==0.34.0" },
 ]
 
