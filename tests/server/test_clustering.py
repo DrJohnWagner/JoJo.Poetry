@@ -2,14 +2,14 @@
 
 Section                  Tests  What's covered
 -----------------------  -----  ---------------------------------------------------------------
-engine unit                 14  build_matrix shape/values, auto_k range, empty-feature
-                                fallback, lift ranking, majority label, awards_summary,
-                                poem_summaries ordering, n<3 single-cluster, zero-vector rows
+engine unit                 13  build_matrix shape/values, auto_k range, empty-feature
+                                fallback, lift ranking, majority label, poem_summaries ordering,
+                                n<3 single-cluster, zero-vector rows
 API endpoint                16  200 response, shape, partition invariant, cluster ordering
                                 (size desc / label asc), poem ordering within cluster,
                                 min_cluster_size exclusion, k override, auto-k (k_used >=2),
                                 categories_used echo, invalid category 422, empty categories 422,
-                                unknown field 422, awards_summary content, read-only allowed,
+                                unknown field 422, no awards in response, read-only allowed,
                                 corpus < 3 poems returns k_used=1
 """
 
@@ -27,7 +27,6 @@ from database.schemas.poem import Poem
 from server.app import create_app
 from server.clustering.engine import (
     _auto_k,
-    _awards_summary,
     _build_matrix,
     _features_and_label,
     _poem_summaries,
@@ -175,17 +174,6 @@ def test_features_and_label_top_n_respected():
 # ================================================================ engine — helpers
 
 
-def test_awards_summary_sorted():
-    p1 = _make_poem(awards=[{"url": "https://x.com/a", "medal": "Silver"}])
-    p2 = _make_poem(awards=[{"url": "https://x.com/b", "medal": "Gold"}])
-    result = _awards_summary([p1, p2])
-    assert result == ["Gold", "Silver"]
-
-
-def test_awards_summary_empty():
-    assert _awards_summary([_make_poem()]) == []
-
-
 def test_poem_summaries_ordering():
     p_high = _make_poem(rating=90, date="2024-03-01T00:00:00Z")
     p_low = _make_poem(rating=20, date="2024-01-01T00:00:00Z")
@@ -277,7 +265,8 @@ def test_cluster_response_cluster_shape(cluster_client):
     body = r.json()
     assert body["clusters"]
     c = body["clusters"][0]
-    assert {"label", "size", "features", "awards_summary", "poems"} <= set(c.keys())
+    assert {"label", "size", "features", "poems"} <= set(c.keys())
+    assert "awards_summary" not in c
     if c["poems"]:
         p = c["poems"][0]
         assert {"id", "title", "rating", "date"} <= set(p.keys())
@@ -382,24 +371,20 @@ def test_cluster_unknown_field_returns_422(cluster_client):
     assert r.status_code == 422
 
 
-def test_cluster_awards_summary_populated(tmp_path, monkeypatch):
-    poems = [
-        _make_poem(
-            themes=[str(i % 2)],
-            url=f"https://example.com/{i}",
-            awards=[{"url": "https://example.com/contest", "medal": "Gold"}],
-        )
-        for i in range(6)
-    ]
-    db = _make_db(tmp_path, poems)
-    with _make_client(db, monkeypatch) as c:
-        r = c.post(
-            "/api/poems/cluster",
-            json={"categories": ["themes"], "min_cluster_size": 1},
-        )
+def test_cluster_response_contains_no_awards(cluster_client):
+    r = cluster_client.post(
+        "/api/poems/cluster",
+        json={"categories": ["themes"], "min_cluster_size": 1},
+    )
     assert r.status_code == 200
-    for cluster in r.json()["clusters"]:
-        assert "awards_summary" in cluster
+    body = r.json()
+    for cluster in body["clusters"]:
+        assert "awards_summary" not in cluster
+        for p in cluster["poems"]:
+            assert "awards" not in p
+            assert "awards_summary" not in p
+    for e in body["excluded"]:
+        assert "awards" not in e
 
 
 def test_cluster_allowed_in_read_only_mode(cluster_db, monkeypatch):

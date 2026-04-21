@@ -115,7 +115,6 @@ export interface ClusterItem {
     label: string
     size: number
     features: string[]
-    awards_summary: string[]
     poems: ClusterPoem[]
 }
 

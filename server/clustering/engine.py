@@ -124,10 +124,6 @@ def _poem_summaries(poems: List[Poem]) -> List[PoemSummary]:
     return [PoemSummary(id=p.id, title=p.title, rating=p.rating, date=p.date) for p in ordered]
 
 
-def _awards_summary(poems: List[Poem]) -> List[str]:
-    return sorted(a.medal for p in poems for a in p.awards)
-
-
 def run_clustering(poems: List[Poem], req: ClusterRequest) -> ClusterResponse:
     n = len(poems)
     matrix, feature_names = _build_matrix(poems, req.categories)
@@ -139,7 +135,6 @@ def run_clustering(poems: List[Poem], req: ClusterRequest) -> ClusterResponse:
                     label="all",
                     size=n,
                     features=[],
-                    awards_summary=_awards_summary(poems),
                     poems=_poem_summaries(poems),
                 )
             ],
@@ -173,7 +168,6 @@ def run_clustering(poems: List[Poem], req: ClusterRequest) -> ClusterResponse:
                 label=label,
                 size=len(group_poems),
                 features=top_feats,
-                awards_summary=_awards_summary(group_poems),
                 poems=_poem_summaries(group_poems),
             )
         )

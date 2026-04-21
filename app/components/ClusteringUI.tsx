@@ -148,11 +148,6 @@ export default function ClusteringUI() {
                                             .join(" · ")}
                                     </p>
                                 )}
-                                {cluster.awards_summary.length > 0 && (
-                                    <p className="taglist mt-0.5">
-                                        {cluster.awards_summary.join(", ")}
-                                    </p>
-                                )}
                                 <ul className="mt-4 space-y-3">
                                     {cluster.poems.map((p) => (
                                         <li key={p.id}>

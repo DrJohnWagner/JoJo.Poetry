@@ -600,7 +600,6 @@ values return `422`.
       "label": "nature / sonnet",
       "size": 12,
       "features": ["themes:nature", "form_and_craft:sonnet", "themes:loss"],
-      "awards_summary": ["Gold", "Silver"],   // sorted medal strings from all poems in cluster
       "poems": [
         { "id": "<uuid>", "title": "...", "rating": 85, "date": "2024-03-01T00:00:00Z" }
       ]

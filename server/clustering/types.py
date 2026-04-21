@@ -44,7 +44,6 @@ class Cluster(BaseModel):
     label: str
     size: int
     features: List[str]
-    awards_summary: List[str]
     poems: List[PoemSummary]
 
 
