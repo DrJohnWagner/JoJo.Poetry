@@ -99,16 +99,16 @@ def test_month_filter(client):
     assert _titles(r) == {"Not a Metaphor", "Just Enough Freedom"}
 
 
-# ---------------------------------------------------------------- awards
+# ---------------------------------------------------------------- medals
 
-def test_award_gold(client):
-    r = client.get("/api/poems/search", params={"awards": "Gold"})
+def test_medal_gold(client):
+    r = client.get("/api/poems/search", params={"medals": "Gold"})
     # Not a Metaphor + Load-Bearing Interior have Gold
     assert _titles(r) == {"Not a Metaphor", "Load-Bearing Interior"}
 
 
-def test_award_none_matches_empty_contests(client):
-    r = client.get("/api/poems/search", params={"awards": "None"})
+def test_medal_none_matches_empty_contests(client):
+    r = client.get("/api/poems/search", params={"medals": "None"})
     # Weather / Just Enough Freedom / Unchecked have empty contests
     assert _titles(r) == {
         "Weather Over Brief Structures",
@@ -117,16 +117,16 @@ def test_award_none_matches_empty_contests(client):
     }
 
 
-def test_award_multiple_is_or(client):
+def test_medal_multiple_is_or(client):
     r = client.get(
         "/api/poems/search",
-        params=[("awards", "Gold"), ("awards", "None"), ("limit", 200)],
+        params=[("medals", "Gold"), ("medals", "None"), ("limit", 200)],
     )
     assert len(r.json()["items"]) == 5
 
 
-def test_award_unknown_rejected(client):
-    r = client.get("/api/poems/search", params={"awards": "Platinum"})
+def test_medal_unknown_rejected(client):
+    r = client.get("/api/poems/search", params={"medals": "Platinum"})
     assert r.status_code == 422
 
 
