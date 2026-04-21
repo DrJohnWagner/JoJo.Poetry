@@ -107,9 +107,9 @@ def test_medal_gold(client):
     assert _titles(r) == {"Not a Metaphor", "Load-Bearing Interior"}
 
 
-def test_medal_none_matches_empty_contests(client):
+def test_medal_none_matches_empty_awards(client):
     r = client.get("/api/poems/search", params={"medals": "None"})
-    # Weather / Just Enough Freedom / Unchecked have empty contests
+    # Weather / Just Enough Freedom / Unchecked have empty awards
     assert _titles(r) == {
         "Weather Over Brief Structures",
         "Just Enough Freedom",

@@ -10,7 +10,7 @@
     "title",
     "url",
     "body",
-    "contests",
+    "awards",
     "date",
     "themes",
     "emotional_register",
@@ -43,10 +43,10 @@
       "type": "string",
       "minLength": 1
     },
-    "contests": {
+    "awards": {
       "description": "Zero or more contest entries the poem was submitted to.",
       "type": "array",
-      "items": { "$ref": "#/$defs/Contest" }
+      "items": { "$ref": "#/$defs/Award" }
     },
     "date": {
       "description": "Publication / authorship timestamp, ISO 8601 with timezone (UTC in existing data).",
@@ -130,7 +130,7 @@
         "full_name": { "type": "string", "minLength": 1 }
       }
     },
-    "Contest": {
+    "Award": {
       "type": "object",
       "additionalProperties": false,
       "required": ["url", "medal"],

@@ -87,7 +87,7 @@ Two services, one flat JSON data source:
 │   │   ├── PoemTitle.tsx             # Shared <h2> with optional Link wrapper + two copy buttons (partial / full markdown)
 │   │   ├── PoemStatistics.tsx        # Shared metadata line (date · rating · lines · words · medals)
 │   │   ├── PoemProject.tsx           # Italic project statement, null-safe
-│   │   ├── PoemContest.tsx           # Medal icon + medal label + optional contest link
+│   │   ├── PoemAward.tsx             # Medal icon + medal label + optional award link
 │   │   ├── PoemSocial.tsx            # Social URL rendered as hostname link
 │   │   ├── PoemMetadataEditor.tsx    # Shared rating/date/url grid + all six TagInput fields
 │   │   ├── PinToggle.tsx             # Server-confirmed pin/unpin
@@ -122,7 +122,7 @@ The authoritative schema is `database/schemas/poem.schema.json`;
 | `title`                                                                               | string                     | yes                          | yes                 | yes                           |                                                                                                    |
 | `url`                                                                                 | URI                        | yes                          | yes                 | no                            | Canonical external link.                                                                           |
 | `body`                                                                                | string (HTML fragment)     | yes                          | yes                 | yes\*                         | `` line breaks + literal whitespace for indentation. \*Search hits a plain-text projection. |
-| `contests`                                                                            | `[{url, medal, title?}]` | yes (may be empty)           | yes (API)           | via `medals` filter         | `medal` is surfaced to search; `title` is an optional contest name displayed in the UI.        |
+| `awards`                                                                              | `[{url, medal, title?}]` | yes (may be empty)           | yes (API)           | via `medals` filter         | `medal` is surfaced to search; `title` is an optional award name displayed in the UI.          |
 | `date`                                                                                | ISO 8601 datetime          | yes                          | yes                 | year/month in advanced search | Timezone-aware; UTC in existing data.                                                              |
 | `themes`, `emotional_register`, `form_and_craft`, `key_images`, `contest_fit` | `string[]`               | yes (may be empty)           | yes                 | yes                           | Free-vocabulary tags.                                                                              |
 | `project`                                                                             | string                     | yes                          | yes                 | yes                           | One-sentence authorial statement.                                                                  |
@@ -324,7 +324,7 @@ The listing page applies a second, client-side sort layer on top of the server's
 | Lines  | most first        | `lines` (integer)           |
 | Words  | most first        | `words` (integer)           |
 | Rating | highest first     | `rating` (integer)          |
-| Awards | most first        | `contests.length` (integer) |
+| Awards | most first        | `awards.length` (integer)   |
 
 One button is always active (Date descending by default). Clicking the active button toggles direction; clicking an inactive button selects it at its default direction. The sort is re-applied automatically as new pages are loaded via infinite scroll.
 
@@ -356,7 +356,7 @@ Populated fields: `title`, `body`, `project`, `notes`
 `max_rating` together = one populated field); `medals`.
 
 `medals` values: `Gold`, `Silver`, `Bronze`, `Honorable Mention`,
-`None`. `None` matches poems whose `contests` array is empty; selecting
+`None`. `None` matches poems whose `awards` array is empty; selecting
 multiple medals is OR (e.g. `medals=Gold&medals=None`). Unknown medals
 → 422.
 
@@ -672,7 +672,7 @@ Test files:
   changes will need a `schema_version` and a one-shot migration.
 - **No relevance ranking.** Search filters but does not rank; order
   is always authoritative (pinned → date-desc → id-asc).
-- **`contests` has no inline UI yet.** It is an object array; the
+- **`awards` has no inline UI yet.** It is an object array; the
   backend accepts PATCH, but the UI surfaces it as read-only only.
 - **Browser-native modals** are used for discard/confirm prompts
   (`window.confirm`, `beforeunload`). Fine for a first draft; a
@@ -690,7 +690,7 @@ Test files:
 
 ## Sensible next steps
 
-1. **Object-array editor** for `contests` in both the create and edit
+1. **Object-array editor** for `awards` in both the create and edit
    surfaces.
 2. **Optimistic concurrency** via `ETag` / `If-Match` headers so a
    stale-client PATCH fails with `409` instead of silently winning.

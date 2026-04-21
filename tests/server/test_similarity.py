@@ -76,7 +76,7 @@ def _make_poem(**overrides):
         "title": "Test Poem",
         "url": "https://example.com/poem",
         "body": "first line<br/>\nsecond line<br/>",
-        "contests": [],
+        "awards": [],
         "date": "2024-01-01T00:00:00Z",
         "themes": [],
         "emotional_register": [],
@@ -877,7 +877,7 @@ def test_similar_response_excludes_full_poem_fields(api_client):
         assert "rating" not in n
         assert "lines" not in n
         assert "words" not in n
-        assert "contests" not in n
+        assert "awards" not in n
 
 
 def test_similar_self_not_in_neighbours(api_client):

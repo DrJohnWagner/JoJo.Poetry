@@ -46,7 +46,7 @@ def test_list_default_shape_and_pagination(client):
     assert set(item) >= {
         "id", "title", "url", "date", "rating", "lines", "words",
         "pinned", "themes", "emotional_register", "form_and_craft",
-        "contest_fit", "project", "body", "contests", "key_images",
+        "contest_fit", "project", "body", "awards", "key_images",
         "notes", "socials",
     }
 
@@ -161,7 +161,7 @@ def test_recent_no_pin_bias(client):
 
 def test_recent_item_has_expected_fields(client):
     item = client.get("/api/poems/recent?k=1").json()["items"][0]
-    assert {"id", "title", "project", "body", "date", "rating", "lines", "words", "contests"} <= set(item.keys())
+    assert {"id", "title", "project", "body", "date", "rating", "lines", "words", "awards"} <= set(item.keys())
 
 
 def test_recent_k_zero_returns_422(client):

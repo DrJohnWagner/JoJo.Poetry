@@ -53,7 +53,7 @@ def test_patch_is_partial_untouched_fields_preserved(client):
     r = client.patch(f"/api/poems/{pid}", json={"rating": 42})
     after = r.json()
     assert after["rating"] == 42
-    for key in ("title", "body", "themes", "contests"):
+    for key in ("title", "body", "themes", "awards"):
         assert after[key] == before[key]
 
 

@@ -76,9 +76,9 @@ export function poemToMarkdown(
     parts.push(
         `**Rating:** ${poem.rating}  \n**Date:** ${formatDate(poem.date)}  \n**Lines:** ${poem.lines} · **Words:** ${poem.words}`
     )
-    if (poem.contests.length)
+    if (poem.awards.length)
         parts.push(
-            `**Contests:**\n${poem.contests.map((c) => `- ${c.medal}: ${c.url}${c.title ? ` (${c.title})` : ""}`).join("\n")}`
+            `**Awards:**\n${poem.awards.map((c) => `- ${c.medal}: ${c.url}${c.title ? ` (${c.title})` : ""}`).join("\n")}`
         )
     if (poem.socials.length)
         parts.push(

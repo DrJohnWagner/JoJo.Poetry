@@ -8,7 +8,7 @@ import PoemStatistics from "./PoemStatistics"
 import PoemProject from "./PoemProject"
 import PoemTitle from "./PoemTitle"
 import DeleteButton from "./DeleteButton"
-import PoemContest from "./PoemContest"
+import PoemAward from "./PoemAward"
 import PoemSocial from "./PoemSocial"
 import PoemEditorForm from "./PoemEditorForm"
 import HorizontalRule from "./HorizontalRule"
@@ -98,15 +98,15 @@ export default function PoemDetail({ poem: initial }: { poem: Poem }) {
                     </>
                 )}
 
-                {poem.contests.length > 0 && (
+                {poem.awards.length > 0 && (
                     <>
-                        <dt className="eyebrow pt-1">Contests</dt>
+                        <dt className="eyebrow pt-1">Awards</dt>
                         {/* <dd className="space-y-1 font-sans text-sm normal-case tracking-normal"> */}
                         <dd className="space-y-1">
-                            {poem.contests.map((contest) => (
-                                <PoemContest
-                                    key={contest.url}
-                                    contest={contest}
+                            {poem.awards.map((award) => (
+                                <PoemAward
+                                    key={award.url}
+                                    award={award}
                                 />
                             ))}
                         </dd>

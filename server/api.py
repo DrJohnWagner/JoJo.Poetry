@@ -19,7 +19,7 @@ _SCHEMAS_DIR = _Path(__file__).resolve().parent.parent / "database" / "schemas"
 if str(_SCHEMAS_DIR) not in sys.path:
     sys.path.insert(0, str(_SCHEMAS_DIR))
 
-from poem import Author, Contest, Poem  # noqa: E402
+from poem import Author, Award, Poem  # noqa: E402
 
 from server.config import get_settings
 from server.repository import (
@@ -107,7 +107,7 @@ class PoemCreate(BaseModel):
     Optional (defaults applied server-side):
 
     - ``date`` — defaults to the current UTC time (second precision).
-    - ``contests`` / ``themes`` / ``emotional_register`` /
+    - ``awards`` / ``themes`` / ``emotional_register`` /
       ``form_and_craft`` / ``key_images`` / ``contest_fit`` — default
       to ``[]``.
     - ``pinned`` — defaults to ``False``.
@@ -130,7 +130,7 @@ class PoemCreate(BaseModel):
     rating: int = Field(ge=0, le=100)
 
     date: Optional[datetime] = None
-    contests: List[Contest] = Field(default_factory=list)
+    awards: List[Award] = Field(default_factory=list)
     themes: List[str] = Field(default_factory=list)
     emotional_register: List[str] = Field(default_factory=list)
     form_and_craft: List[str] = Field(default_factory=list)
@@ -160,7 +160,7 @@ class PoemPatch(BaseModel):
     title: Optional[str] = Field(None, min_length=1)
     url: Optional[str] = None
     body: Optional[str] = Field(None, min_length=1)
-    contests: Optional[List[Contest]] = None
+    awards: Optional[List[Award]] = None
     date: Optional[datetime] = None
     themes: Optional[List[str]] = None
     emotional_register: Optional[List[str]] = None
@@ -253,10 +253,10 @@ def _tag_any(needles: List[str], tags: List[str]) -> bool:
 
 
 def _poem_medals(p: Poem) -> List[str]:
-    """Medals present on the poem, with 'None' sentinel if no contests."""
-    if not p.contests:
+    """Medals present on the poem, with 'None' sentinel if no awards."""
+    if not p.awards:
         return ["None"]
-    return [c.medal for c in p.contests]
+    return [c.medal for c in p.awards]
 
 
 # --------------------------------------------------------------------- router
@@ -349,7 +349,7 @@ def advanced_search(
     max_rating: Optional[int] = Query(None, ge=0, le=100),
     medals: List[str] = Query(
         default_factory=list,
-        description="Contest medals to match. Any of: Gold, Silver, Bronze, Honorable Mention, None. 'None' matches poems with no contests.",
+        description="Medal tier to match. Any of: Gold, Silver, Bronze, Honorable Mention, None. 'None' matches poems with no awards.",
     ),
     offset: int = Query(0, ge=0),
     limit: int = Query(3, ge=1, le=200, description="Page size. Default 3 matches the incremental-load UX."),
@@ -372,7 +372,7 @@ def advanced_search(
       ``max_rating``): each treated as one populated field.
       ``min_rating`` + ``max_rating`` together count as one field.
     - **Awards**: OR across supplied values; ``"None"`` matches poems
-      with an empty ``contests`` array.
+      with an empty ``awards`` array.
     """
     bad = [a for a in medals if a not in MEDAL_VOCAB]
     if bad:

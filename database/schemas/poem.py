@@ -24,7 +24,7 @@ class Author(BaseModel):
     full_name: str = Field(min_length=1)
 
 
-class Contest(BaseModel):
+class Award(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     url: HttpUrl
@@ -50,7 +50,7 @@ class Poem(BaseModel):
     title: str = Field(min_length=1)
     url: HttpUrl
     body: str = Field(min_length=1)
-    contests: List[Contest]
+    awards: List[Award]
     date: datetime
     themes: List[str]
     emotional_register: List[str]

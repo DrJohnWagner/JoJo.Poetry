@@ -5,7 +5,7 @@ export interface Author {
     full_name: string
 }
 
-export interface Contest {
+export interface Award {
     url: string
     medal: string
     title?: string
@@ -26,7 +26,7 @@ export interface Poem {
     contest_fit: string[]
     project: string
     body: string
-    contests: Contest[]
+    awards: Award[]
     key_images: string[]
     notes: string[]
     socials: string[]

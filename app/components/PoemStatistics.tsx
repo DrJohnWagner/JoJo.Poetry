@@ -2,7 +2,7 @@ import type { Poem } from "@/lib/types"
 import { formatDate } from "@/lib/format"
 
 export default function PoemStatistics({ poem }: { poem: Poem }) {
-    const contestCount = poem.contests.length
+    const awardCount = poem.awards.length
     return (
         <div className="eyebrow mt-1 flex flex-wrap gap-x-1 gap-y-1">
             <span>{formatDate(poem.date)}</span>
@@ -12,11 +12,11 @@ export default function PoemStatistics({ poem }: { poem: Poem }) {
             <span>{poem.lines} lines</span>
             <span>·</span>
             <span>{poem.words} words</span>
-            {contestCount > 0 && (
+            {awardCount > 0 && (
                 <>
                     <span>·</span>
                     <span>
-                        {contestCount} {contestCount === 1 ? "medal" : "medals"}
+                        {awardCount} {awardCount === 1 ? "medal" : "medals"}
                     </span>
                 </>
             )}

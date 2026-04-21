@@ -61,7 +61,7 @@ def test_create_minimal_payload_succeeds(client, db):
     assert poem["pinned"] is False
     assert poem["notes"] == []
     assert poem["themes"] == []
-    assert poem["contests"] == []
+    assert poem["awards"] == []
 
     # Derived fields computed from body
     assert poem["lines"] == 3

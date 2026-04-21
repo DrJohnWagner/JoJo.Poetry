@@ -32,7 +32,7 @@ export const IMMUTABLE_FIELDS = ["id", "lines", "words"] as const
 /** Backend accepts edits via PATCH but no inline UI ships for them in
  *  this first draft (they are structured objects and need a dedicated
  *  editor). */
-export const NOT_INLINE_EDITABLE = ["contests", "author"] as const
+export const NOT_INLINE_EDITABLE = ["awards", "author"] as const
 
 /** Working draft used by editors: every inline-editable field is a
  *  string input except pinned (boolean) and rating (number). Tag lists

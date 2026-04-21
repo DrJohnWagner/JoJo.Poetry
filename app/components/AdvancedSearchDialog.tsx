@@ -174,7 +174,7 @@ export default function AdvancedSearchDialog({
                     <fieldset className="col-span-2">
                         <legend className="eyebrow">Medals</legend>
                         <p className="text-[0.78rem] text-muted mt-1 mb-2">
-                            Any selected — “None” matches poems with no contest
+                            Any selected — “None” matches poems with no award
                             entries.
                         </p>
                         <div className="flex flex-wrap gap-x-5 gap-y-2">

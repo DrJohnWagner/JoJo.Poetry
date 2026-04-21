@@ -1,6 +1,6 @@
 "use client"
 
-export type SortField = "title" | "date" | "lines" | "words" | "rating" | "contest_count"
+export type SortField = "title" | "date" | "lines" | "words" | "rating" | "award_count"
 export type SortDir = "asc" | "desc"
 
 export interface SortState {
@@ -16,7 +16,7 @@ const FIELDS: { field: SortField; label: string; defaultDir: SortDir }[] = [
     { field: "rating", label: "Rating", defaultDir: "desc" },
     { field: "lines", label: "Lines", defaultDir: "desc" },
     { field: "words", label: "Words", defaultDir: "desc" },
-    { field: "contest_count", label: "Awards", defaultDir: "desc" },
+    { field: "award_count", label: "Awards", defaultDir: "desc" },
 ]
 
 export default function SortBar({

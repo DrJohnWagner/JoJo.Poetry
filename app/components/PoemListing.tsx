@@ -157,8 +157,8 @@ export default function PoemListing({
                 cmp = a.title.localeCompare(b.title)
             } else if (field === "date") {
                 cmp = new Date(a.date).getTime() - new Date(b.date).getTime()
-            } else if (field === "contest_count") {
-                cmp = a.contests.length - b.contests.length
+            } else if (field === "award_count") {
+                cmp = a.awards.length - b.awards.length
             } else {
                 cmp = (a[field] as number) - (b[field] as number)
             }
