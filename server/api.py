@@ -6,22 +6,14 @@ emits slugs. ``id`` is the only identifier shared with the frontend.
 
 from __future__ import annotations
 
-import sys
 from datetime import datetime, timezone
-from pathlib import Path as _Path
 from typing import List, Literal, Optional
 from uuid import UUID, uuid4
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response, status
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
-_SCHEMAS_DIR = _Path(__file__).resolve().parent.parent / "database" / "schemas"
-if str(_SCHEMAS_DIR) not in sys.path:
-    sys.path.insert(0, str(_SCHEMAS_DIR))
-
-from poem import Author, Award, Poem  # noqa: E402
-
-from pydantic import ValidationError
+from database.schemas.poem import Author, Award, Poem
 
 from server.repository import (
     DuplicateIdError,

@@ -56,13 +56,7 @@ from pathlib import Path
 from typing import Dict, List, Optional
 from uuid import UUID
 
-import sys
-
-_SCHEMAS_DIR = Path(__file__).resolve().parent.parent / "database" / "schemas"
-if str(_SCHEMAS_DIR) not in sys.path:
-    sys.path.insert(0, str(_SCHEMAS_DIR))
-
-from poem import Poem  # noqa: E402  (path-extended import)
+from database.schemas.poem import Poem
 
 
 class RepositoryError(RuntimeError):
