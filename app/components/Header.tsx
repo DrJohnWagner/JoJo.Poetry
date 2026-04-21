@@ -13,14 +13,22 @@ export default function Header() {
                 </h1>
                 <p className="eyebrow mt-2">Collected poems</p>
             </Link>
-            {!readOnly && (
+            <div className="flex items-end gap-5">
                 <Link
-                    href="/poems/new"
+                    href="/clusters"
                     className="eyebrow border-b border-muted pb-1 transition-colors hover:border-ink hover:text-ink hover:no-underline"
                 >
-                    New poem
+                    Clusters
                 </Link>
-            )}
+                {!readOnly && (
+                    <Link
+                        href="/poems/new"
+                        className="eyebrow border-b border-muted pb-1 transition-colors hover:border-ink hover:text-ink hover:no-underline"
+                    >
+                        New poem
+                    </Link>
+                )}
+            </div>
         </header>
     )
 }

@@ -103,3 +103,31 @@ export interface SimilarityBundle {
     emotion: NeighbourListResult
     imagery: NeighbourListResult
 }
+
+export interface ClusterPoem {
+    id: UUID
+    title: string
+    rating: number
+    date: string
+}
+
+export interface ClusterItem {
+    label: string
+    size: number
+    features: string[]
+    awards_summary: string[]
+    poems: ClusterPoem[]
+}
+
+export interface ClusterExcluded {
+    id: UUID
+    title: string
+    reason: string
+}
+
+export interface ClusterResponse {
+    clusters: ClusterItem[]
+    excluded: ClusterExcluded[]
+    k_used: number
+    categories_used: string[]
+}

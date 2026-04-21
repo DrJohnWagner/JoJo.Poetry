@@ -1,4 +1,4 @@
-import type { RecentList, SimilarityBundle } from './types'
+import type { ClusterResponse, RecentList, SimilarityBundle } from './types'
 import type { Poem, PoemList, SearchState } from "./types"
 import { hasAdvanced } from "./types"
 
@@ -111,4 +111,11 @@ export function fetchRecentPoems(k: number = 12): Promise<RecentList> {
 
 export function fetchSimilarPoems(id: string): Promise<SimilarityBundle> {
     return req<SimilarityBundle>(`/api/poems/${encodeURIComponent(id)}/similar`)
+}
+
+export function fetchClusters(categories: string[]): Promise<ClusterResponse> {
+    return req<ClusterResponse>("/api/poems/cluster", {
+        method: "POST",
+        body: JSON.stringify({ categories }),
+    })
 }
