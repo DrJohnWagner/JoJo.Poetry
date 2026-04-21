@@ -80,14 +80,14 @@ Two services, one flat JSON data source:
 │   │   ├── RecentPoems.tsx           # Recent poems aside: k most recent by date, title + project
 │   │   ├── PoemSummary.tsx           # Shared list item: title link + project line; used in both asides
 │   │   ├── SearchBar.tsx             # q + submit + Advanced modal trigger
-│   │   ├── SortBar.tsx               # Client-side sort buttons (title/date/lines/words/rating/awards)
-│   │   ├── AdvancedSearchDialog.tsx  # Native <dialog>-backed modal (title/body/project/notes/year/month/awards/tags)
+│   │   ├── SortBar.tsx               # Client-side sort buttons (title/date/lines/words/rating/medals)
+│   │   ├── AdvancedSearchDialog.tsx  # Native <dialog>-backed modal (title/body/project/notes/year/month/medals/tags)
 │   │   ├── PoemRow.tsx               # Single poem row (title, meta, collapsible body)
 │   │   ├── CopyButton.tsx            # Copy-to-clipboard icon button; variant="outline"|"filled" selects icon set
 │   │   ├── PoemTitle.tsx             # Shared <h2> with optional Link wrapper + two copy buttons (partial / full markdown)
-│   │   ├── PoemStatistics.tsx        # Shared metadata line (date · rating · lines · words · awards)
+│   │   ├── PoemStatistics.tsx        # Shared metadata line (date · rating · lines · words · medals)
 │   │   ├── PoemProject.tsx           # Italic project statement, null-safe
-│   │   ├── PoemContest.tsx           # Medal icon + award label + optional contest link
+│   │   ├── PoemContest.tsx           # Medal icon + medal label + optional contest link
 │   │   ├── PoemSocial.tsx            # Social URL rendered as hostname link
 │   │   ├── PoemMetadataEditor.tsx    # Shared rating/date/url grid + all six TagInput fields
 │   │   ├── PinToggle.tsx             # Server-confirmed pin/unpin
@@ -122,7 +122,7 @@ The authoritative schema is `database/schemas/poem.schema.json`;
 | `title`                                                                               | string                     | yes                          | yes                 | yes                           |                                                                                                    |
 | `url`                                                                                 | URI                        | yes                          | yes                 | no                            | Canonical external link.                                                                           |
 | `body`                                                                                | string (HTML fragment)     | yes                          | yes                 | yes\*                         | `` line breaks + literal whitespace for indentation. \*Search hits a plain-text projection. |
-| `contests`                                                                            | `[{url, award, title?}]` | yes (may be empty)           | yes (API)           | via `awards` filter         | `award` is surfaced to search; `title` is an optional contest name displayed in the UI.        |
+| `contests`                                                                            | `[{url, medal, title?}]` | yes (may be empty)           | yes (API)           | via `medals` filter         | `medal` is surfaced to search; `title` is an optional contest name displayed in the UI.        |
 | `date`                                                                                | ISO 8601 datetime          | yes                          | yes                 | year/month in advanced search | Timezone-aware; UTC in existing data.                                                              |
 | `themes`, `emotional_register`, `form_and_craft`, `key_images`, `contest_fit` | `string[]`               | yes (may be empty)           | yes                 | yes                           | Free-vocabulary tags.                                                                              |
 | `project`                                                                             | string                     | yes                          | yes                 | yes                           | One-sentence authorial statement.                                                                  |
@@ -353,11 +353,11 @@ Populated fields: `title`, `body`, `project`, `notes`
 (all case-insensitive substring); tag arrays
 (OR within field, case-insensitive exact-entry equality); `year`,
 `month` (integer equality on `date`); rating band (`min_rating` +
-`max_rating` together = one populated field); `awards`.
+`max_rating` together = one populated field); `medals`.
 
-`awards` values: `Gold`, `Silver`, `Bronze`, `Honorable Mention`,
+`medals` values: `Gold`, `Silver`, `Bronze`, `Honorable Mention`,
 `None`. `None` matches poems whose `contests` array is empty; selecting
-multiple awards is OR (e.g. `awards=Gold&awards=None`). Unknown awards
+multiple medals is OR (e.g. `medals=Gold&medals=None`). Unknown medals
 → 422.
 
 Both endpoints return the same `PoemList` wrapper (full `Poem` objects)
@@ -630,7 +630,7 @@ Test files:
   unknown-field/id rejection; DELETE; **persistence-failure
   atomicity** (injected `OSError` keeps memory and disk consistent).
 - `tests/server/test_search.py` — OR across populated fields; within-field OR on
-  tags; year/month; Gold / None / multiple awards; pinned-first
+  tags; year/month; Gold / None / multiple medals; pinned-first
   preserved; pagination applies to search.
 - `tests/server/test_ordering.py` — date-desc default; pinned-first with internal
   date-desc; id-ascending tiebreaker; sequential pages neither skip
