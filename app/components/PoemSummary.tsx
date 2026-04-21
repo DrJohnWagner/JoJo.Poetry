@@ -9,7 +9,7 @@ export default function PoemSummary({ id, title, project }: { id: string; title:
                 </Link>
             </h3>
             {project && (
-                <p className="font-sans text-[0.8rem] text-muted mt-1 truncate">
+                <p className="font-sans text-[0.8rem] text-muted mt-1 line-clamp-2">
                     {project}
                 </p>
             )}
