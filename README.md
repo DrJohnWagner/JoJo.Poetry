@@ -62,9 +62,10 @@ Two services, one flat JSON data source:
 │   └── Dockerfile                    # Python 3.11-slim image
 ├── requirements.txt                  # Production Python deps
 ├── requirements-dev.txt              # Adds pytest, httpx, jsonschema
-├── tests/server/                     # pytest suite (187 tests)
+├── tests/server/                     # pytest suite (219 tests)
 ├── app/
 │   ├── page.tsx                      # Landing: listing + search + incremental load + recent poems aside
+│   ├── clusters/page.tsx             # Clustering: category checkboxes → ClusteringUI + recent poems aside
 │   ├── poems/[id]/page.tsx           # Detail + inline editing + similar poems panel
 │   ├── poems/new/page.tsx            # Dedicated create page
 │   ├── layout.tsx, globals.css
@@ -73,7 +74,8 @@ Two services, one flat JSON data source:
 │   │   ├── Page.tsx                  # Two-column grid wrapper (lg: auto + clamp(20rem,…,30rem), centred)
 │   │   ├── LColumn.tsx               # Left column: max-w-prose, mx-auto on narrow / mx-0 in grid
 │   │   ├── RColumn.tsx               # Right aside: 106px top padding in grid mode, scrolls with page
-│   │   ├── Header.tsx                # Site header (title + "New poem" link); imported by each page
+│   │   ├── Header.tsx                # Site header (title + "Clusters" link + optional "New poem" link)
+│   │   ├── ClusteringUI.tsx          # Client: category checkboxes, submit/clear, cluster + excluded results
 │   │   ├── PoemListing.tsx           # Client: fetch, infinite scroll, row edit/delete
 │   │   ├── PoemEditorForm.tsx        # Shared editor (list row + detail)
 │   │   ├── PoemRowEditor.tsx         # Thin wrapper around PoemEditorForm for rows
@@ -99,8 +101,8 @@ Two services, one flat JSON data source:
 │   │   ├── HorizontalRule.tsx        # Shared <div class="rule my-5" /> divider
 │   │   └── PoemBody.tsx              # Body rendered as HTML: <br/> line breaks + anchor links
 │   └── lib/
-│       ├── api.ts                    # Typed fetch wrappers (fetchPoems, fetchSimilarPoems → SimilarityBundle, fetchRecentPoems)
-│       ├── types.ts                  # Author / Poem / SearchState / NeighbourListResult / SimilarityBundle / RecentList
+│       ├── api.ts                    # Typed fetch wrappers (fetchPoems, fetchSimilarPoems, fetchRecentPoems, fetchClusters)
+│       ├── types.ts                  # Author / Poem / SearchState / NeighbourListResult / SimilarityBundle / ClusterResponse / …
 │       ├── editable.ts               # Canonical editable-field contract
 │       └── format.ts                 # body ↔ plaintext, date formatting, cleanPoetryUrl, poemToMarkdown(full)
 ├── database/
@@ -108,7 +110,7 @@ Two services, one flat JSON data source:
 │   ├── <Title>.json                  # Per-poem mirror files (reference only)
 │   └── schemas/
 │       ├── poem.schema.json          # JSON Schema (Draft 2020-12)
-│       ├── poem.py                   # Pydantic Poem / Contest / Author
+│       ├── poem.py                   # Pydantic Poem / Award / Author
 │       └── similarity.py             # Re-exports similarity response types for API use
 ├── Dockerfile                        # Combined multi-stage image (Node 22 + Python 3.11, Debian bookworm-slim, no CMD)
 └── docker-compose.yml                # Orchestrates backend + frontend
@@ -500,12 +502,25 @@ Each value is a full `NeighbourListResult` with its own `k`.
 
 ### Frontend panels
 
-Both the listing page and the single-poem page use a two-column layout
-built from three shared components: `Page` (the grid wrapper),
-`LColumn` (left: `max-w-prose`, centred on narrow viewports), and
-`RColumn` (right aside: sticky, `20rem` wide, `106px` top padding in
-grid mode). The `Header` component (title + optional "New poem" link)
-sits at the top of the left column on every page.
+All pages use the same two-column layout shell: `Page` (the grid
+wrapper), `LColumn` (left: `max-w-prose`, centred on narrow viewports),
+`RColumn` (right aside: `20rem` wide, `106px` top padding in grid mode,
+scrolls with the page). `Header` (title + "Clusters" link + optional
+"New poem" link in RW mode) sits at the top of the left column on every
+page.
+
+**Listing page** (`/`): left column has the full poem listing with search,
+sort, and infinite scroll. The aside shows the 12 most recent poems via
+`RecentPoems`, fetched server-side with `GET /api/poems/recent?k=12`.
+Each item shows the title (link) and project statement.
+
+**Clustering page** (`/clusters`): left column has `ClusteringUI` — five
+category checkboxes (themes, emotional register, form & craft, images,
+contest fit), a Cluster button that fires a single `POST /api/poems/cluster`,
+and results rendered as a vertical list of clusters with labels, feature
+tags, award medals, and poem rows (title link, date, rating). Excluded
+poems appear in a section below. The aside shows the same recent poems as
+the listing page.
 
 **Single-poem page** (`/poems/[id]`): the aside shows all five similarity
 axes via `SimilarPoems`. The page calls `GET /api/poems/{id}/similar`
@@ -515,12 +530,8 @@ Empty axes are silently omitted. If the entire call fails, the aside is
 omitted and the page renders normally. Each result shows only the poem
 title as a link; scores and breakdowns are not exposed.
 
-**Listing page** (`/`): the aside shows the 12 most recent poems via
-`RecentPoems`, fetched server-side with `GET /api/poems/recent?k=12`.
-Each item shows the title (link) and project statement.
-
-Both asides use the shared `PoemSummary` component (title link + project
-line) and the same card styling.
+Both the listing and clustering asides use the shared `PoemSummary`
+component (title link + project line).
 
 - **Wide viewport** (≥ `lg`): aside is in the right column of the two-column grid, scrolling with the page.
 - **Narrow viewport**: aside appears below the main column, capped at
