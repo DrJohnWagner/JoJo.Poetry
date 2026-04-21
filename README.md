@@ -185,7 +185,7 @@ read or write them.
   outside the runtime for editor autocomplete, external validators,
   and CI checks. Rejects unknown fields and enforces UUID-v4 `id`,
   bounded rating, and required-vs-optional structure.
-- **`poem.py`** — Pydantic models (`Poem`, `Contest`, `Author`). Used
+- **`poem.py`** — Pydantic models (`Poem`, `Award`, `Author`). Used
   by the backend at runtime for load-time validation, PATCH-merge
   validation, and response shaping. Applies the documented defaults
   (`pinned=false`, `socials=[]`, `notes=[]`, `author=null`) when optional fields are absent.
@@ -201,8 +201,10 @@ read or write them.
 | `READ_ONLY`      | `true`                                        | When `true`, all mutation endpoints (POST/PATCH/DELETE) return `405 Method Not Allowed`.                                       |
 
 A `.env` file in the current working directory is auto-loaded (via
-`pydantic-settings`). Settings are exposed through
-`server.config.Settings`; tests pass overrides directly.
+`pydantic-settings`). Settings are exposed through `server.config.Settings`, stored on
+`app.state.settings` at startup, and read from there by all request
+handlers — including `require_write_access`. Tests pass overrides
+directly to `create_app`.
 
 ### Frontend
 
