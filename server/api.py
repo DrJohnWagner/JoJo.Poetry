@@ -21,7 +21,10 @@ if str(_SCHEMAS_DIR) not in sys.path:
 
 from poem import Author, Award, Poem  # noqa: E402
 
+from pydantic import ValidationError
+
 from server.repository import (
+    DuplicateIdError,
     ImmutableFieldError,
     InvalidDatabaseError,
     PoemNotFoundError,
@@ -495,14 +498,16 @@ def create_poem(
 
     try:
         poem = Poem.model_validate(record)
-    except Exception as e:
+    except ValidationError as e:
         raise HTTPException(status_code=422, detail=f"Validation failed: {e}") from None
 
     try:
         res = repo.add(poem)
         rebuild_similarity_service(repo.list())
         return res
-    except Exception as e:
+    except DuplicateIdError as e:
+        raise HTTPException(status_code=500, detail=str(e)) from None
+    except InvalidDatabaseError as e:
         raise HTTPException(status_code=500, detail=str(e)) from None
 
 
