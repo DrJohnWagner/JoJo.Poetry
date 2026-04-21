@@ -12,7 +12,7 @@ from pathlib import Path as _Path
 from typing import List, Literal, Optional
 from uuid import UUID, uuid4
 
-from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response, status
 from pydantic import BaseModel, ConfigDict, Field
 
 _SCHEMAS_DIR = _Path(__file__).resolve().parent.parent / "database" / "schemas"
@@ -21,7 +21,6 @@ if str(_SCHEMAS_DIR) not in sys.path:
 
 from poem import Author, Award, Poem  # noqa: E402
 
-from server.config import get_settings
 from server.repository import (
     ImmutableFieldError,
     InvalidDatabaseError,
@@ -41,9 +40,9 @@ MEDAL_VOCAB = ("Gold", "Silver", "Bronze", "Honorable Mention", "None")
 
 # ---------------------------------------------------------------- dependencies
 
-def require_write_access() -> None:
+def require_write_access(request: Request) -> None:
     """Dependency that rejects all mutations when READ_ONLY=true."""
-    if get_settings().read_only:
+    if request.app.state.settings.read_only:
         raise HTTPException(
             status_code=status.HTTP_405_METHOD_NOT_ALLOWED,
             detail="This instance is read-only.",
