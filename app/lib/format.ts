@@ -78,7 +78,7 @@ export function poemToMarkdown(
     )
     if (poem.contests.length)
         parts.push(
-            `**Contests:**\n${poem.contests.map((c) => `- ${c.award}: ${c.url}${c.title ? ` (${c.title})` : ""}`).join("\n")}`
+            `**Contests:**\n${poem.contests.map((c) => `- ${c.medal}: ${c.url}${c.title ? ` (${c.title})` : ""}`).join("\n")}`
         )
     if (poem.socials.length)
         parts.push(

@@ -15,7 +15,7 @@ export default async function Home() {
                 q: "",
                 year: null,
                 month: null,
-                awards: [],
+                medals: [],
                 title: "",
                 body: "",
                 project: "",

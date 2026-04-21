@@ -7,7 +7,7 @@ export interface Author {
 
 export interface Contest {
     url: string
-    award: string
+    medal: string
     title?: string
 }
 
@@ -50,14 +50,14 @@ export interface SearchState {
     q: string
     year: number | null
     month: number | null
-    awards: string[] // Gold | Silver | Bronze | Honorable Mention | None
+    medals: string[] // Gold | Silver | Bronze | Honorable Mention | None
     title: string
     body: string
     project: string
     notes: string
 }
 
-export const AWARDS = [
+export const MEDALS = [
     "Gold",
     "Silver",
     "Bronze",
@@ -69,7 +69,7 @@ export function hasAdvanced(s: SearchState): boolean {
     return (
         s.year !== null ||
         s.month !== null ||
-        s.awards.length > 0 ||
+        s.medals.length > 0 ||
         !!s.title?.trim() ||
         !!s.body?.trim() ||
         !!s.project?.trim() ||

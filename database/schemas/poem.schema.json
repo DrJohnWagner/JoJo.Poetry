@@ -133,11 +133,11 @@
     "Contest": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["url", "award"],
+      "required": ["url", "medal"],
       "properties": {
         "url": { "type": "string", "format": "uri" },
-        "award": {
-          "description": "Award tier. Observed values: Gold. Kept open-vocabulary for flexibility.",
+        "medal": {
+          "description": "Medal tier. Observed values: Gold. Kept open-vocabulary for flexibility.",
           "type": "string",
           "minLength": 1
         },

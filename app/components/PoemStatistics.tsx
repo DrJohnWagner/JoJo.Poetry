@@ -16,7 +16,7 @@ export default function PoemStatistics({ poem }: { poem: Poem }) {
                 <>
                     <span>·</span>
                     <span>
-                        {contestCount} {contestCount === 1 ? "award" : "awards"}
+                        {contestCount} {contestCount === 1 ? "medal" : "medals"}
                     </span>
                 </>
             )}

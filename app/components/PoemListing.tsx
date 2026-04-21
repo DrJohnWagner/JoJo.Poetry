@@ -8,7 +8,7 @@ import SortBar, { DEFAULT_SORT, type SortState } from "./SortBar"
 import PoemRow from "./PoemRow"
 
 const PAGE_SIZE = 5
-const EMPTY: SearchState = { q: "", year: null, month: null, awards: [], title: "", body: "", project: "", notes: "" }
+const EMPTY: SearchState = { q: "", year: null, month: null, medals: [], title: "", body: "", project: "", notes: "" }
 
 export default function PoemListing({
     initial,

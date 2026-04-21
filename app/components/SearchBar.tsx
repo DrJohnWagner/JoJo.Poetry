@@ -7,7 +7,7 @@ import AdvancedSearchDialog from "./AdvancedSearchDialog"
 const EMPTY_ADVANCED = {
     year: null,
     month: null,
-    awards: [] as string[],
+    medals: [] as string[],
     title: "",
     body: "",
     project: "",
@@ -65,7 +65,7 @@ export default function SearchBar({
     const advancedCount =
         (value.year !== null ? 1 : 0) +
         (value.month !== null ? 1 : 0) +
-        value.awards.length +
+        value.medals.length +
         (value.title?.trim() ? 1 : 0) +
         (value.body?.trim() ? 1 : 0) +
         (value.project?.trim() ? 1 : 0) +
@@ -101,14 +101,14 @@ export default function SearchBar({
                 clear: () => onChange({ ...value, month: null }),
             })
         }
-        for (const award of value.awards) {
+        for (const medal of value.medals) {
             filters.push({
-                key: `award:${award}`,
-                label: `Award: ${award}`,
+                key: `medal:${medal}`,
+                label: `Medal: ${medal}`,
                 clear: () =>
                     onChange({
                         ...value,
-                        awards: value.awards.filter((item) => item !== award),
+                        medals: value.medals.filter((item) => item !== medal),
                     }),
             })
         }

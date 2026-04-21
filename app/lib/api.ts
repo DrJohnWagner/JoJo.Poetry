@@ -61,7 +61,7 @@ export function buildAdvancedQuery(
     if (s.q.trim()) p.set("q", s.q.trim())
     if (s.year !== null) p.set("year", String(s.year))
     if (s.month !== null) p.set("month", String(s.month))
-    for (const a of s.awards) p.append("awards", a)
+    for (const a of s.medals) p.append("medals", a)
     if (s.title.trim()) p.set("title", s.title.trim())
     if (s.body.trim()) p.set("body", s.body.trim())
     if (s.project.trim()) p.set("project", s.project.trim())

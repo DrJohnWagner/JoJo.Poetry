@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useRef } from "react"
-import { AWARDS, type SearchState } from "@/lib/types"
+import { MEDALS, type SearchState } from "@/lib/types"
 
 const MONTHS = [
     "",
@@ -42,11 +42,11 @@ export default function AdvancedSearchDialog({
         if (!open && d.open) d.close()
     }, [open])
 
-    const toggleAward = (a: string) => {
-        const next = value.awards.includes(a)
-            ? value.awards.filter((x) => x !== a)
-            : [...value.awards, a]
-        onChange({ ...value, awards: next })
+    const toggleMedal = (a: string) => {
+        const next = value.medals.includes(a)
+            ? value.medals.filter((x) => x !== a)
+            : [...value.medals, a]
+        onChange({ ...value, medals: next })
     }
 
     return (
@@ -172,21 +172,21 @@ export default function AdvancedSearchDialog({
                     </label>
 
                     <fieldset className="col-span-2">
-                        <legend className="eyebrow">Awards</legend>
+                        <legend className="eyebrow">Medals</legend>
                         <p className="text-[0.78rem] text-muted mt-1 mb-2">
                             Any selected — “None” matches poems with no contest
                             entries.
                         </p>
                         <div className="flex flex-wrap gap-x-5 gap-y-2">
-                            {AWARDS.map((a) => (
+                            {MEDALS.map((a) => (
                                 <label
                                     key={a}
                                     className="inline-flex items-center gap-2 font-sans text-sm"
                                 >
                                     <input
                                         type="checkbox"
-                                        checked={value.awards.includes(a)}
-                                        onChange={() => toggleAward(a)}
+                                        checked={value.medals.includes(a)}
+                                        onChange={() => toggleMedal(a)}
                                     />
                                     {a}
                                 </label>

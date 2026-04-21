@@ -36,7 +36,7 @@ from server.similarity.types import NeighbourListResult
 
 # ------------------------------------------------------------------ constants
 
-AWARD_VOCAB = ("Gold", "Silver", "Bronze", "Honorable Mention", "None")
+MEDAL_VOCAB = ("Gold", "Silver", "Bronze", "Honorable Mention", "None")
 
 
 # ---------------------------------------------------------------- dependencies
@@ -252,11 +252,11 @@ def _tag_any(needles: List[str], tags: List[str]) -> bool:
     return any(n.casefold() in tags_cf for n in needles)
 
 
-def _poem_awards(p: Poem) -> List[str]:
-    """Awards present on the poem, with 'None' sentinel if no contests."""
+def _poem_medals(p: Poem) -> List[str]:
+    """Medals present on the poem, with 'None' sentinel if no contests."""
     if not p.contests:
         return ["None"]
-    return [c.award for c in p.contests]
+    return [c.medal for c in p.contests]
 
 
 # --------------------------------------------------------------------- router
@@ -347,9 +347,9 @@ def advanced_search(
     month: Optional[int] = Query(None, ge=1, le=12, description="Match poems whose date month equals this."),
     min_rating: Optional[int] = Query(None, ge=0, le=100),
     max_rating: Optional[int] = Query(None, ge=0, le=100),
-    awards: List[str] = Query(
+    medals: List[str] = Query(
         default_factory=list,
-        description="Contest awards to match. Any of: Gold, Silver, Bronze, Honorable Mention, None. 'None' matches poems with no contests.",
+        description="Contest medals to match. Any of: Gold, Silver, Bronze, Honorable Mention, None. 'None' matches poems with no contests.",
     ),
     offset: int = Query(0, ge=0),
     limit: int = Query(3, ge=1, le=200, description="Page size. Default 3 matches the incremental-load UX."),
@@ -374,11 +374,11 @@ def advanced_search(
     - **Awards**: OR across supplied values; ``"None"`` matches poems
       with an empty ``contests`` array.
     """
-    bad = [a for a in awards if a not in AWARD_VOCAB]
+    bad = [a for a in medals if a not in MEDAL_VOCAB]
     if bad:
         raise HTTPException(
             status_code=422,
-            detail=f"Unknown awards: {bad}. Allowed: {list(AWARD_VOCAB)}",
+            detail=f"Unknown medals: {bad}. Allowed: {list(MEDAL_VOCAB)}",
         )
 
     text_queries = {"title": title, "project": project, "body": body, "notes": notes}
@@ -396,7 +396,7 @@ def advanced_search(
         or year is not None
         or month is not None
         or rating_populated
-        or bool(awards)
+        or bool(medals)
     )
     if not any_populated:
         return PoemList(
@@ -425,7 +425,7 @@ def advanced_search(
             hi = max_rating if max_rating is not None else 100
             if lo <= p.rating <= hi:
                 return True
-        if awards and any(a in _poem_awards(p) for a in awards):
+        if medals and any(a in _poem_medals(p) for a in medals):
             return True
         return False
 

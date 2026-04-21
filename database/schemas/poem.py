@@ -28,7 +28,7 @@ class Contest(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     url: HttpUrl
-    award: str = Field(min_length=1)
+    medal: str = Field(min_length=1)
     title: Optional[str] = None
 
 
