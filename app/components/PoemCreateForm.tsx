@@ -33,8 +33,10 @@ export default function PoemCreateForm() {
     // Optional — empty strings/arrays map to backend defaults if left blank
     const [date, setDate] = useState("")
     const [themes, setThemes] = useState("")
-    const [emotionalRegister, setEmotionalRegister] = useState("")
-    const [formAndCraft, setFormAndCraft] = useState("")
+    const [emotionalRegisters, setEmotionalRegisters] = useState("")
+    const [formalModes, setFormalModes] = useState("")
+    const [craftFeatures, setCraftFeatures] = useState("")
+    const [stylisticPostures, setStylisticPostures] = useState("")
     const [keyImages, setKeyImages] = useState("")
     const [contestFit, setContestFit] = useState("")
     const [socials, setSocials] = useState("")
@@ -52,8 +54,10 @@ export default function PoemCreateForm() {
         url !== "" ||
         date !== "" ||
         themes !== "" ||
-        emotionalRegister !== "" ||
-        formAndCraft !== "" ||
+        emotionalRegisters !== "" ||
+        formalModes !== "" ||
+        craftFeatures !== "" ||
+        stylisticPostures !== "" ||
         keyImages !== "" ||
         contestFit !== "" ||
         socials !== "" ||
@@ -83,8 +87,10 @@ export default function PoemCreateForm() {
         else if (k === "date") setDate(v as string)
         else if (k === "url") setUrl(v as string)
         else if (k === "themes") setThemes(v as string)
-        else if (k === "emotional_register") setEmotionalRegister(v as string)
-        else if (k === "form_and_craft") setFormAndCraft(v as string)
+        else if (k === "emotional_registers") setEmotionalRegisters(v as string)
+        else if (k === "formal_modes") setFormalModes(v as string)
+        else if (k === "craft_features") setCraftFeatures(v as string)
+        else if (k === "stylistic_postures") setStylisticPostures(v as string)
         else if (k === "key_images") setKeyImages(v as string)
         else if (k === "contest_fit") setContestFit(v as string)
         else if (k === "socials") setSocials(v as string)
@@ -107,10 +113,13 @@ export default function PoemCreateForm() {
         }
         if (date.trim()) payload.date = date.trim()
         if (themes.trim()) payload.themes = splitTags(themes)
-        if (emotionalRegister.trim())
-            payload.emotional_register = splitTags(emotionalRegister)
-        if (formAndCraft.trim())
-            payload.form_and_craft = splitTags(formAndCraft)
+        if (emotionalRegisters.trim())
+            payload.emotional_registers = splitTags(emotionalRegisters)
+        if (formalModes.trim()) payload.formal_modes = splitTags(formalModes)
+        if (craftFeatures.trim())
+            payload.craft_features = splitTags(craftFeatures)
+        if (stylisticPostures.trim())
+            payload.stylistic_postures = splitTags(stylisticPostures)
         if (keyImages.trim()) payload.key_images = splitTags(keyImages)
         if (contestFit.trim()) payload.contest_fit = splitTags(contestFit)
         if (socials.trim()) payload.socials = splitTags(socials)
@@ -188,7 +197,19 @@ export default function PoemCreateForm() {
             <NotesEditor value={notes} onChange={setNotes} />
 
             <PoemMetadataEditor
-                values={{ rating, date, url, themes, emotional_register: emotionalRegister, form_and_craft: formAndCraft, key_images: keyImages, contest_fit: contestFit, socials }}
+                values={{
+                    rating,
+                    date,
+                    url,
+                    themes,
+                    emotional_registers: emotionalRegisters,
+                    formal_modes: formalModes,
+                    craft_features: craftFeatures,
+                    stylistic_postures: stylisticPostures,
+                    key_images: keyImages,
+                    contest_fit: contestFit,
+                    socials,
+                }}
                 set={setMeta}
                 ratingRequired
                 urlRequired
@@ -206,11 +227,11 @@ export default function PoemCreateForm() {
                 </label>
             </Labelled>
 
-            <div className="pt-4 flex items-center gap-6 font-sans text-[0.72rem] uppercase tracking-wider2">
+            <div className="flex items-center gap-6 pt-4 font-sans text-[0.72rem] uppercase tracking-wider2">
                 <button
                     type="submit"
                     disabled={saving}
-                    className="text-accent border-b border-accent pb-1 disabled:opacity-60"
+                    className="border-b border-accent pb-1 text-accent disabled:opacity-60"
                 >
                     {saving ? "saving…" : "save poem"}
                 </button>
@@ -223,7 +244,7 @@ export default function PoemCreateForm() {
                     cancel
                 </button>
                 {err && (
-                    <span className="text-red-700 normal-case tracking-normal">
+                    <span className="normal-case tracking-normal text-red-700">
                         {err}
                     </span>
                 )}

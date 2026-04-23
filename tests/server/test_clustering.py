@@ -50,8 +50,10 @@ def _make_poem(**overrides):
         "awards": [],
         "date": "2024-01-01T00:00:00Z",
         "themes": [],
-        "emotional_register": [],
-        "form_and_craft": [],
+        "emotional_registers": [],
+        "formal_modes": [],
+        "craft_features": [],
+        "stylistic_postures": [],
         "key_images": [],
         "project": "A test poem.",
         "contest_fit": [],
@@ -96,13 +98,6 @@ def test_build_matrix_feature_names_prefixed():
     poems = [_make_poem(themes=["nature"])]
     _, names = _build_matrix(poems, ["themes"])
     assert all(n.startswith("themes:") for n in names)
-
-
-def test_build_matrix_images_maps_to_key_images():
-    poems = [_make_poem(key_images=["rain", "leaves"])]
-    mat, names = _build_matrix(poems, ["images"])
-    assert all(n.startswith("images:") for n in names)
-    assert mat.shape[1] == 2
 
 
 def test_build_matrix_empty_categories_zero_columns():
@@ -175,11 +170,11 @@ def test_features_and_label_top_n_respected():
 
 
 def test_poem_summaries_ordering():
-    p_high = _make_poem(rating=90, date="2024-03-01T00:00:00Z")
-    p_low = _make_poem(rating=20, date="2024-01-01T00:00:00Z")
+    p_high = _make_poem(rating=90, date="2024-03-01T00:00:00Z", title="High")
+    p_low = _make_poem(rating=20, date="2024-01-01T00:00:00Z", title="Low")
     summaries = _poem_summaries([p_low, p_high])
-    assert summaries[0].rating == 90
-    assert summaries[1].rating == 20
+    assert summaries[0].title == "High"
+    assert summaries[1].title == "Low"
 
 
 # ================================================================ engine — run_clustering
@@ -189,10 +184,11 @@ def test_run_clustering_small_corpus_single_cluster():
     poems = [_make_poem(), _make_poem()]
     req = ClusterRequest(categories=["themes"])
     result = run_clustering(poems, req)
-    assert result.k_used == 1
-    assert len(result.clusters) == 1
-    assert result.clusters[0].label == "all"
-    assert len(result.excluded) == 0
+    # Zero-signal poems → all excluded; k_used=0
+    assert result.k_used == 0
+    assert len(result.clusters) == 0
+    assert len(result.excluded) == 2
+    assert all(e.reason == "zero signal" for e in result.excluded)
 
 
 def test_run_clustering_partition_invariant():
@@ -216,7 +212,7 @@ def cluster_db(tmp_path):
         _make_poem(
             title=f"Nature {i}",
             themes=["nature"],
-            form_and_craft=["sonnet"],
+            formal_modes=["sonnet"],
             rating=60 + i,
             date=f"2024-0{i+1}-01T00:00:00Z",
             url=f"https://example.com/nature{i}",
@@ -227,7 +223,7 @@ def cluster_db(tmp_path):
         _make_poem(
             title=f"War {i}",
             themes=["war"],
-            form_and_craft=["free verse"],
+            formal_modes=["free verse"],
             rating=40 + i,
             date=f"2024-0{i+1}-01T00:00:00Z",
             url=f"https://example.com/war{i}",
@@ -269,7 +265,17 @@ def test_cluster_response_cluster_shape(cluster_client):
     assert "awards_summary" not in c
     if c["poems"]:
         p = c["poems"][0]
-        assert {"id", "title", "rating", "date"} <= set(p.keys())
+        assert {
+            "id",
+            "title",
+            "pinned",
+            "project",
+            "themes",
+            "emotional_registers",
+            "formal_modes",
+            "craft_features",
+            "stylistic_postures",
+        } <= set(p.keys())
 
 
 def test_cluster_partition_invariant(cluster_client):
@@ -294,14 +300,18 @@ def test_cluster_ordering_size_desc(cluster_client):
     assert sizes == sorted(sizes, reverse=True)
 
 
-def test_cluster_poems_ordered_rating_desc(cluster_client):
+def test_cluster_poems_have_tag_fields(cluster_client):
     r = cluster_client.post(
         "/api/poems/cluster",
         json={"categories": ["themes"], "min_cluster_size": 1},
     )
     for cluster in r.json()["clusters"]:
-        ratings = [p["rating"] for p in cluster["poems"]]
-        assert ratings == sorted(ratings, reverse=True)
+        for p in cluster["poems"]:
+            assert isinstance(p["themes"], list)
+            assert isinstance(p["emotional_registers"], list)
+            assert isinstance(p["formal_modes"], list)
+            assert isinstance(p["craft_features"], list)
+            assert isinstance(p["stylistic_postures"], list)
 
 
 def test_cluster_min_cluster_size_moves_poems_to_excluded(tmp_path, monkeypatch):
@@ -309,22 +319,26 @@ def test_cluster_min_cluster_size_moves_poems_to_excluded(tmp_path, monkeypatch)
     big_group = [
         _make_poem(
             themes=["nature"],
-            form_and_craft=["sonnet"],
+            formal_modes=["sonnet"],
             url=f"https://example.com/n{i}",
         )
         for i in range(8)
     ]
     outlier = _make_poem(
         themes=["war"],
-        form_and_craft=["free verse"],
-        emotional_register=["defiant"],
+        formal_modes=["free verse"],
+        emotional_registers=["defiant"],
         url="https://example.com/outlier",
     )
     db = _make_db(tmp_path, big_group + [outlier])
     with _make_client(db, monkeypatch) as c:
         r = c.post(
             "/api/poems/cluster",
-            json={"categories": ["themes", "form_and_craft"], "k": 2, "min_cluster_size": 3},
+            json={
+                "categories": ["themes", "formal_modes"],
+                "k": 2,
+                "min_cluster_size": 3,
+            },
         )
     assert r.status_code == 200
     body = r.json()
@@ -346,7 +360,7 @@ def test_cluster_auto_k_used_when_k_omitted(cluster_client):
 
 
 def test_cluster_categories_used_echoed(cluster_client):
-    cats = ["themes", "form_and_craft"]
+    cats = ["themes", "formal_modes"]
     r = cluster_client.post("/api/poems/cluster", json={"categories": cats})
     assert set(r.json()["categories_used"]) == set(cats)
 
@@ -355,6 +369,12 @@ def test_cluster_invalid_category_returns_422(cluster_client):
     r = cluster_client.post(
         "/api/poems/cluster", json={"categories": ["nonexistent"]}
     )
+    assert r.status_code == 422
+
+
+@pytest.mark.parametrize("category", ["images", "contest_fit"])
+def test_cluster_removed_categories_return_422(cluster_client, category):
+    r = cluster_client.post("/api/poems/cluster", json={"categories": [category]})
     assert r.status_code == 422
 
 
@@ -398,4 +418,6 @@ def test_cluster_small_corpus_returns_k_used_one(tmp_path, monkeypatch):
     db = _make_db(tmp_path, poems)
     with _make_client(db, monkeypatch) as c:
         r = c.post("/api/poems/cluster", json={"categories": ["themes"]})
-    assert r.json()["k_used"] == 1
+    # Zero-signal corpus → k_used=0, no clusters
+    assert r.json()["k_used"] == 0
+    assert r.json()["clusters"] == []

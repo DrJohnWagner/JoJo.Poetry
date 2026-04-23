@@ -107,8 +107,9 @@ class PoemCreate(BaseModel):
     Optional (defaults applied server-side):
 
     - ``date`` — defaults to the current UTC time (second precision).
-    - ``awards`` / ``themes`` / ``emotional_register`` /
-      ``form_and_craft`` / ``key_images`` / ``contest_fit`` — default
+    - ``awards`` / ``themes`` / ``emotional_registers`` /
+      ``formal_modes`` / ``craft_features`` / ``stylistic_postures`` /
+      ``key_images`` / ``contest_fit`` — default
       to ``[]``.
     - ``pinned`` — defaults to ``False``.
     - ``notes`` — defaults to ``[]``.
@@ -132,8 +133,10 @@ class PoemCreate(BaseModel):
     date: Optional[datetime] = None
     awards: List[Award] = Field(default_factory=list)
     themes: List[str] = Field(default_factory=list)
-    emotional_register: List[str] = Field(default_factory=list)
-    form_and_craft: List[str] = Field(default_factory=list)
+    emotional_registers: List[str] = Field(default_factory=list)
+    formal_modes: List[str] = Field(default_factory=list)
+    craft_features: List[str] = Field(default_factory=list)
+    stylistic_postures: List[str] = Field(default_factory=list)
     key_images: List[str] = Field(default_factory=list)
     contest_fit: List[str] = Field(default_factory=list)
     pinned: bool = False
@@ -163,8 +166,10 @@ class PoemPatch(BaseModel):
     awards: Optional[List[Award]] = None
     date: Optional[datetime] = None
     themes: Optional[List[str]] = None
-    emotional_register: Optional[List[str]] = None
-    form_and_craft: Optional[List[str]] = None
+    emotional_registers: Optional[List[str]] = None
+    formal_modes: Optional[List[str]] = None
+    craft_features: Optional[List[str]] = None
+    stylistic_postures: Optional[List[str]] = None
     key_images: Optional[List[str]] = None
     project: Optional[str] = None
     contest_fit: Optional[List[str]] = None
@@ -189,8 +194,10 @@ def _matches(
     p: Poem,
     q: Optional[str],
     themes: List[str],
-    emotional_register: List[str],
-    form_and_craft: List[str],
+    emotional_registers: List[str],
+    formal_modes: List[str],
+    craft_features: List[str],
+    stylistic_postures: List[str],
     contest_fit: List[str],
     min_rating: Optional[int],
     max_rating: Optional[int],
@@ -205,8 +212,10 @@ def _matches(
             _body_to_plaintext(p.body),
             p.project,
             " ".join(p.themes),
-            " ".join(p.emotional_register),
-            " ".join(p.form_and_craft),
+            " ".join(p.emotional_registers),
+            " ".join(p.formal_modes),
+            " ".join(p.craft_features),
+            " ".join(p.stylistic_postures),
             " ".join(p.key_images),
             " ".join(p.contest_fit),
             " ".join(p.notes),
@@ -222,9 +231,13 @@ def _matches(
 
     if not _all_in(themes, p.themes):
         return False
-    if not _all_in(emotional_register, p.emotional_register):
+    if not _all_in(emotional_registers, p.emotional_registers):
         return False
-    if not _all_in(form_and_craft, p.form_and_craft):
+    if not _all_in(formal_modes, p.formal_modes):
+        return False
+    if not _all_in(craft_features, p.craft_features):
+        return False
+    if not _all_in(stylistic_postures, p.stylistic_postures):
         return False
     if not _all_in(contest_fit, p.contest_fit):
         return False
@@ -281,18 +294,52 @@ def health(
 def list_poems(
     repo: PoemRepository = Depends(get_repository),
     _: None = Depends(check_for_external_changes),
-    q: Optional[str] = Query(None, description="Full-text search across title, body, project, tags, and notes. Case-insensitive substring match."),
-    themes: List[str] = Query(default_factory=list, description="Require ALL supplied themes (AND). Repeatable."),
-    emotional_register: List[str] = Query(default_factory=list, description="Require ALL supplied emotional_register tags (AND). Repeatable."),
-    form_and_craft: List[str] = Query(default_factory=list, description="Require ALL supplied form_and_craft tags (AND). Repeatable."),
-    contest_fit: List[str] = Query(default_factory=list, description="Require ALL supplied contest_fit tags (AND). Repeatable."),
+    q: Optional[str] = Query(
+        None,
+        description="Full-text search across title, body, project, tags, and notes. Case-insensitive substring match.",
+    ),
+    themes: List[str] = Query(
+        default_factory=list,
+        description="Require ALL supplied themes (AND). Repeatable.",
+    ),
+    emotional_registers: List[str] = Query(
+        default_factory=list,
+        description="Require ALL supplied emotional_registers tags (AND). Repeatable.",
+    ),
+    formal_modes: List[str] = Query(
+        default_factory=list,
+        description="Require ALL supplied formal_modes tags (AND). Repeatable.",
+    ),
+    craft_features: List[str] = Query(
+        default_factory=list,
+        description="Require ALL supplied craft_features tags (AND). Repeatable.",
+    ),
+    stylistic_postures: List[str] = Query(
+        default_factory=list,
+        description="Require ALL supplied stylistic_postures tags (AND). Repeatable.",
+    ),
+    contest_fit: List[str] = Query(
+        default_factory=list,
+        description="Require ALL supplied contest_fit tags (AND). Repeatable.",
+    ),
     min_rating: Optional[int] = Query(None, ge=0, le=100),
     max_rating: Optional[int] = Query(None, ge=0, le=100),
-    pinned: Optional[bool] = Query(None, description="Filter to only pinned (true) or only unpinned (false)."),
-    date_from: Optional[datetime] = Query(None, description="Inclusive lower bound on poem date (ISO 8601)."),
-    date_to: Optional[datetime] = Query(None, description="Inclusive upper bound on poem date (ISO 8601)."),
+    pinned: Optional[bool] = Query(
+        None, description="Filter to only pinned (true) or only unpinned (false)."
+    ),
+    date_from: Optional[datetime] = Query(
+        None, description="Inclusive lower bound on poem date (ISO 8601)."
+    ),
+    date_to: Optional[datetime] = Query(
+        None, description="Inclusive upper bound on poem date (ISO 8601)."
+    ),
     offset: int = Query(0, ge=0),
-    limit: int = Query(3, ge=1, le=200, description="Page size. Default 3 matches the incremental-load UX."),
+    limit: int = Query(
+        3,
+        ge=1,
+        le=200,
+        description="Page size. Default 3 matches the incremental-load UX.",
+    ),
 ) -> PoemList:
     """Paginated, filtered list of poem summaries in authoritative order.
 
@@ -310,10 +357,22 @@ def list_poems(
     """
     poems = _ordered(repo.list())
     filtered = [
-        p for p in poems
+        p
+        for p in poems
         if _matches(
-            p, q, themes, emotional_register, form_and_craft, contest_fit,
-            min_rating, max_rating, pinned, date_from, date_to,
+            p,
+            q,
+            themes,
+            emotional_registers,
+            formal_modes,
+            craft_features,
+            stylistic_postures,
+            contest_fit,
+            min_rating,
+            max_rating,
+            pinned,
+            date_from,
+            date_to,
         )
     ]
     total = len(filtered)
@@ -333,18 +392,37 @@ def list_poems(
 def advanced_search(
     repo: PoemRepository = Depends(get_repository),
     _: None = Depends(check_for_external_changes),
-    q: Optional[str] = Query(None, description="Full-text pre-filter across title, body, project, tags, and notes. Case-insensitive substring match."),
-    title: Optional[str] = Query(None, description="Case-insensitive substring of title."),
-    body: Optional[str] = Query(None, description="Case-insensitive substring of body (plain-text projection)."),
-    project: Optional[str] = Query(None, description="Case-insensitive substring of project statement."),
-    themes: List[str] = Query(default_factory=list, description="Any of these themes (OR within field)."),
-    emotional_register: List[str] = Query(default_factory=list),
-    form_and_craft: List[str] = Query(default_factory=list),
+    q: Optional[str] = Query(
+        None,
+        description="Full-text pre-filter across title, body, project, tags, and notes. Case-insensitive substring match.",
+    ),
+    title: Optional[str] = Query(
+        None, description="Case-insensitive substring of title."
+    ),
+    body: Optional[str] = Query(
+        None, description="Case-insensitive substring of body (plain-text projection)."
+    ),
+    project: Optional[str] = Query(
+        None, description="Case-insensitive substring of project statement."
+    ),
+    themes: List[str] = Query(
+        default_factory=list, description="Any of these themes (OR within field)."
+    ),
+    emotional_registers: List[str] = Query(default_factory=list),
+    formal_modes: List[str] = Query(default_factory=list),
+    craft_features: List[str] = Query(default_factory=list),
+    stylistic_postures: List[str] = Query(default_factory=list),
     key_images: List[str] = Query(default_factory=list),
     contest_fit: List[str] = Query(default_factory=list),
-    notes: Optional[str] = Query(None, description="Case-insensitive substring over note bodies."),
-    year: Optional[int] = Query(None, ge=1, le=9999, description="Match poems whose date year equals this."),
-    month: Optional[int] = Query(None, ge=1, le=12, description="Match poems whose date month equals this."),
+    notes: Optional[str] = Query(
+        None, description="Case-insensitive substring over note bodies."
+    ),
+    year: Optional[int] = Query(
+        None, ge=1, le=9999, description="Match poems whose date year equals this."
+    ),
+    month: Optional[int] = Query(
+        None, ge=1, le=12, description="Match poems whose date month equals this."
+    ),
     min_rating: Optional[int] = Query(None, ge=0, le=100),
     max_rating: Optional[int] = Query(None, ge=0, le=100),
     medals: List[str] = Query(
@@ -352,7 +430,12 @@ def advanced_search(
         description="Medal tier to match. Any of: Gold, Silver, Bronze, Honorable Mention, None. 'None' matches poems with no awards.",
     ),
     offset: int = Query(0, ge=0),
-    limit: int = Query(3, ge=1, le=200, description="Page size. Default 3 matches the incremental-load UX."),
+    limit: int = Query(
+        3,
+        ge=1,
+        le=200,
+        description="Page size. Default 3 matches the incremental-load UX.",
+    ),
 ) -> PoemList:
     """Advanced field-specific search with optional free-text narrowing.
 
@@ -365,8 +448,9 @@ def advanced_search(
 
     - **Text fields** (``title``, ``body``, ``project``, ``notes``):
       case-insensitive substring on a plain-text projection.
-    - **Tag fields** (``themes``, ``emotional_register``,
-      ``form_and_craft``, ``key_images``, ``contest_fit``): OR within
+    - **Tag fields** (``themes``, ``emotional_registers``,
+      ``formal_modes``, ``craft_features``, ``stylistic_postures``,
+      ``key_images``, ``contest_fit``): OR within
       the field; case-insensitive exact match on list entries.
     - **Numeric / date filters** (``year``, ``month``, ``min_rating``,
       ``max_rating``): each treated as one populated field.
@@ -384,8 +468,10 @@ def advanced_search(
     text_queries = {"title": title, "project": project, "body": body, "notes": notes}
     tag_queries = {
         "themes": themes,
-        "emotional_register": emotional_register,
-        "form_and_craft": form_and_craft,
+        "emotional_registers": emotional_registers,
+        "formal_modes": formal_modes,
+        "craft_features": craft_features,
+        "stylistic_postures": stylistic_postures,
         "key_images": key_images,
         "contest_fit": contest_fit,
     }
@@ -430,8 +516,9 @@ def advanced_search(
         return False
 
     narrowed = [
-        p for p in _ordered(repo.list())
-        if _matches(p, q, [], [], [], [], None, None, None, None, None)
+        p
+        for p in _ordered(repo.list())
+        if _matches(p, q, [], [], [], [], [], [], None, None, None, None, None)
     ]
     filtered = [p for p in narrowed if match(p)]
     total = len(filtered)
@@ -466,8 +553,9 @@ def cluster_poems(
 ) -> ClusterResponse:
     """Cluster the corpus by one or more metadata categories.
 
-    Categories must be drawn from: ``themes``, ``emotional_register``,
-    ``form_and_craft``, ``images`` (maps to ``key_images``), ``contest_fit``.
+    Categories must be drawn from: ``themes``, ``emotional_registers``,
+    ``formal_modes``, ``craft_features``, ``stylistic_postures``,
+    ``images`` (maps to ``key_images``), ``contest_fit``.
 
     If ``k`` is omitted the number of clusters is chosen automatically via
     silhouette-score sweep. Poems in clusters smaller than

@@ -59,8 +59,10 @@ export interface PoemMetadataValues {
     date: string
     url: string
     themes: string
-    emotional_register: string
-    form_and_craft: string
+    emotional_registers: string
+    formal_modes: string
+    craft_features: string
+    stylistic_postures: string
     key_images: string
     contest_fit: string
     socials: string
@@ -81,7 +83,7 @@ export default function PoemMetadataEditor({
 }) {
     return (
         <>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-x-6 gap-y-4">
+            <div className="grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-3">
                 <Labelled label="Rating (0–100)" required={ratingRequired}>
                     <input
                         type="number"
@@ -102,7 +104,11 @@ export default function PoemMetadataEditor({
                         className={inputCls + " font-mono text-sm"}
                     />
                 </Labelled>
-                <Labelled label="URL" required={urlRequired} hint={urlRequired ? "Canonical external link." : undefined}>
+                <Labelled
+                    label="URL"
+                    required={urlRequired}
+                    hint={urlRequired ? "Canonical external link." : undefined}
+                >
                     <input
                         type="url"
                         value={values.url}
@@ -119,14 +125,24 @@ export default function PoemMetadataEditor({
                 onChange={(v) => set("themes", v)}
             />
             <TagInput
-                label="Emotional register"
-                value={values.emotional_register}
-                onChange={(v) => set("emotional_register", v)}
+                label="Emotional registers"
+                value={values.emotional_registers}
+                onChange={(v) => set("emotional_registers", v)}
             />
             <TagInput
-                label="Form and craft"
-                value={values.form_and_craft}
-                onChange={(v) => set("form_and_craft", v)}
+                label="Formal modes"
+                value={values.formal_modes}
+                onChange={(v) => set("formal_modes", v)}
+            />
+            <TagInput
+                label="Craft features"
+                value={values.craft_features}
+                onChange={(v) => set("craft_features", v)}
+            />
+            <TagInput
+                label="Stylistic postures"
+                value={values.stylistic_postures}
+                onChange={(v) => set("stylistic_postures", v)}
             />
             <TagInput
                 label="Key images"

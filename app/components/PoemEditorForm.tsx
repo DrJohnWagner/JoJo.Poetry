@@ -28,12 +28,14 @@ export default function PoemEditorForm({
     onSaved,
     onCancel,
     onDirtyChange,
+    onTitleChange,
 }: {
     poem: Poem
     density?: "compact" | "comfortable"
     onSaved: (updated: Poem) => void
     onCancel: () => void
     onDirtyChange?: (dirty: boolean) => void
+    onTitleChange?: (title: string) => void
 }) {
     const plainBase = useMemo(() => bodyToPlainText(poem.body), [poem.body])
     const [draft, setDraft] = useState<PoemDraft>(() =>
@@ -94,7 +96,10 @@ export default function PoemEditorForm({
             <Labelled label="Title">
                 <input
                     value={draft.title}
-                    onChange={(e) => set("title", e.target.value)}
+                    onChange={(e) => {
+                        set("title", e.target.value)
+                        onTitleChange?.(e.target.value)
+                    }}
                     className={inputCls + " font-display text-2xl"}
                 />
             </Labelled>
@@ -132,10 +137,12 @@ export default function PoemEditorForm({
 
             <PoemMetadataEditor
                 values={draft as PoemMetadataValues}
-                set={(k, v) => set(k as keyof PoemDraft, v as PoemDraft[keyof PoemDraft])}
+                set={(k, v) =>
+                    set(k as keyof PoemDraft, v as PoemDraft[keyof PoemDraft])
+                }
             />
 
-            <div className="pt-2 flex items-center gap-6 font-sans text-[0.72rem] uppercase tracking-wider2">
+            <div className="flex items-center gap-6 pt-2 font-sans text-[0.72rem] uppercase tracking-wider2">
                 <button
                     onClick={save}
                     disabled={saving}
@@ -151,12 +158,12 @@ export default function PoemEditorForm({
                     cancel
                 </button>
                 {dirty && (
-                    <span className="text-[0.72rem] text-muted normal-case tracking-normal">
+                    <span className="text-[0.72rem] normal-case tracking-normal text-muted">
                         unsaved
                     </span>
                 )}
                 {err && (
-                    <span className="text-red-700 text-[0.8rem] normal-case tracking-normal">
+                    <span className="text-[0.8rem] normal-case tracking-normal text-red-700">
                         {err}
                     </span>
                 )}

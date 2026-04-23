@@ -6,19 +6,24 @@
     html {
         color-scheme: light;
     }
+
     body {
         @apply bg-paper text-ink font-serif antialiased;
         text-rendering: optimizeLegibility;
     }
+
     a {
         @apply text-accent underline-offset-[0.2em] decoration-1;
     }
+
     a:hover {
         @apply underline;
     }
+
     ::selection {
         background: #efe7d6;
     }
+
     input,
     textarea {
         @apply bg-transparent;
@@ -29,18 +34,43 @@
     .eyebrow {
         @apply text-[0.76rem] uppercase tracking-wider2 text-muted font-sans;
     }
+.poem-title-text {
+    @apply font-display leading-snug tracking-tight;
+}
+
+.poem-title-link {
+    @apply text-ink no-underline hover:text-accent;
+}
+
+.poem-title-text-lg {
+    @apply text-xl;
+}
+
+.poem-title-text-sm {
+    @apply text-base;
+}
+
+.poem-project-text {
+    @apply mt-1 italic leading-normal text-ink/90;
+}
     .rule {
         @apply h-px bg-rule;
     }
+.poem-body-text,
+.poem-body {
+    @apply font-serif leading-[1.24] text-[1.12rem];
+}
     /* Poem body: preserves authored whitespace and line breaks. */
     .poem-body {
-        @apply whitespace-pre-wrap font-serif leading-[1.24] text-[1.12rem];
+        @apply whitespace-pre-wrap;
         hyphens: none;
         font-variant-numeric: oldstyle-nums;
     }
+
     .poem-body a {
         @apply underline decoration-muted underline-offset-2 hover:text-accent hover:decoration-accent;
     }
+
     /* Tag list: quiet small-caps feel */
     .taglist {
         @apply font-sans text-[0.82rem] text-muted;

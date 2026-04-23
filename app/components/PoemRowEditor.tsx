@@ -8,11 +8,13 @@ export default function PoemRowEditor({
     onSaved,
     onCancel,
     onDirtyChange,
+    onTitleChange,
 }: {
     poem: Poem
     onSaved: (poem: Poem) => void
     onCancel: () => void
     onDirtyChange?: (dirty: boolean) => void
+    onTitleChange?: (title: string) => void
 }) {
     return (
         <PoemEditorForm
@@ -21,6 +23,7 @@ export default function PoemRowEditor({
             onSaved={onSaved}
             onCancel={onCancel}
             onDirtyChange={onDirtyChange}
+            onTitleChange={onTitleChange}
         />
     )
 }

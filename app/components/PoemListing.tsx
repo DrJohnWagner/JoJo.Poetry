@@ -5,7 +5,7 @@ import { deletePoem, fetchPoems } from "@/lib/api"
 import type { Poem, SearchState } from "@/lib/types"
 import SearchBar from "./SearchBar"
 import SortBar, { DEFAULT_SORT, type SortState } from "./SortBar"
-import PoemRow from "./PoemRow"
+import PoemList from "./PoemList"
 
 const PAGE_SIZE = 5
 const EMPTY: SearchState = { q: "", year: null, month: null, medals: [], title: "", body: "", project: "", notes: "" }
@@ -140,7 +140,7 @@ export default function PoemListing({
         [refetchFromTop]
     )
 
-    async function onDelete(id: string) {
+    async function handleDelete(id: string) {
         try {
             await deletePoem(id)
             refetchFromTop()
@@ -171,54 +171,38 @@ export default function PoemListing({
             <SearchBar value={search} onChange={setSearch} />
             <SortBar sort={sort} onChange={setSort} />
 
-            {editingId && (
-                <p className="eyebrow mb-6 text-muted">
-                    Editing in place{dirty ? " · unsaved changes" : ""}.
-                </p>
-            )}
-
             {items.length === 0 && !loading && (
                 <p className="py-8 italic text-muted">No poems match.</p>
             )}
 
-            <ol className="space-y-8">
-                {sortedItems.map((p) => (
-                    <li key={p.id}>
-                        <PoemRow
-                            poem={p}
-                            editing={editingId === p.id}
-                            onEdit={() => {
-                                if (editingId && editingId !== p.id) {
-                                    if (
-                                        !confirmDiscard(
-                                            `open editor for "${p.title}"`
-                                        )
-                                    )
-                                        return
-                                }
-                                setDirty(false)
-                                setEditingId(p.id)
-                            }}
-                            onCancel={() => {
-                                setDirty(false)
-                                setEditingId(null)
-                            }}
-                            onSaved={(updated) => {
-                                setDirty(false)
-                                applyUpdated(updated, p)
-                            }}
-                            onDirtyChange={setDirty}
-                            onDelete={() => {
-                                if (!confirmDiscard("delete this poem")) return
-                                onDelete(p.id)
-                            }}
-                            onPinChanged={(pinned) => {
-                                if (pinned !== p.pinned) refetchFromTop()
-                            }}
-                        />
-                    </li>
-                ))}
-            </ol>
+            <PoemList
+                poems={sortedItems}
+                editingId={editingId}
+                onEdit={(p) => {
+                    if (editingId && editingId !== p.id) {
+                        if (!confirmDiscard(`open editor for "${p.title}"`))
+                            return
+                    }
+                    setDirty(false)
+                    setEditingId(p.id)
+                }}
+                onCancel={() => {
+                    setDirty(false)
+                    setEditingId(null)
+                }}
+                onSaved={(updated, previous) => {
+                    setDirty(false)
+                    applyUpdated(updated, previous)
+                }}
+                onDirtyChange={setDirty}
+                onDelete={(p) => {
+                    if (!confirmDiscard("delete this poem")) return
+                    handleDelete(p.id)
+                }}
+                onPinChanged={(p, pinned) => {
+                    if (pinned !== p.pinned) refetchFromTop()
+                }}
+            />
 
             <div ref={sentinelRef} className="mt-16 flex items-center gap-6">
                 {loading && (

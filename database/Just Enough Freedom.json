@@ -1,13 +1,6 @@
 {
-    "title": "Just Enough Freedom",
-    "author": {
-        "pen_name": "JoJo",
-        "full_name": "John Wagner"
-    },
-    "url": "https://allpoetry.com/poem/18872799-Just-Enough-Freedom-by-Insta-JoJo",
-    "body": "A shared flat,<br/>\nnine storeys up,<br/>\nwith a view of the city.<br/>\n<br/>\nThe porch faces south—<br/>\n    the Scenic Rim on the horizon,<br/>\n    city streets close by,<br/>\n    blocks of flats, a park,<br/>\n    the Brisbane River between,<br/>\n        close enough to touch;<br/>\n    no morning sun,<br/>\n        but a couch,<br/>\n        cushioned seats,<br/>\n        and a coffee table—<br/>\n            a porch built for six.<br/>\n<br/>\n<br/>\nBut the city is quiet, still—<br/>\nno cars, no motion, no sound<br/>\n    rising from the street,<br/>\nlights in flats flickering<br/>\nas people carry on<br/>\n    with their evening.<br/>\n<br/>\nWe stay where we are.<br/>\n<br/>\n<br/>\nGuests gather again in the kitchen—<br/>\na couple visiting from Adelaide,<br/>\ntwo Sydney students on break,<br/>\nthe host puts Tom Waits<br/>\non portable speakers.<br/>\n<br/>\nWe wash vegetables, rinse rice,<br/>\nopen cans of bamboo shoots,<br/>\ndice fresh chicken thighs.<br/>\nSome cook, others put out<br/>\nplates, chopsticks, forks,<br/>\nand knives.<br/>\n<br/>\nGlasses are set on the bench.<br/>\nWine is opened, sodas and beers.<br/>\n<br/>\nThrough the kitchen window,<br/>\nlights still flicker in flats,<br/>\nutes remain parked,<br/>\nMount Barney holds.<br/>\n<br/>\n<br/>\nWe finish, plate, and take our meals<br/>\nto the porch, arrange, rearrange.<br/>\nThe couch is full of conversation.<br/>\nThose in chairs laugh. Wine is poured.<br/>\nI teach a student how to use chopsticks.<br/>\n<br/>\nThai curry chicken on rice.<br/>\nA Margaret River cabernet.<br/>\nGarlic butter naan.<br/>\n<br/>\nYellow candlelight replaces<br/>\nthe white of incandescent bulbs.<br/>\n<br/>\n<br/>\nI carry plates to the kitchen.<br/>\nSteve puts on Courtney Barnett.<br/>\nAnne reaches for someone’s hand.<br/>\n<br/>\nThey all dance.<br/>\nI wash.<br/>\nClaire dries.<br/>\n<br/>\n<br/>\nOutside, Victoria Bridge is empty.<br/>\nClaire takes more wine and we join.<br/>\nCourtney is replaced by The National.<br/>\n    We sing and dance.<br/>\nAnne and I head for the porch. We smoke.<br/>\nLoud music fails to disturb the city.<br/>\n<br/>\nWe go back in. I dance with Claire.<br/>\nNight turns to morning.<br/>\nMorning leads to bed.<br/>\n<br/>\nWe wake late.<br/>\nPress coffee on the porch.<br/>\nSlice bread.<br/>\nArrange, rearrange sliced devon.<br/>\n<br/>\nBelow us the cars start to move.<br/>\nStreet life reaches us again.<br/>\nVictoria Bridge is no longer empty.<br/>\nMount Cordeaux is close enough to touch.<br/>\n<br/>\nThe city moves again.<br/>\n<br/>\n<br/>\nWe stand, take<br/>\n    our French press,<br/>\n    coffee cups,<br/>\n    light cream<br/>\n        to the kitchen<br/>\n            and begin to cook. ",
-    "awards": [],
-    "date": "2026-01-09T23:43:00Z",
+    "rating": 80,
+    "project": "Microhistorical poem of a Brisbane COVID lockdown night — a provisional community forms through shared food, music, and dancing while the city stands still outside.",
     "themes": [
         "community",
         "COVID lockdown",
@@ -16,19 +9,15 @@
         "Brisbane",
         "provisional belonging"
     ],
-    "emotional_register": [
+    "emotional_registers": [
         "warm",
         "nostalgic",
         "bittersweet",
         "documentary"
     ],
-    "form_and_craft": [
-        "long documentary lyric",
-        "white space section breaks",
-        "precise sensory detail",
-        "minimal commentary",
-        "microhistorical approach"
-    ],
+    "formal_modes": [],
+    "craft_features": [],
+    "stylistic_postures": [],
     "key_images": [
         "Scenic Rim on horizon",
         "Thai curry chicken",
@@ -39,7 +28,6 @@
         "French press coffee on porch",
         "Mount Cordeaux"
     ],
-    "project": "Microhistorical poem of a Brisbane COVID lockdown night — a provisional community forms through shared food, music, and dancing while the city stands still outside.",
     "contest_fit": [
         "community",
         "pandemic and lockdown",
@@ -48,11 +36,21 @@
         "friendship",
         "food and cooking"
     ],
-    "rating": 80,
+    "id": "2fc1c84b-3e65-4788-abaf-333205e709e6",
+    "title": "Just Enough Freedom",
+    "author": {
+        "pen_name": "JoJo",
+        "full_name": "John Wagner"
+    },
+    "url": "https://allpoetry.com/poem/18872799",
+    "body": "A shared flat,<br/>\nnine storeys up,<br/>\nwith a view of the city.<br/>\n<br/>\nThe porch faces south—<br/>\n    the Scenic Rim on the horizon,<br/>\n    city streets close by,<br/>\n    blocks of flats, a park,<br/>\n    the Brisbane River between,<br/>\n        close enough to touch;<br/>\n    no morning sun,<br/>\n        but a couch,<br/>\n        cushioned seats,<br/>\n        and a coffee table—<br/>\n            a porch built for six.<br/>\n<br/>\n<br/>\nBut the city is quiet, still—<br/>\nno cars, no motion, no sound<br/>\n    rising from the street,<br/>\nlights in flats flickering<br/>\nas people carry on<br/>\n    with their evening.<br/>\n<br/>\nWe stay where we are.<br/>\n<br/>\n<br/>\nGuests gather again in the kitchen—<br/>\na couple visiting from Adelaide,<br/>\ntwo Sydney students on break,<br/>\nthe host puts Tom Waits<br/>\non portable speakers.<br/>\n<br/>\nWe wash vegetables, rinse rice,<br/>\nopen cans of bamboo shoots,<br/>\ndice fresh chicken thighs.<br/>\nSome cook, others put out<br/>\nplates, chopsticks, forks,<br/>\nand knives.<br/>\n<br/>\nGlasses are set on the bench.<br/>\nWine is opened, sodas and beers.<br/>\n<br/>\nThrough the kitchen window,<br/>\nlights still flicker in flats,<br/>\nutes remain parked,<br/>\nMount Barney holds.<br/>\n<br/>\n<br/>\nWe finish, plate, and take our meals<br/>\nto the porch, arrange, rearrange.<br/>\nThe couch is full of conversation.<br/>\nThose in chairs laugh. Wine is poured.<br/>\nI teach a student how to use chopsticks.<br/>\n<br/>\nThai curry chicken on rice.<br/>\nA Margaret River cabernet.<br/>\nGarlic butter naan.<br/>\n<br/>\nYellow candlelight replaces<br/>\nthe white of incandescent bulbs.<br/>\n<br/>\n<br/>\nI carry plates to the kitchen.<br/>\nSteve puts on Courtney Barnett.<br/>\nAnne reaches for someone’s hand.<br/>\n<br/>\nThey all dance.<br/>\nI wash.<br/>\nClaire dries.<br/>\n<br/>\n<br/>\nOutside, Victoria Bridge is empty.<br/>\nClaire takes more wine and we join.<br/>\nCourtney is replaced by The National.<br/>\n    We sing and dance.<br/>\nAnne and I head for the porch. We smoke.<br/>\nLoud music fails to disturb the city.<br/>\n<br/>\nWe go back in. I dance with Claire.<br/>\nNight turns to morning.<br/>\nMorning leads to bed.<br/>\n<br/>\nWe wake late.<br/>\nPress coffee on the porch.<br/>\nSlice bread.<br/>\nArrange, rearrange sliced devon.<br/>\n<br/>\nBelow us the cars start to move.<br/>\nStreet life reaches us again.<br/>\nVictoria Bridge is no longer empty.<br/>\nMount Cordeaux is close enough to touch.<br/>\n<br/>\nThe city moves again.<br/>\n<br/>\n<br/>\nWe stand, take<br/>\n    our French press,<br/>\n    coffee cups,<br/>\n    light cream<br/>\n        to the kitchen<br/>\n            and begin to cook. ",
+    "awards": [],
+    "socials": [],
+    "date": "2026-01-09T23:43:00Z",
     "lines": 78,
     "words": 353,
-    "id": "2fc1c84b-3e65-4788-abaf-333205e709e6",
-    "pinned": false,
-    "notes": [],
-    "socials": []
+    "notes": [
+        "The porch looks south from a ninth-floor Brisbane flat, with Mount Barney and the Scenic Rim visible beyond the river. Friends gather for an evening that stretches into morning, cooking and sharing meals while the city below stays unusually quiet. The stillness outside mirrors the contained world they've created together, nine storeys up."
+    ],
+    "pinned": false
 }

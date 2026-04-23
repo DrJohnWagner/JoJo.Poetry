@@ -1,58 +1,57 @@
 {
+    "rating": 88,
+    "project": "The poem inhabits the perspective of cancer cells, narrating their growth and spread through the body as a process of exploration and division rather than destruction.",
+    "themes": [
+        "cancer",
+        "biological_process",
+        "death"
+    ],
+    "emotional_registers": [
+        "clinical",
+        "detached"
+    ],
+    "formal_modes": [
+        "lyric"
+    ],
+    "craft_features": [
+        "short_declarative_lines",
+        "anaphora",
+        "parallelism"
+    ],
+    "stylistic_postures": [
+        "clinical"
+    ],
+    "key_images": [
+        "corridors of red",
+        "iron wash",
+        "yielding walls",
+        "bright pulses",
+        "cooled rooms",
+        "slowed rivers",
+        "narrowed space"
+    ],
+    "contest_fit": [
+        "medical",
+        "illness",
+        "biology",
+        "mortality",
+        "science"
+    ],
+    "id": "d0dc543f-6922-4e8d-9ebb-cbd562936fe0",
     "title": "Unchecked",
     "author": {
         "pen_name": "JoJo",
         "full_name": "John Wagner"
     },
-    "url": "https://allpoetry.com/poem/19002938-Unchecked-by-Insta-JoJo",
+    "url": "https://allpoetry.com/poem/19002938",
     "body": "I began as a softness<br/>\nin a place already full.<br/>\n<br/>\nThere was warmth,<br/>\na steady wash of iron,<br/>\ncorridors of red<br/>\nopening and closing<br/>\nwithout decision.<br/>\n<br/>\nI learned the walls by touch.<br/>\n<br/>\nThey yielded.<br/>\nThey tightened.<br/>\nThey thinned.<br/>\n<br/>\nWhere there was current,<br/>\nI followed it.<br/>\nWhere there was stillness,<br/>\nI pressed until it altered.<br/>\n<br/>\nDivision was not ambition.<br/>\nIt was repetition.<br/>\nA quiet doubling<br/>\nthat felt like continuity.<br/>\n<br/>\nThe larger body dimmed gradually.<br/>\n<br/>\nSignals that once arrived<br/>\nin bright pulses<br/>\ncame irregularly,<br/>\nthen not at all.<br/>\nThe rooms cooled.<br/>\nThe rivers slowed.<br/>\n<br/>\nI did not register alarm.<br/>\nOnly difference.<br/>\n<br/>\nSpace narrowed.<br/>\nThen widened strangely,<br/>\nas if boundaries had forgotten<br/>\ntheir instructions.<br/>\n<br/>\nAt the end,<br/>\nthere was no verdict.<br/>\n<br/>\nOnly the absence<br/>\nof resistance.<br/>\n<br/>\nI would have continued.",
     "awards": [],
+    "socials": [],
     "date": "2026-03-20T03:06:00Z",
-    "themes": [
-        "cancer",
-        "cellular growth",
-        "the body",
-        "death",
-        "indifference of biological process",
-        "continuation",
-        "process without moral judgment"
-    ],
-    "emotional_register": [
-        "affectless",
-        "clinical",
-        "innocently destructive",
-        "cold"
-    ],
-    "form_and_craft": [
-        "first-person voice of a cancer cell",
-        "no moral framing anywhere",
-        "short declarative statements",
-        "companion to 'Margin'",
-        "devastating final line: 'I would have continued'"
-    ],
-    "key_images": [
-        "warmth and iron (womb-like origin)",
-        "corridors of red opening and closing",
-        "walls yielding/tightening/thinning",
-        "bright pulses going quiet",
-        "only the absence of resistance"
-    ],
-    "project": "A cancer cell narrates its own process — division as repetition, not ambition — ending on the chilling 'I would have continued.'",
-    "contest_fit": [
-        "the body",
-        "death",
-        "cancer",
-        "disease",
-        "nature",
-        "biological process",
-        "dark poetry",
-        "indifference"
-    ],
-    "rating": 86,
     "lines": 37,
     "words": 127,
-    "id": "d0dc543f-6922-4e8d-9ebb-cbd562936fe0",
-    "pinned": false,
-    "notes": [],
-    "socials": []
+    "notes": [
+        "This is a voice from inside a body that is failing, speaking from within the very process that is causing that failure."
+    ],
+    "pinned": false
 }

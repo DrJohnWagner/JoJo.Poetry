@@ -17,8 +17,10 @@ export const EDITABLE_FIELDS = [
     "date",
     "url",
     "themes",
-    "emotional_register",
-    "form_and_craft",
+    "emotional_registers",
+    "formal_modes",
+    "craft_features",
+    "stylistic_postures",
     "key_images",
     "contest_fit",
     "socials",
@@ -46,8 +48,10 @@ export interface PoemDraft {
     date: string // ISO 8601
     url: string
     themes: string // comma-separated
-    emotional_register: string
-    form_and_craft: string
+    emotional_registers: string
+    formal_modes: string
+    craft_features: string
+    stylistic_postures: string
     key_images: string
     contest_fit: string
     socials: string // comma-separated
@@ -64,8 +68,10 @@ export function draftFromPoem(p: Poem, plainBody: string): PoemDraft {
         date: p.date,
         url: p.url,
         themes: p.themes.join(", "),
-        emotional_register: p.emotional_register.join(", "),
-        form_and_craft: p.form_and_craft.join(", "),
+        emotional_registers: p.emotional_registers.join(", "),
+        formal_modes: p.formal_modes.join(", "),
+        craft_features: p.craft_features.join(", "),
+        stylistic_postures: p.stylistic_postures.join(", "),
         key_images: p.key_images.join(", "),
         contest_fit: p.contest_fit.join(", "),
         socials: p.socials.join(", "),
@@ -100,8 +106,10 @@ export function diffDraft(
 
     const tagFields: (keyof PoemDraft & keyof Poem)[] = [
         "themes",
-        "emotional_register",
-        "form_and_craft",
+        "emotional_registers",
+        "formal_modes",
+        "craft_features",
+        "stylistic_postures",
         "key_images",
         "contest_fit",
         "socials",

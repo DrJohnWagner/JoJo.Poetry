@@ -11,20 +11,25 @@ export interface Award {
     title?: string
 }
 
-export interface Poem {
+export interface ClusterPoem {
     id: UUID
     title: string
+    pinned: boolean
+    project: string
+    themes: string[]
+    emotional_registers: string[]
+    formal_modes: string[]
+    craft_features: string[]
+    stylistic_postures: string[]
+}
+
+export interface Poem extends ClusterPoem {
     url: string
     date: string
     rating: number
     lines: number
     words: number
-    pinned: boolean
-    themes: string[]
-    emotional_register: string[]
-    form_and_craft: string[]
     contest_fit: string[]
-    project: string
     body: string
     awards: Award[]
     key_images: string[]
@@ -102,13 +107,6 @@ export interface SimilarityBundle {
     form: NeighbourListResult
     emotion: NeighbourListResult
     imagery: NeighbourListResult
-}
-
-export interface ClusterPoem {
-    id: UUID
-    title: string
-    rating: number
-    date: string
 }
 
 export interface ClusterItem {

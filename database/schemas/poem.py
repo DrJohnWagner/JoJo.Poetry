@@ -53,8 +53,10 @@ class Poem(BaseModel):
     awards: List[Award]
     date: datetime
     themes: List[str]
-    emotional_register: List[str]
-    form_and_craft: List[str]
+    emotional_registers: List[str]
+    formal_modes: List[str]
+    craft_features: List[str]
+    stylistic_postures: List[str]
     key_images: List[str]
     project: str
     contest_fit: List[str]

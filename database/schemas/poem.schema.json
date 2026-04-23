@@ -6,119 +6,131 @@
   "type": "object",
   "additionalProperties": false,
   "required": [
-    "id",
-    "title",
-    "url",
-    "body",
-    "awards",
-    "date",
-    "themes",
-    "emotional_register",
-    "form_and_craft",
-    "key_images",
-    "project",
-    "contest_fit",
-    "rating",
-    "lines",
-    "words"
+      "id",
+      "title",
+      "url",
+      "body",
+      "awards",
+      "date",
+      "themes",
+      "emotional_registers",
+      "formal_modes",
+      "craft_features",
+      "stylistic_postures",
+      "key_images",
+      "project",
+      "contest_fit",
+      "rating",
+      "lines",
+      "words"
   ],
   "properties": {
-    "id": {
-      "description": "Stable unique identifier. UUID v4. Immutable.",
-      "type": "string",
-      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
-    },
-    "title": {
-      "description": "Poem title. Editable. Searchable.",
-      "type": "string",
-      "minLength": 1
-    },
-    "url": {
-      "description": "Canonical external URL (allpoetry.com). Editable.",
-      "type": "string",
-      "format": "uri"
-    },
-    "body": {
-      "description": "Poem body as an HTML fragment with <br/> line breaks and literal whitespace for indentation. Editable. Searchable via a normalised plain-text projection, not the raw HTML.",
-      "type": "string",
-      "minLength": 1
-    },
-    "awards": {
-      "description": "Zero or more contest entries the poem was submitted to.",
-      "type": "array",
-      "items": { "$ref": "#/$defs/Award" }
-    },
-    "date": {
-      "description": "Publication / authorship timestamp, ISO 8601 with timezone (UTC in existing data).",
-      "type": "string",
-      "format": "date-time"
-    },
-    "themes": {
-      "description": "Free-vocabulary theme tags. Searchable.",
-      "type": "array",
-      "items": { "type": "string", "minLength": 1 }
-    },
-    "emotional_register": {
-      "description": "Free-vocabulary tonal/affective tags.",
-      "type": "array",
-      "items": { "type": "string", "minLength": 1 }
-    },
-    "form_and_craft": {
-      "description": "Free-vocabulary craft / formal device tags.",
-      "type": "array",
-      "items": { "type": "string", "minLength": 1 }
-    },
-    "key_images": {
-      "description": "Notable images from the poem.",
-      "type": "array",
-      "items": { "type": "string", "minLength": 1 }
-    },
-    "project": {
-      "description": "One-sentence authorial statement of the poem's project.",
-      "type": "string"
-    },
-    "contest_fit": {
-      "description": "Tags used for matching the poem to contests. Searchable.",
-      "type": "array",
-      "items": { "type": "string", "minLength": 1 }
-    },
-    "rating": {
-      "description": "Authorial self-rating, 0-100.",
-      "type": "integer",
-      "minimum": 0,
-      "maximum": 100
-    },
-    "lines": {
-      "description": "Derived: line count of the rendered body. Stored for convenience; authoritative value is recomputable from body.",
-      "type": "integer",
-      "minimum": 0
-    },
-    "words": {
-      "description": "Derived: word count of the rendered body. Stored for convenience; authoritative value is recomputable from body.",
-      "type": "integer",
-      "minimum": 0
-    },
-    "pinned": {
-      "description": "Optional. Whether the poem is pinned in listings. Defaults to false when absent.",
-      "type": "boolean",
-      "default": false
-    },
-    "notes": {
-      "description": "Optional. Editorial notes, one string per note. Defaults to [] when absent.",
-      "type": "array",
-      "default": [],
-      "items": { "type": "string", "minLength": 1 }
-    },
-    "socials": {
-      "description": "Optional. Social media post URLs or handles for this poem. Defaults to [] when absent.",
-      "type": "array",
-      "default": [],
-      "items": { "type": "string" }
-    },
-    "author": {
-      "description": "Optional. Author identity (pen name and legal name).",
-      "$ref": "#/$defs/Author"
-    }
+      "id": {
+          "description": "Stable unique identifier. UUID v4. Immutable.",
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+      },
+      "title": {
+          "description": "Poem title. Editable. Searchable.",
+          "type": "string",
+          "minLength": 1
+      },
+      "url": {
+          "description": "Canonical external URL (allpoetry.com). Editable.",
+          "type": "string",
+          "format": "uri"
+      },
+      "body": {
+          "description": "Poem body as an HTML fragment with <br/> line breaks and literal whitespace for indentation. Editable. Searchable via a normalised plain-text projection, not the raw HTML.",
+          "type": "string",
+          "minLength": 1
+      },
+      "awards": {
+          "description": "Zero or more contest entries the poem was submitted to.",
+          "type": "array",
+          "items": { "$ref": "#/$defs/Award" }
+      },
+      "date": {
+          "description": "Publication / authorship timestamp, ISO 8601 with timezone (UTC in existing data).",
+          "type": "string",
+          "format": "date-time"
+      },
+      "themes": {
+          "description": "Free-vocabulary theme tags. Searchable.",
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+      },
+      "emotional_registers": {
+          "description": "Free-vocabulary tonal/affective tags.",
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+      },
+      "formal_modes": {
+          "description": "Free-vocabulary formal mode tags (e.g. sonnet, free verse).",
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+      },
+      "craft_features": {
+          "description": "Free-vocabulary craft feature tags (e.g. extended metaphor, enjambment).",
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+      },
+      "stylistic_postures": {
+          "description": "Free-vocabulary stylistic posture tags (e.g. lyric, documentary).",
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+      },
+      "key_images": {
+          "description": "Notable images from the poem.",
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+      },
+      "project": {
+          "description": "One-sentence authorial statement of the poem's project.",
+          "type": "string"
+      },
+      "contest_fit": {
+          "description": "Tags used for matching the poem to contests. Searchable.",
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+      },
+      "rating": {
+          "description": "Authorial self-rating, 0-100.",
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100
+      },
+      "lines": {
+          "description": "Derived: line count of the rendered body. Stored for convenience; authoritative value is recomputable from body.",
+          "type": "integer",
+          "minimum": 0
+      },
+      "words": {
+          "description": "Derived: word count of the rendered body. Stored for convenience; authoritative value is recomputable from body.",
+          "type": "integer",
+          "minimum": 0
+      },
+      "pinned": {
+          "description": "Optional. Whether the poem is pinned in listings. Defaults to false when absent.",
+          "type": "boolean",
+          "default": false
+      },
+      "notes": {
+          "description": "Optional. Editorial notes, one string per note. Defaults to [] when absent.",
+          "type": "array",
+          "default": [],
+          "items": { "type": "string", "minLength": 1 }
+      },
+      "socials": {
+          "description": "Optional. Social media post URLs or handles for this poem. Defaults to [] when absent.",
+          "type": "array",
+          "default": [],
+          "items": { "type": "string" }
+      },
+      "author": {
+          "description": "Optional. Author identity (pen name and legal name).",
+          "$ref": "#/$defs/Author"
+      }
   },
   "$defs": {
     "Author": {

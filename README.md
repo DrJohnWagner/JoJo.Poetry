@@ -62,21 +62,27 @@ Two services, one flat JSON data source:
 │   └── Dockerfile                    # Python 3.11-slim image
 ├── requirements.txt                  # Production Python deps
 ├── requirements-dev.txt              # Adds pytest, httpx, jsonschema
-├── tests/server/                     # pytest suite (219 tests)
+├── tests/server/                     # pytest suite (218 tests)
 ├── app/
 │   ├── page.tsx                      # Landing: listing + search + incremental load + recent poems aside
-│   ├── clusters/page.tsx             # Clustering: category checkboxes → ClusteringUI + recent poems aside
+│   ├── clusters/page.tsx             # Clustering: category checkboxes → ClusteringUI (+ RecentPoems aside on lg+)
 │   ├── poems/[id]/page.tsx           # Detail + inline editing + similar poems panel
 │   ├── poems/new/page.tsx            # Dedicated create page
 │   ├── layout.tsx, globals.css
 │   ├── components/
 │   │   ├── AppConfig.tsx             # React context provider for runtime config (readOnly)
-│   │   ├── Page.tsx                  # Two-column grid wrapper (lg: auto + clamp(20rem,…,30rem), centred)
-│   │   ├── LColumn.tsx               # Left column: max-w-prose, mx-auto on narrow / mx-0 in grid
-│   │   ├── RColumn.tsx               # Right aside: 106px top padding in grid mode, scrolls with page
+│   │   ├── Page.tsx                  # Two-column flex wrapper (full-width, centred)
+│   │   ├── LColumn.tsx               # Left column shell: fixed lg flex-basis (62%) + inner max-w-prose
+│   │   ├── RColumn.tsx               # Right aside shell: hidden <lg, fixed lg flex-basis (38%), 106px top padding
 │   │   ├── Header.tsx                # Site header (title + "Clusters" link + optional "New poem" link)
-│   │   ├── ClusteringUI.tsx          # Client: category checkboxes, submit/clear, cluster + excluded results
-│   │   ├── PoemListing.tsx           # Client: fetch, infinite scroll, row edit/delete
+│   │   ├── ClusteringUI.tsx          # Client: cluster results + pin updates; default PoemList with no category selected
+│   │   ├── cluster/
+│   │   │   ├── ClusterCheckboxes.tsx # Category checkbox controls used by ClusteringUI
+│   │   │   ├── ClusterHeader.tsx     # Cluster summary line (categories used, cluster/poem counts, excluded count)
+│   │   │   ├── ClusterLabel.tsx      # Per-cluster heading and poem count
+│   │   │   └── ClusterFeatures.tsx   # Per-cluster feature chips/labels
+│   │   ├── PoemListing.tsx           # Client: fetch, search/sort controls, infinite scroll, row edit/delete
+│   │   ├── PoemList.tsx              # Shared list renderer (<ol> of PoemRow), used by listing and clustering
 │   │   ├── PoemEditorForm.tsx        # Shared editor (list row + detail)
 │   │   ├── PoemRowEditor.tsx         # Thin wrapper around PoemEditorForm for rows
 │   │   ├── PoemCreateForm.tsx        # Dedicated POST form with defaults + guards
@@ -89,9 +95,7 @@ Two services, one flat JSON data source:
 │   │   ├── AdvancedSearchDialog.tsx  # Native <dialog>-backed modal (title/body/project/notes/year/month/medals/tags)
 │   │   ├── PoemRow.tsx               # Single poem row (title, meta, collapsible body)
 │   │   ├── CopyButton.tsx            # Copy-to-clipboard icon button; variant="outline"|"filled" selects icon set
-│   │   ├── PoemTitle.tsx             # Shared <h2> with optional Link wrapper + two copy buttons (partial / full markdown)
 │   │   ├── PoemStatistics.tsx        # Shared metadata line (date · rating · lines · words · medals)
-│   │   ├── PoemProject.tsx           # Italic project statement, null-safe
 │   │   ├── PoemAward.tsx             # Medal icon + medal label + optional award link
 │   │   ├── PoemSocial.tsx            # Social URL rendered as hostname link
 │   │   ├── PoemMetadataEditor.tsx    # Shared rating/date/url grid + all six TagInput fields
@@ -100,11 +104,15 @@ Two services, one flat JSON data source:
 │   │   ├── NotesEditor.tsx           # Multi-line textarea for author's notes (one line = one note)
 │   │   ├── HorizontalRule.tsx        # Shared <div class="rule my-5" /> divider
 │   │   └── PoemBody.tsx              # Body rendered as HTML: <br/> line breaks + anchor links
+│   │   ├── poem/
+│   │   │   ├── PoemTitle.tsx         # Client title block: h2/h4 by context, optional link/pin toggle, id-driven copy buttons
+│   │   │   └── PoemProject.tsx       # Italic project statement, null-safe, optional line clamp
 │   └── lib/
 │       ├── api.ts                    # Typed fetch wrappers (fetchPoems, fetchSimilarPoems, fetchRecentPoems, fetchClusters)
+│       ├── cluster.ts                # Cluster feature/group label helpers for cluster UI rendering
 │       ├── types.ts                  # Author / Poem / SearchState / NeighbourListResult / SimilarityBundle / ClusterResponse / …
 │       ├── editable.ts               # Canonical editable-field contract
-│       └── format.ts                 # body ↔ plaintext, date formatting, cleanPoetryUrl, poemToMarkdown(full)
+│       └── format.ts                 # body ↔ plaintext, date formatting, cleanPoetryUrl, poemToMarkdown(id, full)
 ├── database/
 │   ├── Poems.json                    # Canonical collection
 │   ├── <Title>.json                  # Per-poem mirror files (reference only)
@@ -129,7 +137,7 @@ The authoritative schema is `database/schemas/poem.schema.json`;
 | `body`                                                                                | string (HTML fragment)     | yes                          | yes                 | yes\*                         | `` line breaks + literal whitespace for indentation. \*Search hits a plain-text projection. |
 | `awards`                                                                              | `[{url, medal, title?}]` | yes (may be empty)           | yes (API)           | via `medals` filter         | `medal` is surfaced to search; `title` is an optional award name displayed in the UI.          |
 | `date`                                                                                | ISO 8601 datetime          | yes                          | yes                 | year/month in advanced search | Timezone-aware; UTC in existing data.                                                              |
-| `themes`, `emotional_register`, `form_and_craft`, `key_images`, `contest_fit` | `string[]`               | yes (may be empty)           | yes                 | yes                           | Free-vocabulary tags.                                                                              |
+| `themes`, `emotional_registers`, `formal_modes`, `craft_features`, `stylistic_postures`, `key_images`, `contest_fit` | `string[]`               | yes (may be empty)           | yes                 | yes                           | Free-vocabulary tags. `emotional_registers`: tonal/affective; `formal_modes`: metrical/structural forms; `craft_features`: devices and techniques; `stylistic_postures`: voice/stance. |
 | `project`                                                                             | string                     | yes                          | yes                 | yes                           | One-sentence authorial statement.                                                                  |
 | `rating`                                                                              | int 0–100                 | yes                          | yes                 | min/max band                  | Authorial self-rating.                                                                             |
 | `lines`, `words`                                                                    | int ≥ 0                   | yes                          | **derived**   | no                            | Recomputed from `body` on every write.                                                           |
@@ -404,8 +412,8 @@ Similarity is **multi-axis**. Each axis has a named score in [0, 1]:
 | Axis       | Structured input    | Semantic input  | Structured weight | Semantic weight |
 | ---------- | ------------------- | --------------- | ----------------- | --------------- |
 | theme      | `themes` Jaccard    | —               | 1.0               | 0.0             |
-| form       | `form_and_craft` J. | `form_text`     | 0.8               | 0.2             |
-| emotion    | `emotional_register`| —               | 1.0               | 0.0             |
+| form       | `formal_modes` + `craft_features` + `stylistic_postures` J. | `form_text` | 0.8 | 0.2 |
+| emotion    | `emotional_registers` J. | —          | 1.0               | 0.0             |
 | imagery    | `key_images` J.     | `image_text`    | 0.8               | 0.2             |
 
 The **overall score** is a weighted average across all axes plus `fit`
@@ -433,7 +441,7 @@ in `server/similarity/normalise.py`. The table is empty by default;
 add entries as the vocabulary grows.
 
 `form_text` and `image_text` are the sorted, space-joined
-`form_and_craft` and `key_images` sets respectively, used as TF-IDF
+union of `formal_modes`, `craft_features`, `stylistic_postures` and `key_images` sets respectively, used as TF-IDF
 inputs. `project_text` is the lowercased project statement.
 
 ### Determinism
@@ -502,25 +510,27 @@ Each value is a full `NeighbourListResult` with its own `k`.
 
 ### Frontend panels
 
-All pages use the same two-column layout shell: `Page` (the grid
-wrapper), `LColumn` (left: `max-w-prose`, centred on narrow viewports),
-`RColumn` (right aside: `20rem` wide, `106px` top padding in grid mode,
-scrolls with the page). `Header` (title + "Clusters" link + optional
-"New poem" link in RW mode) sits at the top of the left column on every
-page.
+All pages use the same two-column layout shell: `Page` (full-width flex
+wrapper), `LColumn` (content shell with an `lg` fixed basis of 62% and an
+inner `max-w-prose` measure), and `RColumn` (hidden below `lg`; fixed 38%
+basis with `106px` top padding at `lg+`). `Header` (title + "Clusters"
+link + optional "New poem" link in RW mode) sits at the top of the left
+column on every page.
 
 **Listing page** (`/`): left column has the full poem listing with search,
 sort, and infinite scroll. The aside shows the 12 most recent poems via
 `RecentPoems`, fetched server-side with `GET /api/poems/recent?k=12`.
 Each item shows the title (link) and project statement.
 
-**Clustering page** (`/clusters`): left column has `ClusteringUI` — five
-category checkboxes (themes, emotional register, form & craft, images,
-contest fit), a Cluster button that fires a single `POST /api/poems/cluster`,
-and results rendered as a vertical list of clusters with labels, feature
-tags, award medals, and poem rows (title link, date, rating). Excluded
-poems appear in a section below. The aside shows the same recent poems as
-the listing page.
+**Clustering page** (`/clusters`): left column has `ClusteringUI` with
+`ClusterCheckboxes` — four category checkboxes (themes, emotional registers,
+craft features, stylistic postures). With no boxes selected, it renders `PoemList`
+from the initial server payload (list rows only; no search/sort controls).
+Selecting one or more categories triggers `POST /api/poems/cluster`
+automatically and renders clusters as a vertical list with labels, feature
+tags, and poem rows (title link, italic project statement, then all five tag
+arrays joined inline). Excluded poems appear in a section below. At `lg+`, the
+aside shows the same recent poems as the listing page.
 
 **Single-poem page** (`/poems/[id]`): the aside shows all five similarity
 axes via `SimilarPoems`. The page calls `GET /api/poems/{id}/similar`
@@ -533,9 +543,9 @@ title as a link; scores and breakdowns are not exposed.
 Both the listing and clustering asides use the shared `PoemSummary`
 component (title link + project line).
 
-- **Wide viewport** (≥ `lg`): aside is in the right column of the two-column grid, scrolling with the page.
-- **Narrow viewport**: aside appears below the main column, capped at
-  `max-w-prose`.
+- **Wide viewport** (≥ `lg`): aside is shown in the right column and scrolls
+  with the page.
+- **Narrow viewport**: aside is hidden.
 
 ## The clustering system
 
@@ -547,16 +557,15 @@ shared metadata tags. The endpoint is read-safe (available in
 
 ```jsonc
 {
-  "categories": ["themes", "form_and_craft"],  // required; 1+ from the list below
+  "categories": ["themes", "formal_modes"],  // required; 1+ from the list below
   "k": 4,            // optional; omit for auto-k selection
   "min_cluster_size": 2,   // optional; default 2
   "top_features": 3        // optional; default 3, max 20
 }
 ```
 
-`categories` must be a non-empty subset of: `themes`, `emotional_register`,
-`form_and_craft`, `images` (maps to `key_images`), `contest_fit`. Unknown
-values return `422`.
+`categories` must be a non-empty subset of: `themes`, `emotional_registers`,
+`formal_modes`, `craft_features`, `stylistic_postures`. Unknown values return `422`.
 
 ### Algorithm
 
@@ -599,9 +608,19 @@ values return `422`.
     {
       "label": "nature / sonnet",
       "size": 12,
-      "features": ["themes:nature", "form_and_craft:sonnet", "themes:loss"],
+      "features": ["themes:nature", "formal_modes:sonnet", "themes:loss"],
       "poems": [
-        { "id": "<uuid>", "title": "...", "rating": 85, "date": "2024-03-01T00:00:00Z" }
+        {
+          "id": "<uuid>",
+          "title": "...",
+          "pinned": false,
+          "project": "A poem about loss in the natural world.",
+          "themes": ["nature", "loss"],
+          "emotional_registers": ["elegiac"],
+          "formal_modes": ["sonnet"],
+          "craft_features": ["enjambment"],
+          "stylistic_postures": ["lyric"]
+        }
       ]
     }
   ],
@@ -609,7 +628,7 @@ values return `422`.
     { "id": "<uuid>", "title": "...", "reason": "cluster too small" }
   ],
   "k_used": 3,
-  "categories_used": ["themes", "form_and_craft"]
+  "categories_used": ["themes", "formal_modes"]
 }
 ```
 
@@ -665,7 +684,8 @@ datetime, no fallback needed.
   (`PoemEditorForm` in compact density) and the detail page
   (comfortable density). Fields editable inline in both contexts:
   `title`, `project`, `body`, `rating`, `pinned`, `date`, `url`,
-  `themes`, `emotional_register`, `form_and_craft`, `key_images`,
+  `themes`, `emotional_registers`,
+  `formal_modes`, `craft_features`, `stylistic_postures`, `key_images`,
   `contest_fit`, `socials`, `notes`. PATCH sends only the diff; local
   state is replaced from the server response; failure keeps edit
   mode open with an inline error.
@@ -701,7 +721,7 @@ make check          # test + typecheck + lint
 Or manually:
 
 ```bash
-READ_ONLY=false uv run pytest tests/server   # ~219 tests, ~11 s
+READ_ONLY=false uv run pytest tests/server   # ~218 tests, ~11 s
 npx tsc --noEmit                             # TypeScript type-check
 npx next build                               # production build
 ```
@@ -743,13 +763,12 @@ Test files:
   endpoints, and mutation → rebuild integration (POST/PATCH/DELETE each
   reflected in subsequent similarity queries).
 - `tests/server/test_clustering.py` — engine unit tests (matrix shape,
-  L2 normalisation, `images`→`key_images` mapping, auto-k range,
-  lift ranking, majority label, awards summary, poem ordering) and API
-  tests (200 response, response shape, partition invariant, cluster
-  ordering, poem ordering within cluster, `min_cluster_size` exclusion,
-  `k` override, `categories_used` echo, invalid category 422, empty
-  categories 422, unknown field 422, awards content, read-only allowed,
-  small-corpus single-cluster fallback).
+  L2 normalisation, auto-k range, lift ranking, majority label, poem
+  ordering) and API tests (200 response, response shape including new
+  tag fields, partition invariant, cluster ordering, poem tag fields
+  present, `min_cluster_size` exclusion, `k` override, `categories_used`
+  echo, invalid category 422, empty categories 422, unknown field 422,
+  read-only allowed, small-corpus single-cluster fallback).
 
 ## Limitations and assumptions
 

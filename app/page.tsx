@@ -22,7 +22,7 @@ export default async function Home() {
                 notes: "",
             },
             0,
-            3
+            10
         ),
         fetchRecentPoems(12),
     ])

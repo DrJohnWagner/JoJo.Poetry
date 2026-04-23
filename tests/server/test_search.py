@@ -62,11 +62,10 @@ def test_tag_within_field_is_or(client):
         "/api/poems/search",
         params=[("themes", "COVID lockdown"), ("themes", "cancer")],
     )
-    # Just Enough Freedom (COVID) + Unchecked + Weather Over Brief Structures (cancer)
+    # Just Enough Freedom (COVID lockdown) + Unchecked (cancer)
     assert _titles(r) == {
         "Just Enough Freedom",
         "Unchecked",
-        "Weather Over Brief Structures",
     }
 
 
@@ -156,8 +155,12 @@ def test_rating_band_is_single_field(client):
     r = client.get(
         "/api/poems/search", params={"min_rating": 85, "max_rating": 88}
     )
-    # Not a Metaphor 88, Load-Bearing Interior 85, Unchecked 86
-    assert _titles(r) == {"Not a Metaphor", "Load-Bearing Interior", "Unchecked"}
+    # Not a Metaphor 88, Unchecked 88, Weather Over Brief Structures 88
+    assert _titles(r) == {
+        "Not a Metaphor",
+        "Unchecked",
+        "Weather Over Brief Structures",
+    }
 
 
 def test_q_can_narrow_advanced_search(client):

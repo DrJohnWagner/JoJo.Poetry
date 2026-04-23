@@ -44,10 +44,26 @@ def test_list_default_shape_and_pagination(client):
     item = body["items"][0]
     assert "copyright" not in item
     assert set(item) >= {
-        "id", "title", "url", "date", "rating", "lines", "words",
-        "pinned", "themes", "emotional_register", "form_and_craft",
-        "contest_fit", "project", "body", "awards", "key_images",
-        "notes", "socials",
+        "id",
+        "title",
+        "url",
+        "date",
+        "rating",
+        "lines",
+        "words",
+        "pinned",
+        "themes",
+        "emotional_registers",
+        "formal_modes",
+        "craft_features",
+        "stylistic_postures",
+        "contest_fit",
+        "project",
+        "body",
+        "awards",
+        "key_images",
+        "notes",
+        "socials",
     }
 
 
@@ -66,19 +82,19 @@ def test_search_q_matches_body_text(client):
 
 
 def test_search_tag_filter_is_and(client):
-    # Both poems about cancer have these themes; intersect on 'cancer'
-    r = client.get("/api/poems", params=[("themes", "cancer"), ("themes", "the body")])
+    # biological_process AND mortality: only WOBS has both
+    r = client.get(
+        "/api/poems", params=[("themes", "biological_process"), ("themes", "mortality")]
+    )
     body = r.json()
     titles = {i["title"] for i in body["items"]}
-    # Unchecked and Weather Over Brief Structures both have cancer + the body
-    assert "Unchecked" in titles
-    assert "Weather Over Brief Structures" in titles
+    assert titles == {"Weather Over Brief Structures"}
 
 
 def test_search_rating_bounds(client):
     r = client.get("/api/poems", params={"min_rating": 86})
     titles = {i["title"] for i in r.json()["items"]}
-    assert titles == {"Not a Metaphor", "Unchecked"}
+    assert titles == {"Not a Metaphor", "Unchecked", "Weather Over Brief Structures"}
 
 
 def test_list_orders_pinned_first(client, tmp_path):

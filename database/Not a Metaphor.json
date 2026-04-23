@@ -1,22 +1,6 @@
 {
-    "title": "Not a Metaphor",
-    "author": {
-        "pen_name": "JoJo",
-        "full_name": "John Wagner"
-    },
-    "url": "https://allpoetry.com/poem/18912395-Not-a-Metaphor-by-Insta-JoJo",
-    "body": "I rehearse a line I think is clever<br/>\n    while the kettle clicks off.<br/>\n<br/>\nShe leans in the doorway<br/>\n    and clever dies first.<br/>\n<br/>\nMy breathing goes wrong.<br/>\nNot poetic-wrong—<br/>\n    asthma wrong, like misjudging<br/>\n        a staircase.<br/>\n<br/>\nHer arm rests on the counter.<br/>\nA faint knife scar.<br/>\nI don’t ask about it.<br/>\n    I track it.<br/>\n        Already ashamed.<br/>\n<br/>\nThe room begins to pair things:<br/>\n        her silence with my name,<br/>\n        the hum of the fridge with waiting.<br/>\n<br/>\nShe barely moves.<br/>\nNeither do I.<br/>\nThe space between us thickens,<br/>\n    visible as dust in sunlight.<br/>\n<br/>\nShe almost says something—<br/>\n    stops.<br/>\nThe almost<br/>\n        lands heavier.<br/>\n<br/>\nI think of a river and immediately hate myself.<br/>\nHer knuckle taps the counter twice.<br/>\n        Enough.<br/>\n<br/>\nWhat I expect to end<br/>\n    doesn’t.<br/>\nMy attention keeps sliding forward,<br/>\n    past manners,<br/>\n    past restraint.<br/>\n<br/>\nI am no longer deciding<br/>\n        what this is.<br/>\n<br/>\nI try, once more,<br/>\n    to make her stand<br/>\n        for anything else.<br/>\nShe exhales.<br/>\nThe idea collapses.<br/>\n<br/>\nNothing is crossed out.<br/>\nI stop reaching for language<br/>\n    and stay with the pressure of her presence,<br/>\n    unsymbolised,<br/>\n    unforgiving.<br/>\n    Close enough<br/>\n        that even silence<br/>\n            is contact.",
-    "awards": [
-        {
-            "url": "https://allpoetry.com/contest/2889727",
-            "medal": "Gold"
-        },
-        {
-            "url": "https://allpoetry.com/contest/2889193",
-            "medal": "Gold"
-        }
-    ],
-    "date": "2026-01-31T06:02:00Z",
+    "rating": 88,
+    "project": "A speaker resists aestheticizing a moment of charged physical proximity, finally surrendering language for presence itself.",
     "themes": [
         "desire",
         "restraint",
@@ -28,21 +12,16 @@
         "the body",
         "language and its limits"
     ],
-    "emotional_register": [
+    "emotional_registers": [
         "tension",
         "longing",
         "ambivalence",
         "vulnerability",
         "self-reproach"
     ],
-    "form_and_craft": [
-        "white space as breath",
-        "interior monologue",
-        "meta-commentary on the impulse to metaphorize",
-        "restrained imagery",
-        "short declarative lines",
-        "indentation for breathwork"
-    ],
+    "formal_modes": [],
+    "craft_features": [],
+    "stylistic_postures": [],
     "key_images": [
         "kettle clicking off",
         "knife scar tracked with shame",
@@ -50,7 +29,6 @@
         "knuckle tapping the counter twice",
         "river (rejected)"
     ],
-    "project": "A speaker resists aestheticizing a moment of charged physical proximity, finally surrendering language for presence itself.",
     "contest_fit": [
         "desire",
         "the body",
@@ -61,13 +39,34 @@
         "restraint",
         "intimacy"
     ],
-    "rating": 88,
-    "lines": 47,
-    "words": 178,
     "id": "f6077c31-23d0-4652-8249-e2f965406167",
-    "pinned": false,
-    "notes": [],
+    "title": "Not a Metaphor",
+    "author": {
+        "pen_name": "JoJo",
+        "full_name": "John Wagner"
+    },
+    "url": "https://allpoetry.com/poem/18912395",
+    "body": "I rehearse a line I think is clever<br/>\n    while the kettle clicks off.<br/>\n<br/>\nShe leans in the doorway<br/>\n    and clever dies first.<br/>\n<br/>\nMy breathing goes wrong.<br/>\nNot poetic-wrong—<br/>\n    asthma wrong, like misjudging<br/>\n        a staircase.<br/>\n<br/>\nHer arm rests on the counter.<br/>\nA faint knife scar.<br/>\nI don’t ask about it.<br/>\n    I track it.<br/>\n        Already ashamed.<br/>\n<br/>\nThe room begins to pair things:<br/>\n        her silence with my name,<br/>\n        the hum of the fridge with waiting.<br/>\n<br/>\nShe barely moves.<br/>\nNeither do I.<br/>\nThe space between us thickens,<br/>\n    visible as dust in sunlight.<br/>\n<br/>\nShe almost says something—<br/>\n    stops.<br/>\nThe almost<br/>\n        lands heavier.<br/>\n<br/>\nI think of a river and immediately hate myself.<br/>\nHer knuckle taps the counter twice.<br/>\n        Enough.<br/>\n<br/>\nWhat I expect to end<br/>\n    doesn’t.<br/>\nMy attention keeps sliding forward,<br/>\n    past manners,<br/>\n    past restraint.<br/>\n<br/>\nI am no longer deciding<br/>\n        what this is.<br/>\n<br/>\nI try, once more,<br/>\n    to make her stand<br/>\n        for anything else.<br/>\nShe exhales.<br/>\nThe idea collapses.<br/>\n<br/>\nNothing is crossed out.<br/>\nI stop reaching for language<br/>\n    and stay with the pressure of her presence,<br/>\n    unsymbolised,<br/>\n    unforgiving.<br/>\n    Close enough<br/>\n        that even silence<br/>\n            is contact.",
+    "awards": [
+        {
+            "url": "https://allpoetry.com/contest/2889727",
+            "medal": "Gold",
+            "title": "Forty"
+        },
+        {
+            "url": "https://allpoetry.com/contest/2889193",
+            "medal": "Gold",
+            "title": "Part Sinner Part Saint: Threshold"
+        }
+    ],
     "socials": [
         "https://www.instagram.com/p/DWR8JQtlJ3_/"
-    ]
+    ],
+    "date": "2026-01-31T06:02:00Z",
+    "lines": 47,
+    "words": 178,
+    "notes": [
+        "The poem began as an argument with myself about what relationships are allowed to mean — and whether I was actually present, or already composing."
+    ],
+    "pinned": false
 }

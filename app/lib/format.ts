@@ -1,3 +1,14 @@
+import { constants } from "buffer"
+import { fetchPoem } from "./api"
+import type { Poem } from "./types"
+
+/** Convert a snake_case string into a human-readable label. */
+export const toLabel = (s: string) =>
+    s
+        .split("_")
+        .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+        .join(" ")
+
 /** Convert the stored HTML-fragment body into plain text, preserving
  *  line breaks and authored whitespace. Mirrors the backend projection.
  */
@@ -26,10 +37,7 @@ export function plainTextToBody(text: string): string {
     return text.replace(/\n/g, "<br/>\n")
 }
 
-export function poemToMarkdown(
-    poem: import("./types").Poem,
-    full: boolean
-): string {
+function poemToMarkdownFromPoem(poem: Poem, full: boolean): string {
     const body = bodyToPlainText(poem.body)
 
     if (!full) {
@@ -63,10 +71,16 @@ export function poemToMarkdown(
     const tags: string[] = []
     if (poem.project) tags.push(`**Project:** ${poem.project}`)
     if (poem.themes.length) tags.push(`**Themes:** ${poem.themes.join(", ")}`)
-    if (poem.emotional_register.length)
-        tags.push(`**Register:** ${poem.emotional_register.join(", ")}`)
-    if (poem.form_and_craft.length)
-        tags.push(`**Form & Craft:** ${poem.form_and_craft.join(", ")}`)
+    if (poem.emotional_registers.length)
+        tags.push(`**Register:** ${poem.emotional_registers.join(", ")}`)
+    if (poem.formal_modes.length)
+        tags.push(`**Formal Modes:** ${poem.formal_modes.join(", ")}`)
+    if (poem.craft_features.length)
+        tags.push(`**Craft Features:** ${poem.craft_features.join(", ")}`)
+    if (poem.stylistic_postures.length)
+        tags.push(
+            `**Stylistic Postures:** ${poem.stylistic_postures.join(", ")}`
+        )
     if (poem.key_images.length)
         tags.push(`**Key Images:** ${poem.key_images.join(", ")}`)
     if (poem.contest_fit.length)
@@ -92,6 +106,14 @@ export function poemToMarkdown(
         )
 
     return parts.join("\n\n")
+}
+
+export async function poemToMarkdown(
+    id: string,
+    full: boolean
+): Promise<string> {
+    const poem = await fetchPoem(id)
+    return poemToMarkdownFromPoem(poem, full)
 }
 
 /** Strip the human-readable slug from an AllPoetry-style URL, keeping only

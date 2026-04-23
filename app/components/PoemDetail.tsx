@@ -5,8 +5,8 @@ import type { Poem } from "@/lib/types"
 import { useAppConfig } from "./AppConfig"
 import PoemBody from "./PoemBody"
 import PoemStatistics from "./PoemStatistics"
-import PoemProject from "./PoemProject"
-import PoemTitle from "./PoemTitle"
+import PoemProject from "./poem/PoemProject"
+import PoemTitle from "./poem/PoemTitle"
 import DeleteButton from "./DeleteButton"
 import PoemAward from "./PoemAward"
 import PoemSocial from "./PoemSocial"
@@ -18,19 +18,29 @@ export default function PoemDetail({ poem: initial }: { poem: Poem }) {
     const { readOnly } = useAppConfig()
     const [poem, setPoem] = useState<Poem>(initial)
     const [editing, setEditing] = useState(false)
+    const [liveTitle, setLiveTitle] = useState(initial.title)
+    const { id, title } = poem
 
     if (editing) {
         return (
             <div>
-                <p className="eyebrow mb-6">Editing · “{poem.title}”</p>
+                <p className="eyebrow mb-6">
+                    Editing &middot; &ldquo;{liveTitle.trim() || "(Untitled)"}
+                    &rdquo;
+                </p>
                 <PoemEditorForm
                     poem={poem}
                     density="comfortable"
+                    onTitleChange={setLiveTitle}
                     onSaved={(u) => {
                         setPoem(u)
+                        setLiveTitle(u.title)
                         setEditing(false)
                     }}
-                    onCancel={() => setEditing(false)}
+                    onCancel={() => {
+                        setLiveTitle(poem.title)
+                        setEditing(false)
+                    }}
                 />
             </div>
         )
@@ -40,14 +50,16 @@ export default function PoemDetail({ poem: initial }: { poem: Poem }) {
         <div>
             <header className="mb-5">
                 <PoemTitle
-                    poem={poem}
+                    id={id}
+                    title={title}
                     link={false}
+                    pinned={poem.pinned}
                     onPinChange={(p) =>
                         setPoem((prev) => ({ ...prev, pinned: p }))
                     }
                 />
                 <PoemStatistics poem={poem} />
-                <PoemProject poem={poem} />
+                <PoemProject project={poem.project} />
             </header>
 
             <HorizontalRule />
@@ -83,8 +95,13 @@ export default function PoemDetail({ poem: initial }: { poem: Poem }) {
                     </>
                 )}
                 <MetaRow label="Themes" values={poem.themes} />
-                <MetaRow label="Register" values={poem.emotional_register} />
-                <MetaRow label="Form" values={poem.form_and_craft} />
+                <MetaRow label="Register" values={poem.emotional_registers} />
+                <MetaRow label="Formal modes" values={poem.formal_modes} />
+                <MetaRow label="Craft features" values={poem.craft_features} />
+                <MetaRow
+                    label="Stylistic postures"
+                    values={poem.stylistic_postures}
+                />
                 <MetaRow label="Images" values={poem.key_images} />
                 <MetaRow label="Contest fit" values={poem.contest_fit} />
                 {poem.socials.length > 0 && (
@@ -104,10 +121,7 @@ export default function PoemDetail({ poem: initial }: { poem: Poem }) {
                         {/* <dd className="space-y-1 font-sans text-sm normal-case tracking-normal"> */}
                         <dd className="space-y-1">
                             {poem.awards.map((award) => (
-                                <PoemAward
-                                    key={award.url}
-                                    award={award}
-                                />
+                                <PoemAward key={award.url} award={award} />
                             ))}
                         </dd>
                     </>
