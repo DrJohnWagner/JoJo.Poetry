@@ -10,19 +10,20 @@ import {
     isDirty,
     type PoemDraft,
 } from "@/lib/editable"
-import NotesEditor from "./NotesEditor"
+import PoemNotesEditor from "./PoemNotesEditor"
 import PoemMetadataEditor, {
     inputCls,
     textareaCls,
     Labelled,
     type PoemMetadataValues,
 } from "./PoemMetadataEditor"
+import ErrorMessage from "../ErrorMessage"
 
 /** Shared inline editor for a full poem — exactly the same editable
  *  field set wherever it is rendered. `density` tweaks the layout for
  *  list rows vs. the detail page; the fields themselves do not change.
  */
-export default function PoemEditorForm({
+export default function PoemEditor({
     poem,
     density = "comfortable",
     onSaved,
@@ -90,6 +91,8 @@ export default function PoemEditorForm({
 
     const rowGap = density === "compact" ? "space-y-3" : "space-y-5"
     const bodyRows = density === "compact" ? 10 : 22
+    const actionButtonClass =
+        "button-text button-text-standard button-text-default button-text-hoverable button-text-disabled"
 
     return (
         <div className={rowGap}>
@@ -130,7 +133,7 @@ export default function PoemEditorForm({
                 />
             </Labelled>
 
-            <NotesEditor
+            <PoemNotesEditor
                 value={draft.notes}
                 onChange={(v) => set("notes", v)}
             />
@@ -142,18 +145,18 @@ export default function PoemEditorForm({
                 }
             />
 
-            <div className="flex items-center gap-6 pt-2 font-sans text-[0.72rem] uppercase tracking-wider2">
+            <div className="flex items-center gap-6 pt-2">
                 <button
                     onClick={save}
                     disabled={saving}
-                    className="text-accent"
+                    className={actionButtonClass}
                 >
                     {saving ? "saving…" : dirty ? "save" : "done"}
                 </button>
                 <button
                     onClick={cancel}
                     disabled={saving}
-                    className="text-muted hover:text-ink"
+                    className={actionButtonClass}
                 >
                     cancel
                 </button>
@@ -162,11 +165,7 @@ export default function PoemEditorForm({
                         unsaved
                     </span>
                 )}
-                {err && (
-                    <span className="text-[0.8rem] normal-case tracking-normal text-red-700">
-                        {err}
-                    </span>
-                )}
+                <ErrorMessage message={err} className="text-[0.8rem] normal-case tracking-normal inline" />
             </div>
         </div>
     )

@@ -24,5 +24,5 @@ export default function ClusterHeader({
         result.excluded.length > 0 ? `${result.excluded.length} excluded` : null,
     ].filter(Boolean)
 
-    return <p className="eyebrow">{parts.join(" · ")}</p>
+    return <p className="label-text">{parts.join(" · ")}</p>
 }

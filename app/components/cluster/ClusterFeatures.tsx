@@ -1,6 +1,8 @@
 import { toLabel } from "@/lib/format"
 
-export default function ClusterFeatures({ features }: { features: string[] }) {
+export default function ClusterFeatures({ features }: { features?: string[] }) {
+    if (!features || features.length === 0) return null
+
     return (
         <span className="cluster-features-text mt-1">
             {features

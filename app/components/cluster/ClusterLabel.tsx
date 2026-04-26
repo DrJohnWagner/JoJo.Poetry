@@ -7,7 +7,7 @@ export default function ClusterLabel({ cluster }: { cluster: ClusterItem }) {
             <h3 className="font-serif text-[1.1rem] font-semibold uppercase leading-tight">
                 {toLabel(cluster.label)}
             </h3>
-            <span className="eyebrow">
+            <span className="label-text">
                 {cluster.size} {cluster.size === 1 ? "poem" : "poems"}
             </span>
         </div>

@@ -59,6 +59,32 @@ function renderBody(body: string): ReactNode[] {
     ))
 }
 
-export default function PoemBody({ body }: { body: string }) {
+export default function PoemBody({
+    body,
+    open,
+    onOpenChange,
+}: {
+    body: string
+    open?: boolean
+    onOpenChange?: (open: boolean) => void
+}) {
+    if (onOpenChange !== undefined && open !== undefined) {
+        return (
+            <div className="my-3">
+                <button
+                    onClick={() => onOpenChange(!open)}
+                    className="label-text hover:text-ink"
+                >
+                    {open ? "Hide poem" : "Show poem"}
+                </button>
+                {open && (
+                    <div className="mt-4">
+                        <div className="poem-body">{renderBody(body)}</div>
+                    </div>
+                )}
+            </div>
+        )
+    }
+
     return <div className="poem-body">{renderBody(body)}</div>
 }

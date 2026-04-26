@@ -18,7 +18,7 @@ export default function ClusterCheckboxes({
 }) {
     return (
         <div>
-            <p className="eyebrow">Cluster by:</p>
+            <p className="label-text">Cluster by:</p>
             <ul className="mt-3 flex w-auto flex-wrap items-center gap-x-4 gap-y-2">
                 {CLUSTER_GROUPS.map((group) => (
                     <li key={group}>

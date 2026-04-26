@@ -4,7 +4,7 @@ import Page from "@/components/Page"
 import LColumn from "@/components/LColumn"
 import RColumn from "@/components/RColumn"
 import Header from "@/components/Header"
-import PoemDetail from "@/components/PoemDetail"
+import PoemDetail from "@/components/poem/PoemDetail"
 import SimilarPoems from "@/components/SimilarPoems"
 import { fetchPoem, fetchSimilarPoems } from "@/lib/api"
 

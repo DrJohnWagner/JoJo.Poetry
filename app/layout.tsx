@@ -40,7 +40,7 @@ export default function RootLayout({
                 <AppConfigProvider readOnly={readOnly}>
                     <div className="px-6 pb-24 pt-16">
                         <main>{children}</main>
-                        <footer className="eyebrow mx-auto mt-12 max-w-prose border-t border-rule pt-8">
+                        <footer className="label-text mx-auto mt-12 max-w-prose border-t border-rule pt-8">
                             © JoJo (John Wagner) · <Link href="/">Index</Link>
                         </footer>
                     </div>

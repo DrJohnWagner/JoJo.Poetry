@@ -8,8 +8,8 @@ const config: Config = {
                 // Deliberately small palette: paper, ink, a muted accent.
                 paper: "#faf8f4",
                 ink: "#1b1a17",
-                muted: "#4b4740", //"#6b655c",
-                rule: "#d9d3c7",
+                muted: "#4b4740", // restored to original muted color
+                rule: "#b3ab9c", // darkened for more visual weight
                 accent: "#7a4e2e", // dark ochre — used only for interactive accents
             },
             fontFamily: {

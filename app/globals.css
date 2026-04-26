@@ -3,17 +3,28 @@
 @tailwind utilities;
 
 @layer base {
+    :root {
+        --button-text-font-family:
+            ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+        --button-text-font-size-standard: 0.76rem;
+        --button-text-font-size-compact: 0.72rem;
+        --button-text-font-weight: 400;
+        --button-text-letter-spacing: 0.08em;
+        --button-text-line-height: 1;
+        --button-text-transform: uppercase;
+        --button-text-opacity-disabled: 0.6;
+    }
     html {
         color-scheme: light;
     }
 
     body {
-        @apply bg-paper text-ink font-serif antialiased;
+        @apply bg-paper font-serif text-ink antialiased;
         text-rendering: optimizeLegibility;
     }
 
     a {
-        @apply text-accent underline-offset-[0.2em] decoration-1;
+        @apply text-accent decoration-1 underline-offset-[0.2em];
     }
 
     a:hover {
@@ -31,64 +42,135 @@
 }
 
 @layer components {
-    .eyebrow {
-        @apply text-[0.76rem] uppercase tracking-wider2 text-muted font-sans;
+    /* Typography base for small caps labels */
+    .label-text {
+        @apply font-sans text-[0.76rem] uppercase tracking-wider2 text-muted;
     }
-.poem-title-text {
-    @apply font-display leading-snug tracking-tight;
-}
+    /* Button style 1: Primary navigation/action buttons (Home, Clusters, Edit Poem, Delete Poem) */
+    .button-primary {
+        @apply label-text border-b border-muted pb-1 transition-colors hover:border-ink hover:text-ink;
+    }
 
-.poem-title-link {
-    @apply text-ink no-underline hover:text-accent;
-}
+    .button-primary-armed {
+        @apply label-text border-b border-red-700 pb-1 text-red-700 transition-colors;
+    }
 
-.poem-title-text-lg {
-    @apply text-xl;
-}
+    /* Button style 2: Sort buttons (active/inactive states) */
+    .button-sort {
+        @apply label-text border-b pb-0.5 transition-colors;
+    }
 
-.poem-title-text-sm {
-    @apply text-base;
-}
+    .button-sort-active {
+        @apply border-accent text-accent;
+    }
 
-.poem-project-text {
-    @apply mt-1 italic leading-normal text-ink/90;
-}
-.poem-award-text {
-    @apply font-sans text-[0.78rem] text-ink/80;
-}
+    .button-sort-inactive {
+        @apply border-transparent text-muted hover:border-ink/30 hover:text-ink;
+    }
 
-.poem-statistics-text,
-.poem-group-text {
-    @apply eyebrow;
-}
+    /* Typography for small uppercase labels and groups */
+    .poem-statistics-text,
+    .poem-group-text {
+        @apply label-text;
+    }
 
-.poem-author-text,
-.poem-notes-text,
-.poem-features-text,
-.cluster-features-text {
-    @apply font-sans text-[0.78rem] text-ink/80;
-    /* font-sans text-[0.85rem] text-ink/80 */
-}
+    /* Legacy rename: button-text is for small, compact buttons */
+    .button-text {
+        font-family: var(--button-text-font-family);
+        font-weight: var(--button-text-font-weight);
+        letter-spacing: var(--button-text-letter-spacing);
+        line-height: var(--button-text-line-height);
+        text-transform: var(--button-text-transform);
+        transition:
+            color 180ms ease,
+            opacity 180ms ease;
+    }
+
+    .button-text-standard {
+        font-size: var(--button-text-font-size-standard);
+    }
+
+    .button-text-compact {
+        font-size: var(--button-text-font-size-compact);
+    }
+
+    .button-text-default {
+        @apply text-muted;
+    }
+
+    .button-text-accent {
+        @apply text-accent;
+    }
+
+    .button-text-danger {
+        @apply text-red-700;
+    }
+
+    .button-text-hoverable:hover {
+        @apply text-ink;
+    }
+
+    .button-text-disabled,
+    .button-text:disabled {
+        opacity: var(--button-text-opacity-disabled);
+    }
+
+    .button-text-armed {
+        @apply text-red-700;
+    }
+
+    .button-text-pending {
+        @apply text-muted;
+    }
+    .poem-title-text {
+        @apply font-display leading-snug tracking-tight;
+    }
+
+    .poem-title-link {
+        @apply text-ink no-underline hover:text-accent;
+    }
+
+    .poem-title-text-lg {
+        @apply text-xl;
+    }
+
+    .poem-title-text-sm {
+        @apply text-base;
+    }
+
+    .poem-project-text {
+        @apply mt-1 italic leading-normal text-ink/90;
+    }
+    .poem-award-text {
+        @apply font-sans text-[0.78rem] text-ink/80;
+    }
+
+    .poem-statistics-text,
+    .poem-group-text {
+        @apply label-text;
+    }
+
+    .poem-author-text,
+    .poem-notes-text,
+    .poem-features-text,
+    .cluster-features-text {
+        @apply font-sans text-[0.78rem] text-ink/80;
+        /* font-sans text-[0.85rem] text-ink/80 */
+    }
     .rule {
         @apply h-px bg-rule;
     }
-.poem-body-text,
-.poem-body {
-    @apply font-serif leading-[1.24] text-[1.12rem];
-}
+    .poem-body-text,
+    .poem-body {
+        @apply font-serif text-[1.12rem] leading-[1.24];
+    }
     /* Poem body: preserves authored whitespace and line breaks. */
     .poem-body {
         @apply whitespace-pre-wrap;
         hyphens: none;
         font-variant-numeric: oldstyle-nums;
     }
-
     .poem-body a {
         @apply underline decoration-muted underline-offset-2 hover:text-accent hover:decoration-accent;
-    }
-
-        /* Tag list: quiet small-caps feel Unused????? */
-    .taglist {
-        @apply font-sans text-[0.82rem] text-muted;
     }
 }

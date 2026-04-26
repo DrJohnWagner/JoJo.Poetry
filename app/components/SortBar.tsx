@@ -28,7 +28,7 @@ export default function SortBar({
 }) {
     return (
         <div className="mb-6">
-            <p className="eyebrow mb-3 text-muted">Sort</p>
+            <p className="label-text mb-3 text-muted">Sort</p>
             <div className="flex flex-wrap gap-x-5 gap-y-1">
                 {FIELDS.map(({ field, label, defaultDir }) => {
                     const active = sort.field === field
@@ -38,20 +38,23 @@ export default function SortBar({
                             onClick={() =>
                                 onChange(
                                     active
-                                        ? { field, dir: sort.dir === "asc" ? "desc" : "asc" }
+                                        ? {
+                                              field,
+                                              dir:
+                                                  sort.dir === "asc"
+                                                      ? "desc"
+                                                      : "asc",
+                                          }
                                         : { field, dir: defaultDir }
                                 )
                             }
-                            className={[
-                                "eyebrow pb-0.5 border-b transition-colors",
-                                active
-                                    ? "border-accent text-accent"
-                                    : "border-transparent text-muted hover:text-ink hover:border-ink/30",
-                            ].join(" ")}
+                            className={`button-sort ${active ? "button-sort-active" : "button-sort-inactive"}`}
                         >
                             {label}
                             {active && (
-                                <span className="ml-1">{sort.dir === "asc" ? "↑" : "↓"}</span>
+                                <span className="ml-1">
+                                    {sort.dir === "asc" ? "↑" : "↓"}
+                                </span>
                             )}
                         </button>
                     )

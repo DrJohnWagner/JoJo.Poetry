@@ -2,27 +2,27 @@
 
 import { useState } from "react"
 import type { Poem } from "@/lib/types"
-import { useAppConfig } from "./AppConfig"
-import PoemBody from "./poem/PoemBody"
-import PoemStatistics from "./poem/PoemStatistics"
-import PoemProject from "./poem/PoemProject"
-import PoemTitle from "./poem/PoemTitle"
-import DeleteButton from "./DeleteButton"
-import PoemAuthor from "./poem/PoemAuthor"
-import PoemNotes from "./poem/PoemNotes"
-import PoemSocial from "./poem/PoemSocial"
-import PoemGroup from "./poem/PoemGroup"
-import PoemFeatures from "./poem/PoemFeatures"
-import PoemEditorForm from "./PoemEditorForm"
-import HorizontalRule from "./HorizontalRule"
+import { useAppConfig } from "../AppConfig"
+import PoemBody from "./PoemBody"
+import PoemStatistics from "./PoemStatistics"
+import PoemProject from "./PoemProject"
+import PoemTitle from "./PoemTitle"
+import PoemAuthor from "./PoemAuthor"
+import PoemNotes from "./PoemNotes"
+import PoemSocial from "./PoemSocial"
+import PoemGroup from "./PoemGroup"
+import PoemFeatures from "./PoemFeatures"
+import PoemButtons from "./PoemButtons"
+import PoemEditor from "./PoemEditor"
+import HorizontalRule from "../HorizontalRule"
 import { cleanPoetryUrl } from "@/lib/format"
-import PoemAwards from "./poem/PoemAwards"
+import PoemAwards from "./PoemAwards"
 
 function MetaRow({ group, features }: { group: string; features: string[] }) {
     if (!features || features.length === 0) return null
     return (
         <>
-            <dt className="eyebrow pt-0">
+            <dt className="label-text pt-0">
                 <PoemGroup group={group} />
             </dt>
             <dd className="font-sans text-[0.78rem] text-ink/80">
@@ -42,11 +42,11 @@ export default function PoemDetail({ poem: initial }: { poem: Poem }) {
     if (editing) {
         return (
             <div>
-                <p className="eyebrow mb-6">
+                <p className="label-text mb-6">
                     Editing &middot; &ldquo;{liveTitle.trim() || "(Untitled)"}
                     &rdquo;
                 </p>
-                <PoemEditorForm
+                <PoemEditor
                     poem={poem}
                     density="comfortable"
                     onTitleChange={setLiveTitle}
@@ -102,7 +102,7 @@ export default function PoemDetail({ poem: initial }: { poem: Poem }) {
             <dl className="grid grid-cols-1 gap-x-4 gap-y-2 text-[0.95rem] md:grid-cols-[max-content_1fr]">
                 {poem.author && (
                     <>
-                        <dt className="eyebrow pt-1">Author</dt>
+                        <dt className="label-text pt-1">Author</dt>
                         <dd>
                             <PoemAuthor author={poem.author} />
                         </dd>
@@ -110,7 +110,7 @@ export default function PoemDetail({ poem: initial }: { poem: Poem }) {
                 )}
                 {poem.notes.length > 0 && (
                     <>
-                        <dt className="eyebrow pt-1">Notes</dt>
+                        <dt className="label-text pt-1">Notes</dt>
                         <dd>
                             <PoemNotes poem={poem} />
                         </dd>
@@ -125,7 +125,7 @@ export default function PoemDetail({ poem: initial }: { poem: Poem }) {
                 <MetaRow group="Contest fit" features={contest_fit} />
                 {socials.length > 0 && (
                     <>
-                        <dt className="eyebrow pt-1">Socials</dt>
+                        <dt className="label-text pt-1">Socials</dt>
                         <dd className="space-y-1">
                             {socials.map((s) => (
                                 <PoemSocial key={s} url={s} />
@@ -136,7 +136,7 @@ export default function PoemDetail({ poem: initial }: { poem: Poem }) {
 
                 {awards.length > 0 && (
                     <>
-                        <dt className="eyebrow pt-1">
+                        <dt className="label-text pt-1">
                             <PoemGroup group="Awards" />
                         </dt>
                         <dd className="space-y-1">
@@ -145,7 +145,7 @@ export default function PoemDetail({ poem: initial }: { poem: Poem }) {
                     </>
                 )}
 
-                <dt className="eyebrow pt-1">Link</dt>
+                <dt className="label-text pt-1">Link</dt>
                 <dd>
                     <a
                         href={cleanPoetryUrl(poem.url)}
@@ -159,14 +159,11 @@ export default function PoemDetail({ poem: initial }: { poem: Poem }) {
 
             <HorizontalRule />
             {!readOnly && (
-                <footer className="flex items-center justify-between gap-6">
-                    <button
-                        onClick={() => setEditing(true)}
-                        className="eyebrow border-b border-ink pb-1 transition-colors hover:border-accent hover:text-accent"
-                    >
-                        Edit poem
-                    </button>
-                    <DeleteButton id={poem.id} />
+                <footer>
+                    <PoemButtons
+                        onEdit={() => setEditing(true)}
+                        deleteId={poem.id}
+                    />
                 </footer>
             )}
         </div>

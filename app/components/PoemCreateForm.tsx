@@ -4,13 +4,14 @@ import { useEffect, useRef, useState } from "react"
 import { useRouter } from "next/navigation"
 import { createPoem } from "@/lib/api"
 import { plainTextToBody } from "@/lib/format"
-import NotesEditor from "./NotesEditor"
+import PoemNotesEditor from "./poem/PoemNotesEditor"
 import PoemMetadataEditor, {
     inputCls,
     textareaCls,
     Labelled,
     type PoemMetadataValues,
-} from "./PoemMetadataEditor"
+} from "./poem/PoemMetadataEditor"
+import ErrorMessage from "./ErrorMessage"
 
 /** Dedicated create form. Mirrors the editing surface in field names,
  *  widgets, and behaviour so that the create and edit experiences feel
@@ -143,7 +144,7 @@ export default function PoemCreateForm() {
     return (
         <form onSubmit={submit} className="space-y-5">
             <div>
-                <p className="eyebrow mb-6 text-muted">
+                <p className="label-text mb-6 text-muted">
                     New poem · fields marked{" "}
                     <span className="text-accent">⦁</span> are required.
                 </p>
@@ -191,7 +192,7 @@ export default function PoemCreateForm() {
                 />
             </Labelled>
 
-            <NotesEditor value={notes} onChange={setNotes} />
+            <PoemNotesEditor value={notes} onChange={setNotes} />
 
             <PoemMetadataEditor
                 values={{
@@ -224,11 +225,11 @@ export default function PoemCreateForm() {
                 </label>
             </Labelled> */}
 
-            <div className="flex items-center gap-6 pt-4 font-sans text-[0.72rem] uppercase tracking-wider2">
+            <div className="flex items-center gap-6 pt-4">
                 <button
                     type="submit"
                     disabled={saving}
-                    className="border-b border-accent pb-1 text-accent disabled:opacity-60"
+                    className="button-text button-text-standard button-text-accent button-text-disabled border-b border-accent pb-1"
                 >
                     {saving ? "saving…" : "save poem"}
                 </button>
@@ -236,15 +237,14 @@ export default function PoemCreateForm() {
                     type="button"
                     onClick={cancel}
                     disabled={saving}
-                    className="text-muted hover:text-ink"
+                    className="button-text button-text-standard button-text-default button-text-hoverable button-text-disabled"
                 >
                     cancel
                 </button>
-                {err && (
-                    <span className="normal-case tracking-normal text-red-700">
-                        {err}
-                    </span>
-                )}
+                <ErrorMessage
+                    message={err}
+                    className="inline normal-case tracking-normal"
+                />
             </div>
         </form>
     )

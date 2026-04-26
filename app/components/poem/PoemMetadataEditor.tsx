@@ -18,7 +18,7 @@ export function Labelled({
 }) {
     return (
         <label className="block">
-            <span className="eyebrow">
+            <span className="label-text">
                 {label}
                 {required && <span className="ml-1 text-accent">⦁</span>}
             </span>

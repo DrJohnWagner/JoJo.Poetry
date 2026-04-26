@@ -150,7 +150,7 @@ export default function SearchBar({
             <form onSubmit={submit} className="mb-5">
                 <div className="flex items-end gap-3">
                     <label className="block flex-1">
-                        <span className="eyebrow">Search</span>
+                        <span className="label-text">Search</span>
                         <input
                             type="search"
                             value={draft}
@@ -168,7 +168,7 @@ export default function SearchBar({
                     <button
                         type="button"
                         onClick={() => setAdvancedOpen(true)}
-                        className={`eyebrow border-b pb-1 transition-colors ${
+                        className={`label-text border-b pb-1 transition-colors ${
                             hasAdvanced(value)
                                 ? "border-accent text-accent"
                                 : "border-muted text-muted hover:border-ink hover:text-ink"
@@ -180,7 +180,7 @@ export default function SearchBar({
 
                 <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2">
                     {hasAnyFilter && (
-                        <p className="eyebrow text-muted">
+                        <p className="label-text text-muted">
                             {`${activeFilters.length} active filter${activeFilters.length === 1 ? "" : "s"}`}
                         </p>
                     )}
@@ -191,7 +191,7 @@ export default function SearchBar({
                                 setDraft("")
                                 onChange({ q: "", ...EMPTY_ADVANCED })
                             }}
-                            className="eyebrow text-muted hover:text-ink"
+                            className="label-text text-muted hover:text-ink"
                         >
                             Clear all
                         </button>

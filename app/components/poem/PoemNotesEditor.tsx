@@ -3,7 +3,7 @@
 /** Multi-line editor for the notes field.
  *  Each non-empty line in the textarea maps to one string in the notes array.
  */
-export default function NotesEditor({
+export default function PoemNotesEditor({
     value,
     onChange,
 }: {
@@ -12,7 +12,7 @@ export default function NotesEditor({
 }) {
     return (
         <label className="block">
-            <span className="eyebrow">Author&#39;s Notes</span>
+            <span className="label-text">Author's Notes</span>
             <textarea
                 value={value}
                 onChange={(e) => onChange(e.target.value)}

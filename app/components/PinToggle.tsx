@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react"
 import { patchPoem } from "@/lib/api"
 import { useAppConfig } from "./AppConfig"
+import ErrorMessage from "./ErrorMessage"
 
 /** A small, text-forward pin control. Visually secondary to the title.
  *  Server-confirmed: local state flips only after PATCH returns 200.
@@ -44,12 +45,16 @@ export default function PinToggle({
             disabled={pending}
             aria-pressed={pinned}
             title={pinned ? "Unpin" : "Pin to top"}
-            className={`font-sans text-[0.76rem] uppercase tracking-wider2 transition-colors ${
-                pinned ? "text-accent" : "text-muted hover:text-ink"
-            } disabled:opacity-60`}
+            className={`button-text button-text-standard${
+                pending ? "button-text-disabled" : ""
+            } ${
+                pinned
+                    ? "button-text-accent"
+                    : "button-text-default button-text-hoverable"
+            }`}
         >
             {pending ? "…" : pinned ? "◆ pinned" : "◇ pin"}
-            {err && <span className="ml-2 text-red-700">{err}</span>}
+            <ErrorMessage message={err} className="ml-2 inline" />
         </button>
     )
 }

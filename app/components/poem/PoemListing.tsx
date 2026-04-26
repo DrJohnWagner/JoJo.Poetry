@@ -3,12 +3,22 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { deletePoem, fetchPoems } from "@/lib/api"
 import type { Poem, SearchState } from "@/lib/types"
-import SearchBar from "./SearchBar"
-import SortBar, { DEFAULT_SORT, type SortState } from "./SortBar"
+import SearchBar from "../SearchBar"
+import SortBar, { DEFAULT_SORT, type SortState } from "../SortBar"
 import PoemList from "./PoemList"
+import ErrorMessage from "../ErrorMessage"
 
 const PAGE_SIZE = 5
-const EMPTY: SearchState = { q: "", year: null, month: null, medals: [], title: "", body: "", project: "", notes: "" }
+const EMPTY: SearchState = {
+    q: "",
+    year: null,
+    month: null,
+    medals: [],
+    title: "",
+    body: "",
+    project: "",
+    notes: "",
+}
 
 export default function PoemListing({
     initial,
@@ -120,7 +130,9 @@ export default function PoemListing({
         const el = sentinelRef.current
         if (!el) return
         const observer = new IntersectionObserver(
-            ([entry]) => { if (entry.isIntersecting) loadMore() },
+            ([entry]) => {
+                if (entry.isIntersecting) loadMore()
+            },
             { rootMargin: "200px" }
         )
         observer.observe(el)
@@ -158,6 +170,7 @@ export default function PoemListing({
     const sortedItems = useMemo(() => {
         const { field, dir } = sort
         return [...items].sort((a, b) => {
+            if (a.pinned !== b.pinned) return a.pinned ? -1 : 1
             let cmp: number
             if (field === "title") {
                 cmp = a.title.localeCompare(b.title)
@@ -212,14 +225,14 @@ export default function PoemListing({
 
             <div ref={sentinelRef} className="mt-16 flex items-center gap-6">
                 {loading && (
-                    <span className="eyebrow text-muted">Loading…</span>
+                    <span className="label-text text-muted">Loading…</span>
                 )}
                 {!hasMore && total > 0 && (
-                    <span className="eyebrow text-muted">
+                    <span className="label-text text-muted">
                         End · {total} poem{total === 1 ? "" : "s"}
                     </span>
                 )}
-                {err && <span className="text-sm text-red-700">{err}</span>}
+                <ErrorMessage message={err} className="text-sm inline" />
             </div>
         </div>
     )

@@ -2,7 +2,7 @@ import Page from "@/components/Page"
 import LColumn from "@/components/LColumn"
 import RColumn from "@/components/RColumn"
 import Header from "@/components/Header"
-import PoemListing from "@/components/PoemListing"
+import PoemListing from "@/components/poem/PoemListing"
 import RecentPoems from "@/components/RecentPoems"
 import { fetchPoems, fetchRecentPoems } from "@/lib/api"
 

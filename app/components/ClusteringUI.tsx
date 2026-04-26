@@ -1,42 +1,18 @@
 "use client"
 
-import type { ClusterPoem, ClusterResponse, Poem } from "@/lib/types"
-import PoemList from "./PoemList"
+import { useState } from "react"
+import { deletePoem, fetchPoem } from "@/lib/api"
+import type { ClusterResponse, Poem } from "@/lib/types"
+import PoemList from "./poem/PoemList"
 import ClusterFeatures from "./cluster/ClusterFeatures"
 import ClusterHeader from "./cluster/ClusterHeader"
 import ClusterLabel from "./cluster/ClusterLabel"
-import PoemTitle from "./poem/PoemTitle"
+import ClusterList from "./cluster/ClusterList"
 import PoemSummary from "./poem/PoemSummary"
-import PoemStatistics from "./poem/PoemStatistics"
-import PoemProject from "./poem/PoemProject"
-import PoemFeatures from "./poem/PoemFeatures"
-import { getFeatureLabels, type ClusterGroup } from "@/lib/cluster"
+import HorizontalRule from "./HorizontalRule"
+import ErrorMessage from "./ErrorMessage"
+import { type ClusterGroup } from "@/lib/cluster"
 
-function PoemItem({
-    poem,
-    selected,
-    onPinnedChange,
-}: {
-    poem: ClusterPoem
-    selected: ClusterGroup[]
-    onPinnedChange: (poemId: string, pinned: boolean) => void
-}) {
-    const featureLabels = getFeatureLabels(poem, selected)
-
-    return (
-        <li key={poem.id}>
-            <PoemTitle
-                id={poem.id}
-                title={poem.title}
-                pinned={poem.pinned}
-                onPinChange={(next) => onPinnedChange(poem.id, next)}
-            />
-            <PoemStatistics poem={poem} />
-            {poem.project && <PoemProject project={poem.project} />}
-            <PoemFeatures features={featureLabels} />
-        </li>
-    )
-}
 export default function ClusteringUI({
     initial,
     selected,
@@ -52,13 +28,98 @@ export default function ClusteringUI({
     result: ClusterResponse | null
     onPinnedChange: (poemId: string, pinned: boolean) => void
 }) {
+    const [editingId, setEditingId] = useState<string | null>(null)
+    const [editingTitle, setEditingTitle] = useState("")
+    const [dirty, setDirty] = useState(false)
+    const [rowError, setRowError] = useState<string | null>(null)
+    const [loadedPoems, setLoadedPoems] = useState<Record<string, Poem>>({})
+    const [deletedIds, setDeletedIds] = useState<Set<string>>(new Set())
+
     const totalPoems = result
-        ? result.clusters.reduce((sum, cluster) => sum + cluster.size, 0)
+        ? result.clusters.reduce((sum, c) => sum + c.size, 0)
         : 0
+
+    function stopEditing() {
+        setDirty(false)
+        setEditingId(null)
+    }
+
+    function updateLoaded(poem: Poem) {
+        setLoadedPoems((prev) => ({ ...prev, [poem.id]: poem }))
+    }
+
+    function handlePinChange(id: string, pinned: boolean) {
+        onPinnedChange(id, pinned)
+        setLoadedPoems((prev) => {
+            const target = prev[id]
+            if (!target) return prev
+            return { ...prev, [id]: { ...target, pinned } }
+        })
+    }
+
+    function confirmDiscard(reason: string): boolean {
+        if (!dirty) return true
+        return window.confirm(`Discard unsaved changes? (${reason})`)
+    }
+
+    async function startEditing(poem: { id: string; title: string }) {
+        if (editingId && editingId !== poem.id) {
+            if (!confirmDiscard(`open editor for "${poem.title}"`)) return
+        }
+
+        setRowError(null)
+        setDirty(false)
+
+        let target = loadedPoems[poem.id]
+        if (!target) {
+            try {
+                target = await fetchPoem(poem.id)
+                updateLoaded(target)
+            } catch (e: unknown) {
+                setRowError(e instanceof Error ? e.message : "Failed")
+                return
+            }
+        }
+
+        setEditingTitle(target.title)
+        setEditingId(target.id)
+    }
+
+    async function handleDelete(id: string, title: string) {
+        if (editingId === id && !confirmDiscard(`delete "${title}"`)) return
+
+        setRowError(null)
+        try {
+            await deletePoem(id)
+            setDeletedIds((prev) => new Set([...prev, id]))
+            if (editingId === id) stopEditing()
+        } catch (e: unknown) {
+            setRowError(e instanceof Error ? e.message : "Failed")
+        }
+    }
 
     return (
         <section>
-            {selected.length === 0 && <PoemList poems={initial.items} />}
+            {selected.length === 0 && (
+                <PoemList
+                    poems={initial.items
+                        .filter((p) => !deletedIds.has(p.id))
+                        .map((p) => loadedPoems[p.id] ?? p)}
+                    editingId={editingId}
+                    onEdit={(poem) => void startEditing(poem)}
+                    onCancel={stopEditing}
+                    onSaved={(updated) => {
+                        updateLoaded(updated)
+                        onPinnedChange(updated.id, updated.pinned)
+                        stopEditing()
+                    }}
+                    onDirtyChange={setDirty}
+                    onDelete={(poem) => void handleDelete(poem.id, poem.title)}
+                    onPinChanged={(poem, pinned) =>
+                        handlePinChange(poem.id, pinned)
+                    }
+                />
+            )}
 
             {loading && selected.length > 0 && (
                 <p className="mt-10 font-sans text-sm text-muted">
@@ -66,51 +127,70 @@ export default function ClusteringUI({
                 </p>
             )}
 
-            {/* Error */}
-            {error && (
-                <p className="mt-8 font-sans text-sm text-red-700">{error}</p>
-            )}
+            <ErrorMessage message={error} className="mt-8 font-sans text-sm" />
 
-            {/* Results */}
             {result && (
                 <>
-                    <div className="rule mb-6 mt-8" />
-
-                    {/* Summary */}
+                    <HorizontalRule />
                     <ClusterHeader result={result} totalPoems={totalPoems} />
 
-                    {/* Clusters */}
                     <div className="mt-8 space-y-10">
                         {result.clusters.map((cluster, i) => (
                             <div key={i}>
                                 <ClusterLabel cluster={cluster} />
-                                {cluster.features.length > 0 && (
-                                    <ClusterFeatures
-                                        features={cluster.features}
+                                <ClusterFeatures features={cluster.features} />
+                                <div className="mt-4">
+                                    <ClusterList
+                                        poems={cluster.poems
+                                            .filter(
+                                                (p) => !deletedIds.has(p.id)
+                                            )
+                                            .map((p) => loadedPoems[p.id] ?? p)}
+                                        selected={selected}
+                                        editingId={editingId}
+                                        editingTitle={editingTitle}
+                                        loadedPoems={loadedPoems}
+                                        onEdit={(poem) =>
+                                            void startEditing(poem)
+                                        }
+                                        onDelete={(poem) =>
+                                            void handleDelete(
+                                                poem.id,
+                                                poem.title
+                                            )
+                                        }
+                                        onSaved={(updated) => {
+                                            updateLoaded(updated)
+                                            onPinnedChange(
+                                                updated.id,
+                                                updated.pinned
+                                            )
+                                            stopEditing()
+                                        }}
+                                        onCancel={stopEditing}
+                                        onDirtyChange={setDirty}
+                                        onTitleChange={setEditingTitle}
+                                        onPinChanged={(poem, pinned) =>
+                                            handlePinChange(poem.id, pinned)
+                                        }
                                     />
-                                )}
-                                <ul className="mt-4 space-y-5">
-                                    {cluster.poems.map((p) => (
-                                        <PoemItem
-                                            key={p.id}
-                                            poem={p}
-                                            selected={selected}
-                                            onPinnedChange={onPinnedChange}
-                                        />
-                                    ))}
-                                </ul>
-                                {i < result.clusters.length - 1 && (
-                                    <div className="rule mb-6 mt-8" />
-                                )}
+                                </div>
+                                <HorizontalRule
+                                    show={i < result.clusters.length - 1}
+                                />
                             </div>
                         ))}
                     </div>
 
-                    {/* Excluded */}
+                    <ErrorMessage
+                        message={rowError}
+                        className="mt-8 font-sans text-sm"
+                    />
+
                     {result.excluded.length > 0 && (
                         <div className="mt-10">
-                            <div className="rule mb-6" />
-                            <p className="eyebrow mb-4">
+                            <HorizontalRule />
+                            <p className="label-text mb-4">
                                 Unclustered — cluster too small
                             </p>
                             <div className="space-y-4">
