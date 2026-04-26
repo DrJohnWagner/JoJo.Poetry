@@ -14,7 +14,7 @@ Two services, one flat JSON data source:
 
 ```
 ┌─────────────────┐ HTTP/JSON ┌──────────────────────┐
-│ Next.js 15 │ ───────────▶ │ FastAPI │
+│ Next.js 16 │ ───────────▶ │ FastAPI │
 │ React 19 / TS │ │ Pydantic v2 │
 │ Tailwind 3 │ ◀─────────── │ │
 └─────────────────┘ └──────────┬───────────┘
@@ -62,7 +62,7 @@ Two services, one flat JSON data source:
 │   └── Dockerfile                    # Python 3.11-slim image
 ├── requirements.txt                  # Production Python deps
 ├── requirements-dev.txt              # Adds pytest, httpx, jsonschema
-├── tests/server/                     # pytest suite (218 tests)
+├── tests/server/                     # pytest suite
 ├── app/
 │   ├── page.tsx                      # Landing: listing + search + incremental load + recent poems aside
 │   ├── clusters/page.tsx             # Clustering server entry: fetches initial/recent data and renders ClustersPageClient
@@ -90,7 +90,7 @@ Two services, one flat JSON data source:
 │   │   ├── PoemCreateForm.tsx        # Dedicated POST form with defaults + guards
 │   │   ├── PoemDetail.tsx            # Reading view + Edit toggle
 │   │   ├── SimilarPoems.tsx          # Similar poems aside: all 5 axes (overall/theme/form/emotion/imagery) grouped
-│   │   ├── RecentPoems.tsx           # Recent poems aside: k most recent by date, title + project
+│   │   ├── RecentPoems.tsx           # Recent poems aside: k most recent by date, rendered via PoemSummary (abridged)
 │   │   ├── SearchBar.tsx             # q + submit + Advanced modal trigger
 │   │   ├── SortBar.tsx               # Client-side sort buttons (title/date/lines/words/rating/medals)
 │   │   ├── AdvancedSearchDialog.tsx  # Native <dialog>-backed modal (title/body/project/notes/year/month/medals/tags)
@@ -112,7 +112,7 @@ Two services, one flat JSON data source:
 │   │   │   ├── PoemGroup.tsx         # Metadata group label span (eyebrow style)
 │   │   │   ├── PoemNotes.tsx         # Unordered list of per-poem notes
 │   │   │   ├── PoemSocial.tsx        # Social URL rendered as hostname link
-│   │   │   └── PoemBody.tsx          # Body rendered as HTML: <br/> line breaks + anchor links
+│   │   │   └── PoemBody.tsx          # Safe inline parser for lightweight markdown-like text (*, **, [text](url))
 │   └── lib/
 │       ├── api.ts                    # Typed fetch wrappers (fetchPoems, fetchSimilarPoems, fetchRecentPoems, fetchClusters)
 │       ├── cluster.ts                # Cluster feature/group label helpers for cluster UI rendering
@@ -140,7 +140,7 @@ The authoritative schema is `database/schemas/poem.schema.json`;
 | `id`                                                                                  | UUID v4 string             | yes                          | **immutable** | no                            | Sole identifier used everywhere.                                                                   |
 | `title`                                                                               | string                     | yes                          | yes                 | yes                           |                                                                                                    |
 | `url`                                                                                 | URI                        | yes                          | yes                 | no                            | Canonical external link.                                                                           |
-| `body`                                                                                | string (HTML fragment)     | yes                          | yes                 | yes\*                         | `` line breaks + literal whitespace for indentation. \*Search hits a plain-text projection. |
+| `body`                                                                                | string (plain text)        | yes                          | yes                 | yes                            | Stored and edited as plain text; newline and indentation are preserved on render. |
 | `awards`                                                                              | `[{url, medal, title?}]` | yes (may be empty)           | yes (API)           | via `medals` filter         | `medal` is surfaced to search; `title` is an optional award name displayed in the UI.          |
 | `date`                                                                                | ISO 8601 datetime          | yes                          | yes                 | year/month in advanced search | Timezone-aware; UTC in existing data.                                                              |
 | `themes`, `moods`, `poetic_forms`, `techniques`, `tones_voices`, `key_images`, `contest_fit` | `string[]`               | yes (may be empty)           | yes                 | yes                           | Free-vocabulary tags. `moods`: tonal/affective; `poetic_forms`: metrical/structural forms; `techniques`: devices and techniques; `tones_voices`: voice/stance. |
@@ -158,21 +158,13 @@ rejected on every read and every write.
 
 ### The `body` field — text fidelity
 
-- **Stored verbatim** as an HTML fragment: `<br/>` line breaks and
-  literal leading whitespace for indentation. No normalisation on
-  write.
-- **Projected** for search, `lines`/`words` derivation, display, and
-  editing by one shared regex (`<br\s*/?>\n?` → `\n`) on both
-  backend (`_body_to_plaintext`) and frontend (`bodyToPlainText`).
-- **Displayed** as HTML via `dangerouslySetInnerHTML` inside
-  `white-space: pre-wrap`, so authored newlines **and** leading-whitespace
-  indentation survive byte-for-byte. Anchor tags (`<a href="...">`) are
-  normalised on render: the href and text are extracted and the tag is
-  rewritten as `<a href="…" target="_blank" rel="noreferrer">text ↗</a>`,
-  opening in a new tab with a visual indicator.
-- **Edited** as the same plaintext projection — writers edit what
-  they read. `plainTextToBody` rewrites each newline as `<br/>\n`
-  when saving, reproducing the canonical stored form.
+- **Stored verbatim** as plain text; no HTML is required.
+- **Displayed** by a safe inline renderer in `PoemBody.tsx` that supports
+  `*italic*`, `**bold**`, and `[text](url)` links while preserving authored
+  line breaks via `white-space: pre-wrap`.
+- **Legacy compatibility:** historical `<br>` tags are normalised to `\n`
+  during render so older content still displays correctly.
+- **Search and derived metrics** (`lines`, `words`) operate on plain text.
 
 ## The role of `database/Poems.json`
 
@@ -551,8 +543,9 @@ axes via `SimilarPoems`. The page calls `GET /api/poems/{id}/similar`
 (default per-category `k` values) and groups results under **Overall**,
 **Theme**, **Form & Craft**, **Emotion**, and **Imagery** headings.
 Empty axes are silently omitted. If the entire call fails, the aside is
-omitted and the page renders normally. Each result shows only the poem
-title as a link; scores and breakdowns are not exposed.
+omitted and the page renders normally. Each result is rendered with the
+shared summary view (title + abridged stats/project). Scores and
+breakdowns are not exposed in the UI.
 
 Both the listing and clustering asides use the shared `PoemSummary`
 component (title link + optional two-line-clamped project line).
@@ -573,8 +566,7 @@ shared metadata tags. The endpoint is read-safe (available in
 {
   "categories": ["themes", "poetic_forms"],  // required; 1+ from the list below
   "k": 4,            // optional; omit for auto-k selection
-  "min_cluster_size": 2,   // optional; default 2
-  "top_features": 3        // optional; default 3, max 20
+  "min_cluster_size": 2   // optional; default 2
 }
 ```
 
@@ -598,8 +590,8 @@ shared metadata tags. The endpoint is read-safe (available in
    scikit-learn. Deterministic — no random state.
 
 4. **Feature ranking** — lift = `cluster_freq / (global_freq + ε)`.
-   Top `top_features` features by lift are returned per cluster
-   (features with zero presence in the cluster are omitted).
+  The top 3 features by lift are returned per cluster
+  (features with zero presence in the cluster are omitted).
 
 5. **Cluster label** — up to 3 features with frequency ≥ 0.5 in the
    cluster, ranked by lift, joined with ` / `. Falls back to the
@@ -639,8 +631,25 @@ shared metadata tags. The endpoint is read-safe (available in
     }
   ],
   "excluded": [
-    { "id": "<uuid>", "title": "...", "reason": "cluster too small" }
+    {
+      "id": "<uuid>",
+      "title": "...",
+      "project": "...",
+      "rating": 42,
+      "lines": 18,
+      "words": 122,
+      "date": "2024-02-01T00:00:00Z",
+      "awards": [],
+      "reason": "cluster too small"
+    }
   ],
+      "rating": 87,
+      "lines": 32,
+      "words": 214,
+      "date": "2024-06-20T00:00:00Z",
+      "awards": [
+        { "url": "https://example.com/contest", "medal": "Silver" }
+      ],
   "k_used": 3,
   "categories_used": ["themes", "poetic_forms"]
 }
@@ -735,7 +744,7 @@ make check          # test + typecheck + lint
 Or manually:
 
 ```bash
-READ_ONLY=false uv run pytest tests/server   # ~218 tests, ~11 s
+READ_ONLY=false uv run pytest tests/server   # server test suite
 npx tsc --noEmit                             # TypeScript type-check
 npx next build                               # production build
 ```
