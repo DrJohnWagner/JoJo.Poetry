@@ -1,24 +1,28 @@
 "use client"
 
-import { useEffect, useState } from "react"
-import { fetchClusters } from "@/lib/api"
 import type { ClusterPoem, ClusterResponse, Poem } from "@/lib/types"
 import PoemList from "./PoemList"
-import ClusterCheckboxes from "./cluster/ClusterCheckboxes"
 import ClusterFeatures from "./cluster/ClusterFeatures"
 import ClusterHeader from "./cluster/ClusterHeader"
 import ClusterLabel from "./cluster/ClusterLabel"
 import PoemTitle from "./poem/PoemTitle"
+import PoemSummary from "./poem/PoemSummary"
+import PoemStatistics from "./poem/PoemStatistics"
 import PoemProject from "./poem/PoemProject"
-import { getFeatureLabels } from "@/lib/cluster"
+import PoemFeatures from "./poem/PoemFeatures"
+import { getFeatureLabels, type ClusterGroup } from "@/lib/cluster"
 
 function PoemItem({
     poem,
+    selected,
     onPinnedChange,
 }: {
     poem: ClusterPoem
+    selected: ClusterGroup[]
     onPinnedChange: (poemId: string, pinned: boolean) => void
 }) {
+    const featureLabels = getFeatureLabels(poem, selected)
+
     return (
         <li key={poem.id}>
             <PoemTitle
@@ -27,92 +31,40 @@ function PoemItem({
                 pinned={poem.pinned}
                 onPinChange={(next) => onPinnedChange(poem.id, next)}
             />
+            <PoemStatistics poem={poem} />
             {poem.project && <PoemProject project={poem.project} />}
-            {getFeatureLabels(poem).length > 0 && (
-                <p className="taglist mt-1">
-                    {getFeatureLabels(poem).join(" · ")}
-                </p>
-            )}
+            <PoemFeatures features={featureLabels} />
         </li>
     )
 }
 export default function ClusteringUI({
     initial,
+    selected,
+    loading,
+    error,
+    result,
+    onPinnedChange,
 }: {
     initial: { items: Poem[]; total: number; has_more: boolean }
+    selected: ClusterGroup[]
+    loading: boolean
+    error: string | null
+    result: ClusterResponse | null
+    onPinnedChange: (poemId: string, pinned: boolean) => void
 }) {
-    const [selected, setSelected] = useState<string[]>([])
-    const [loading, setLoading] = useState(false)
-    const [error, setError] = useState<string | null>(null)
-    const [result, setResult] = useState<ClusterResponse | null>(null)
-
-    function toggle(cat: string) {
-        setSelected((prev) =>
-            prev.includes(cat) ? prev.filter((c) => c !== cat) : [...prev, cat]
-        )
-    }
-
-    function handlePinnedChange(poemId: string, pinned: boolean) {
-        setResult((prev) => {
-            if (!prev) return prev
-            return {
-                ...prev,
-                clusters: prev.clusters.map((cluster) => ({
-                    ...cluster,
-                    poems: cluster.poems.map((poem) =>
-                        poem.id === poemId ? { ...poem, pinned } : poem
-                    ),
-                })),
-            }
-        })
-    }
-
-    useEffect(() => {
-        if (selected.length === 0) return
-
-        let cancelled = false
-
-        async function run() {
-            setLoading(true)
-            setError(null)
-            setResult(null)
-            try {
-                const next = await fetchClusters(selected)
-                if (!cancelled) setResult(next)
-            } catch (e) {
-                if (!cancelled) {
-                    setResult(null)
-                    setError(e instanceof Error ? e.message : "Request failed")
-                }
-            } finally {
-                if (!cancelled) setLoading(false)
-            }
-        }
-
-        void run()
-
-        return () => {
-            cancelled = true
-        }
-    }, [selected])
-
     const totalPoems = result
-        ? result.clusters.reduce((s, c) => s + c.size, 0)
+        ? result.clusters.reduce((sum, cluster) => sum + cluster.size, 0)
         : 0
 
     return (
         <section>
-            <div className="mb-6">
-                <ClusterCheckboxes selected={selected} toggle={toggle} />
-            </div>
             {selected.length === 0 && <PoemList poems={initial.items} />}
 
-            {/* Placeholder
-            {selected.length > 0 && !result && !loading && !error && (
+            {loading && selected.length > 0 && (
                 <p className="mt-10 font-sans text-sm text-muted">
-                    Select one or more categories to cluster automatically.
+                    Clustering poems...
                 </p>
-            )} */}
+            )}
 
             {/* Error */}
             {error && (
@@ -142,7 +94,8 @@ export default function ClusteringUI({
                                         <PoemItem
                                             key={p.id}
                                             poem={p}
-                                            onPinnedChange={handlePinnedChange}
+                                            selected={selected}
+                                            onPinnedChange={onPinnedChange}
                                         />
                                     ))}
                                 </ul>
@@ -160,13 +113,15 @@ export default function ClusteringUI({
                             <p className="eyebrow mb-4">
                                 Unclustered — cluster too small
                             </p>
-                            <ul className="space-y-3">
+                            <div className="space-y-4">
                                 {result.excluded.map((e) => (
-                                    <li key={String(e.id)}>
-                                        <PoemTitle id={e.id} title={e.title} />
-                                    </li>
+                                    <PoemSummary
+                                        key={String(e.id)}
+                                        poem={e}
+                                        variant="abridged"
+                                    />
                                 ))}
-                            </ul>
+                            </div>
                         </div>
                     )}
                 </>

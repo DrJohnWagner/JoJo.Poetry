@@ -1,18 +1,31 @@
-import type { ClusterPoem } from "@/lib/types"
-import { toLabel } from "./format"
+import type { Poem, ClusterPoem } from "@/lib/types"
+import { toSortedLabels } from "./format"
 
-export const getGroups = (p: ClusterPoem) => {
+export type ClusterGroup =
+    | "themes"
+    | "moods"
+    | "poetic_forms"
+    | "techniques"
+    | "tones_voices"
+
+export const getGroups = (p: Poem | ClusterPoem) => {
     return [
         p.themes,
-        p.emotional_registers,
-        p.formal_modes,
-        p.craft_features,
-        p.stylistic_postures,
+        p.moods,
+        p.poetic_forms,
+        p.techniques,
+        p.tones_voices,
     ]
 }
 
 export const getFeatures = (groups: Array<Array<string>>) => groups.flat()
 
-export const getFeatureLabels = (p: ClusterPoem) => {
-    return getFeatures(getGroups(p)).map(toLabel)
+export const getFeatureLabels = (
+    p: Poem | ClusterPoem,
+    selected?: readonly ClusterGroup[]
+) => {
+    const groups = selected?.length
+        ? selected.map((group) => p[group])
+        : getGroups(p)
+    return toSortedLabels(getFeatures(groups))
 }

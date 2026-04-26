@@ -3,11 +3,12 @@
 import { useState } from "react"
 import type { Poem } from "@/lib/types"
 import { useAppConfig } from "./AppConfig"
-import PoemStatistics from "./PoemStatistics"
+import PoemStatistics from "./poem/PoemStatistics"
 import PoemProject from "./poem/PoemProject"
 import PoemTitle from "./poem/PoemTitle"
-import PoemBody from "./PoemBody"
+import PoemBody from "./poem/PoemBody"
 import PoemRowEditor from "./PoemRowEditor"
+import { toSortedLabels } from "@/lib/format"
 
 export default function PoemRow({
     poem,
@@ -77,7 +78,8 @@ export default function PoemRow({
             </div>
             {poem.themes.length > 0 && (
                 <p className="taglist mt-3">
-                    {poem.themes.slice(0, 6).join(" · ")}
+                    {/* {toSortedLabels(poem.themes).slice(0, 6).join(" · ")} */}
+                    {toSortedLabels(poem.themes).join(" · ")}
                 </p>
             )}
             {!readOnly && (

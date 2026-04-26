@@ -107,8 +107,8 @@ class PoemCreate(BaseModel):
     Optional (defaults applied server-side):
 
     - ``date`` — defaults to the current UTC time (second precision).
-    - ``awards`` / ``themes`` / ``emotional_registers`` /
-      ``formal_modes`` / ``craft_features`` / ``stylistic_postures`` /
+    - ``awards`` / ``themes`` / ``moods`` /
+      ``poetic_forms`` / ``techniques`` / ``tones_voices`` /
       ``key_images`` / ``contest_fit`` — default
       to ``[]``.
     - ``pinned`` — defaults to ``False``.
@@ -133,10 +133,10 @@ class PoemCreate(BaseModel):
     date: Optional[datetime] = None
     awards: List[Award] = Field(default_factory=list)
     themes: List[str] = Field(default_factory=list)
-    emotional_registers: List[str] = Field(default_factory=list)
-    formal_modes: List[str] = Field(default_factory=list)
-    craft_features: List[str] = Field(default_factory=list)
-    stylistic_postures: List[str] = Field(default_factory=list)
+    moods: List[str] = Field(default_factory=list)
+    poetic_forms: List[str] = Field(default_factory=list)
+    techniques: List[str] = Field(default_factory=list)
+    tones_voices: List[str] = Field(default_factory=list)
     key_images: List[str] = Field(default_factory=list)
     contest_fit: List[str] = Field(default_factory=list)
     pinned: bool = False
@@ -166,10 +166,10 @@ class PoemPatch(BaseModel):
     awards: Optional[List[Award]] = None
     date: Optional[datetime] = None
     themes: Optional[List[str]] = None
-    emotional_registers: Optional[List[str]] = None
-    formal_modes: Optional[List[str]] = None
-    craft_features: Optional[List[str]] = None
-    stylistic_postures: Optional[List[str]] = None
+    moods: Optional[List[str]] = None
+    poetic_forms: Optional[List[str]] = None
+    techniques: Optional[List[str]] = None
+    tones_voices: Optional[List[str]] = None
     key_images: Optional[List[str]] = None
     project: Optional[str] = None
     contest_fit: Optional[List[str]] = None
@@ -194,10 +194,10 @@ def _matches(
     p: Poem,
     q: Optional[str],
     themes: List[str],
-    emotional_registers: List[str],
-    formal_modes: List[str],
-    craft_features: List[str],
-    stylistic_postures: List[str],
+    moods: List[str],
+    poetic_forms: List[str],
+    techniques: List[str],
+    tones_voices: List[str],
     contest_fit: List[str],
     min_rating: Optional[int],
     max_rating: Optional[int],
@@ -212,10 +212,10 @@ def _matches(
             _body_to_plaintext(p.body),
             p.project,
             " ".join(p.themes),
-            " ".join(p.emotional_registers),
-            " ".join(p.formal_modes),
-            " ".join(p.craft_features),
-            " ".join(p.stylistic_postures),
+            " ".join(p.moods),
+            " ".join(p.poetic_forms),
+            " ".join(p.techniques),
+            " ".join(p.tones_voices),
             " ".join(p.key_images),
             " ".join(p.contest_fit),
             " ".join(p.notes),
@@ -231,13 +231,13 @@ def _matches(
 
     if not _all_in(themes, p.themes):
         return False
-    if not _all_in(emotional_registers, p.emotional_registers):
+    if not _all_in(moods, p.moods):
         return False
-    if not _all_in(formal_modes, p.formal_modes):
+    if not _all_in(poetic_forms, p.poetic_forms):
         return False
-    if not _all_in(craft_features, p.craft_features):
+    if not _all_in(techniques, p.techniques):
         return False
-    if not _all_in(stylistic_postures, p.stylistic_postures):
+    if not _all_in(tones_voices, p.tones_voices):
         return False
     if not _all_in(contest_fit, p.contest_fit):
         return False
@@ -302,21 +302,21 @@ def list_poems(
         default_factory=list,
         description="Require ALL supplied themes (AND). Repeatable.",
     ),
-    emotional_registers: List[str] = Query(
+    moods: List[str] = Query(
         default_factory=list,
-        description="Require ALL supplied emotional_registers tags (AND). Repeatable.",
+        description="Require ALL supplied moods tags (AND). Repeatable.",
     ),
-    formal_modes: List[str] = Query(
+    poetic_forms: List[str] = Query(
         default_factory=list,
-        description="Require ALL supplied formal_modes tags (AND). Repeatable.",
+        description="Require ALL supplied poetic_forms tags (AND). Repeatable.",
     ),
-    craft_features: List[str] = Query(
+    techniques: List[str] = Query(
         default_factory=list,
-        description="Require ALL supplied craft_features tags (AND). Repeatable.",
+        description="Require ALL supplied techniques tags (AND). Repeatable.",
     ),
-    stylistic_postures: List[str] = Query(
+    tones_voices: List[str] = Query(
         default_factory=list,
-        description="Require ALL supplied stylistic_postures tags (AND). Repeatable.",
+        description="Require ALL supplied tones_voices tags (AND). Repeatable.",
     ),
     contest_fit: List[str] = Query(
         default_factory=list,
@@ -363,10 +363,10 @@ def list_poems(
             p,
             q,
             themes,
-            emotional_registers,
-            formal_modes,
-            craft_features,
-            stylistic_postures,
+            moods,
+            poetic_forms,
+            techniques,
+            tones_voices,
             contest_fit,
             min_rating,
             max_rating,
@@ -408,10 +408,10 @@ def advanced_search(
     themes: List[str] = Query(
         default_factory=list, description="Any of these themes (OR within field)."
     ),
-    emotional_registers: List[str] = Query(default_factory=list),
-    formal_modes: List[str] = Query(default_factory=list),
-    craft_features: List[str] = Query(default_factory=list),
-    stylistic_postures: List[str] = Query(default_factory=list),
+    moods: List[str] = Query(default_factory=list),
+    poetic_forms: List[str] = Query(default_factory=list),
+    techniques: List[str] = Query(default_factory=list),
+    tones_voices: List[str] = Query(default_factory=list),
     key_images: List[str] = Query(default_factory=list),
     contest_fit: List[str] = Query(default_factory=list),
     notes: Optional[str] = Query(
@@ -448,8 +448,8 @@ def advanced_search(
 
     - **Text fields** (``title``, ``body``, ``project``, ``notes``):
       case-insensitive substring on a plain-text projection.
-    - **Tag fields** (``themes``, ``emotional_registers``,
-      ``formal_modes``, ``craft_features``, ``stylistic_postures``,
+    - **Tag fields** (``themes``, ``moods``,
+      ``poetic_forms``, ``techniques``, ``tones_voices``,
       ``key_images``, ``contest_fit``): OR within
       the field; case-insensitive exact match on list entries.
     - **Numeric / date filters** (``year``, ``month``, ``min_rating``,
@@ -468,10 +468,10 @@ def advanced_search(
     text_queries = {"title": title, "project": project, "body": body, "notes": notes}
     tag_queries = {
         "themes": themes,
-        "emotional_registers": emotional_registers,
-        "formal_modes": formal_modes,
-        "craft_features": craft_features,
-        "stylistic_postures": stylistic_postures,
+        "moods": moods,
+        "poetic_forms": poetic_forms,
+        "techniques": techniques,
+        "tones_voices": tones_voices,
         "key_images": key_images,
         "contest_fit": contest_fit,
     }
@@ -553,8 +553,8 @@ def cluster_poems(
 ) -> ClusterResponse:
     """Cluster the corpus by one or more metadata categories.
 
-    Categories must be drawn from: ``themes``, ``emotional_registers``,
-    ``formal_modes``, ``craft_features``, ``stylistic_postures``,
+    Categories must be drawn from: ``themes``, ``moods``,
+    ``poetic_forms``, ``techniques``, ``tones_voices``,
     ``images`` (maps to ``key_images``), ``contest_fit``.
 
     If ``k`` is omitted the number of clusters is chosen automatically via

@@ -50,10 +50,10 @@ def _make_poem(**overrides):
         "awards": [],
         "date": "2024-01-01T00:00:00Z",
         "themes": [],
-        "emotional_registers": [],
-        "formal_modes": [],
-        "craft_features": [],
-        "stylistic_postures": [],
+        "moods": [],
+        "poetic_forms": [],
+        "techniques": [],
+        "tones_voices": [],
         "key_images": [],
         "project": "A test poem.",
         "contest_fit": [],
@@ -212,7 +212,7 @@ def cluster_db(tmp_path):
         _make_poem(
             title=f"Nature {i}",
             themes=["nature"],
-            formal_modes=["sonnet"],
+            poetic_forms=["sonnet"],
             rating=60 + i,
             date=f"2024-0{i+1}-01T00:00:00Z",
             url=f"https://example.com/nature{i}",
@@ -223,7 +223,7 @@ def cluster_db(tmp_path):
         _make_poem(
             title=f"War {i}",
             themes=["war"],
-            formal_modes=["free verse"],
+            poetic_forms=["free verse"],
             rating=40 + i,
             date=f"2024-0{i+1}-01T00:00:00Z",
             url=f"https://example.com/war{i}",
@@ -268,13 +268,16 @@ def test_cluster_response_cluster_shape(cluster_client):
         assert {
             "id",
             "title",
+            "rating",
+            "lines",
+            "words",
             "pinned",
             "project",
             "themes",
-            "emotional_registers",
-            "formal_modes",
-            "craft_features",
-            "stylistic_postures",
+            "moods",
+            "poetic_forms",
+            "techniques",
+            "tones_voices",
         } <= set(p.keys())
 
 
@@ -308,10 +311,10 @@ def test_cluster_poems_have_tag_fields(cluster_client):
     for cluster in r.json()["clusters"]:
         for p in cluster["poems"]:
             assert isinstance(p["themes"], list)
-            assert isinstance(p["emotional_registers"], list)
-            assert isinstance(p["formal_modes"], list)
-            assert isinstance(p["craft_features"], list)
-            assert isinstance(p["stylistic_postures"], list)
+            assert isinstance(p["moods"], list)
+            assert isinstance(p["poetic_forms"], list)
+            assert isinstance(p["techniques"], list)
+            assert isinstance(p["tones_voices"], list)
 
 
 def test_cluster_min_cluster_size_moves_poems_to_excluded(tmp_path, monkeypatch):
@@ -319,15 +322,15 @@ def test_cluster_min_cluster_size_moves_poems_to_excluded(tmp_path, monkeypatch)
     big_group = [
         _make_poem(
             themes=["nature"],
-            formal_modes=["sonnet"],
+            poetic_forms=["sonnet"],
             url=f"https://example.com/n{i}",
         )
         for i in range(8)
     ]
     outlier = _make_poem(
         themes=["war"],
-        formal_modes=["free verse"],
-        emotional_registers=["defiant"],
+        poetic_forms=["free verse"],
+        moods=["defiant"],
         url="https://example.com/outlier",
     )
     db = _make_db(tmp_path, big_group + [outlier])
@@ -335,7 +338,7 @@ def test_cluster_min_cluster_size_moves_poems_to_excluded(tmp_path, monkeypatch)
         r = c.post(
             "/api/poems/cluster",
             json={
-                "categories": ["themes", "formal_modes"],
+                "categories": ["themes", "poetic_forms"],
                 "k": 2,
                 "min_cluster_size": 3,
             },
@@ -360,7 +363,7 @@ def test_cluster_auto_k_used_when_k_omitted(cluster_client):
 
 
 def test_cluster_categories_used_echoed(cluster_client):
-    cats = ["themes", "formal_modes"]
+    cats = ["themes", "poetic_forms"]
     r = cluster_client.post("/api/poems/cluster", json={"categories": cats})
     assert set(r.json()["categories_used"]) == set(cats)
 
@@ -401,7 +404,9 @@ def test_cluster_response_contains_no_awards(cluster_client):
     for cluster in body["clusters"]:
         assert "awards_summary" not in cluster
         for p in cluster["poems"]:
-            assert "awards" not in p
+            # awards list is now included in the summary contract
+            assert "awards" in p
+            assert isinstance(p["awards"], list)
             assert "awards_summary" not in p
     for e in body["excluded"]:
         assert "awards" not in e

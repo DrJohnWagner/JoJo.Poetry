@@ -3,16 +3,34 @@
 import { useState } from "react"
 import type { Poem } from "@/lib/types"
 import { useAppConfig } from "./AppConfig"
-import PoemBody from "./PoemBody"
-import PoemStatistics from "./PoemStatistics"
+import PoemBody from "./poem/PoemBody"
+import PoemStatistics from "./poem/PoemStatistics"
 import PoemProject from "./poem/PoemProject"
 import PoemTitle from "./poem/PoemTitle"
 import DeleteButton from "./DeleteButton"
-import PoemAward from "./PoemAward"
-import PoemSocial from "./PoemSocial"
+import PoemAuthor from "./poem/PoemAuthor"
+import PoemNotes from "./poem/PoemNotes"
+import PoemSocial from "./poem/PoemSocial"
+import PoemGroup from "./poem/PoemGroup"
+import PoemFeatures from "./poem/PoemFeatures"
 import PoemEditorForm from "./PoemEditorForm"
 import HorizontalRule from "./HorizontalRule"
 import { cleanPoetryUrl } from "@/lib/format"
+import PoemAwards from "./poem/PoemAwards"
+
+function MetaRow({ group, features }: { group: string; features: string[] }) {
+    if (!features || features.length === 0) return null
+    return (
+        <>
+            <dt className="eyebrow pt-0">
+                <PoemGroup group={group} />
+            </dt>
+            <dd className="font-sans text-[0.78rem] text-ink/80">
+                <PoemFeatures features={features} />
+            </dd>
+        </>
+    )
+}
 
 export default function PoemDetail({ poem: initial }: { poem: Poem }) {
     const { readOnly } = useAppConfig()
@@ -45,6 +63,17 @@ export default function PoemDetail({ poem: initial }: { poem: Poem }) {
             </div>
         )
     }
+    const {
+        themes,
+        moods,
+        poetic_forms,
+        techniques,
+        tones_voices,
+        key_images,
+        contest_fit,
+        socials,
+        awards,
+    } = poem
 
     return (
         <div>
@@ -70,15 +99,12 @@ export default function PoemDetail({ poem: initial }: { poem: Poem }) {
 
             <HorizontalRule />
 
-            <dl className="grid grid-cols-1 gap-x-0 gap-y-2 text-[0.95rem] md:grid-cols-[8rem_1fr]">
+            <dl className="grid grid-cols-1 gap-x-4 gap-y-2 text-[0.95rem] md:grid-cols-[max-content_1fr]">
                 {poem.author && (
                     <>
                         <dt className="eyebrow pt-1">Author</dt>
-                        <dd className="font-sans text-[0.78rem] text-ink/80">
-                            {poem.author.pen_name}{" "}
-                            <span className="text-muted">
-                                ({poem.author.full_name})
-                            </span>
+                        <dd>
+                            <PoemAuthor author={poem.author} />
                         </dd>
                     </>
                 )}
@@ -86,43 +112,35 @@ export default function PoemDetail({ poem: initial }: { poem: Poem }) {
                     <>
                         <dt className="eyebrow pt-1">Notes</dt>
                         <dd>
-                            <ul className="space-y-1 font-sans text-[0.85rem] text-ink/80">
-                                {poem.notes.map((n, i) => (
-                                    <li key={i}>{n}</li>
-                                ))}
-                            </ul>
+                            <PoemNotes poem={poem} />
                         </dd>
                     </>
                 )}
-                <MetaRow label="Themes" values={poem.themes} />
-                <MetaRow label="Register" values={poem.emotional_registers} />
-                <MetaRow label="Formal modes" values={poem.formal_modes} />
-                <MetaRow label="Craft features" values={poem.craft_features} />
-                <MetaRow
-                    label="Stylistic postures"
-                    values={poem.stylistic_postures}
-                />
-                <MetaRow label="Images" values={poem.key_images} />
-                <MetaRow label="Contest fit" values={poem.contest_fit} />
-                {poem.socials.length > 0 && (
+                <MetaRow group="Themes" features={themes} />
+                <MetaRow group="Moods" features={moods} />
+                <MetaRow group="Poetic forms" features={poetic_forms} />
+                <MetaRow group="Techniques" features={techniques} />
+                <MetaRow group="Tones/Voices" features={tones_voices} />
+                <MetaRow group="Images" features={key_images} />
+                <MetaRow group="Contest fit" features={contest_fit} />
+                {socials.length > 0 && (
                     <>
                         <dt className="eyebrow pt-1">Socials</dt>
                         <dd className="space-y-1">
-                            {poem.socials.map((s) => (
+                            {socials.map((s) => (
                                 <PoemSocial key={s} url={s} />
                             ))}
                         </dd>
                     </>
                 )}
 
-                {poem.awards.length > 0 && (
+                {awards.length > 0 && (
                     <>
-                        <dt className="eyebrow pt-1">Awards</dt>
-                        {/* <dd className="space-y-1 font-sans text-sm normal-case tracking-normal"> */}
+                        <dt className="eyebrow pt-1">
+                            <PoemGroup group="Awards" />
+                        </dt>
                         <dd className="space-y-1">
-                            {poem.awards.map((award) => (
-                                <PoemAward key={award.url} award={award} />
-                            ))}
+                            <PoemAwards awards={awards} />
                         </dd>
                     </>
                 )}
@@ -152,17 +170,5 @@ export default function PoemDetail({ poem: initial }: { poem: Poem }) {
                 </footer>
             )}
         </div>
-    )
-}
-
-function MetaRow({ label, values }: { label: string; values: string[] }) {
-    if (!values || values.length === 0) return null
-    return (
-        <>
-            <dt className="eyebrow pt-0">{label}</dt>
-            <dd className="font-sans text-[0.78rem] text-ink/80">
-                {values.join(" · ")}
-            </dd>
-        </>
     )
 }

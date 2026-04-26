@@ -30,11 +30,11 @@ def _normalise_list(terms: Iterable[str]) -> Set[str]:
 
 def normalise_poem(poem: Poem) -> NormalisedPoemFeatures:
     themes = _normalise_list(poem.themes)
-    emotion = _normalise_list(poem.emotional_registers)
+    emotion = _normalise_list(poem.moods)
     form = (
-        _normalise_list(poem.formal_modes)
-        | _normalise_list(poem.craft_features)
-        | _normalise_list(poem.stylistic_postures)
+        _normalise_list(poem.poetic_forms)
+        | _normalise_list(poem.techniques)
+        | _normalise_list(poem.tones_voices)
     )
     images = _normalise_list(poem.key_images)
     fit = _normalise_list(poem.contest_fit)

@@ -6,19 +6,19 @@
         "biological_process",
         "death"
     ],
-    "emotional_registers": [
+    "moods": [
         "clinical",
         "detached"
     ],
-    "formal_modes": [
+    "poetic_forms": [
         "lyric"
     ],
-    "craft_features": [
+    "techniques": [
         "short_declarative_lines",
         "anaphora",
         "parallelism"
     ],
-    "stylistic_postures": [
+    "tones_voices": [
         "clinical"
     ],
     "key_images": [

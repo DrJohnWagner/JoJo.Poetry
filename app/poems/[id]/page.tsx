@@ -34,14 +34,6 @@ export default async function PoemPage({
         <Page>
             <LColumn>
                 <Header />
-                <nav className="eyebrow mb-10">
-                    <Link
-                        href="/"
-                        className="hover:text-ink hover:no-underline"
-                    >
-                        ← Index
-                    </Link>
-                </nav>
                 <PoemDetail poem={poem} />
             </LColumn>
             <RColumn>

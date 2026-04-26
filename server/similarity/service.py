@@ -21,6 +21,7 @@ class PoemSimilarityService:
     def rebuild(self, poems: List[Poem]) -> None:
         self.poems = [normalise_poem(p) for p in poems]
         self.poem_map = {p.id: p for p in self.poems}
+        self.full_poem_map = {p.id: p for p in poems}
         self.semantic_index.fit(self.poems)
 
     def _get_neighbours(self, query_id: UUID, sort_key: callable, k: int) -> Optional[NeighbourListResult]:
@@ -28,27 +29,35 @@ class PoemSimilarityService:
             return None
 
         query_poem = self.poem_map[query_id]
-        
+
         results = []
         for target in self.poems:
             if target.id == query_id:
                 continue
-                
+
             struct_sim = compute_structured_similarity(query_poem, target)
             sem_sim = self.semantic_index.get_similarity(query_id, target.id)
             fused_sim = compute_fused_similarity(struct_sim, sem_sim)
-            
-            results.append(NeighbourResult(
-                id=target.id,
-                title=target.title,
-                project=target.project,
-                score=sort_key(fused_sim),
-                breakdown=fused_sim
-            ))
+
+            full = self.full_poem_map[target.id]
+            results.append(
+                NeighbourResult(
+                    id=target.id,
+                    title=target.title,
+                    project=target.project,
+                    rating=full.rating,
+                    lines=full.lines,
+                    words=full.words,
+                    date=full.date,
+                    awards=full.awards,
+                    score=sort_key(fused_sim),
+                    breakdown=fused_sim,
+                )
+            )
 
         # Sort: score desc, then id asc (UUID as string for stable sorting)
         results.sort(key=lambda x: (-x.score, str(x.id)))
-        
+
         return NeighbourListResult(
             query_id=query_id,
             neighbours=results[:k]

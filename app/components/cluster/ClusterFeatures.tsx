@@ -1,15 +1,11 @@
-const toLabel = (s: string) =>
-    s
-        .split("_")
-        .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-        .join(" ")
+import { toLabel } from "@/lib/format"
 
 export default function ClusterFeatures({ features }: { features: string[] }) {
     return (
-        <p className="taglist mt-1">
+        <span className="cluster-features-text mt-1">
             {features
                 .map((f) => toLabel(f.split(":").slice(1).join(":") || f))
                 .join(" · ")}
-        </p>
+        </span>
     )
 }

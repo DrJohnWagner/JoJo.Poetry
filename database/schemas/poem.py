@@ -32,7 +32,20 @@ class Award(BaseModel):
     title: Optional[str] = None
 
 
-class Poem(BaseModel):
+class PoemSummaryData(BaseModel):
+    """All fields needed to display a poem summary, statistics, and awards."""
+
+    id: UUID
+    title: str
+    project: str
+    rating: int = Field(ge=0, le=100)
+    lines: int = Field(ge=0)
+    words: int = Field(ge=0)
+    date: datetime
+    awards: List[Award]
+
+
+class Poem(PoemSummaryData):
     """Persisted poem record.
 
     Strictness: `extra="forbid"` on the top-level model rejects unknown fields
@@ -43,28 +56,17 @@ class Poem(BaseModel):
 
     model_config = ConfigDict(extra="forbid", str_strip_whitespace=False)
 
-    # Required / immutable
-    id: UUID
-
     # Required / editable
     title: str = Field(min_length=1)
     url: HttpUrl
     body: str = Field(min_length=1)
-    awards: List[Award]
-    date: datetime
     themes: List[str]
-    emotional_registers: List[str]
-    formal_modes: List[str]
-    craft_features: List[str]
-    stylistic_postures: List[str]
+    moods: List[str]
+    poetic_forms: List[str]
+    techniques: List[str]
+    tones_voices: List[str]
     key_images: List[str]
-    project: str
     contest_fit: List[str]
-    rating: int = Field(ge=0, le=100)
-
-    # Required / derived (recomputable from body)
-    lines: int = Field(ge=0)
-    words: int = Field(ge=0)
 
     # Optional with defaults
     pinned: bool = False

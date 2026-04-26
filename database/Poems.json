@@ -10,15 +10,15 @@
             "Brisbane",
             "provisional belonging"
         ],
-        "emotional_registers": [
+        "moods": [
             "warm",
             "nostalgic",
             "bittersweet",
             "documentary"
         ],
-        "formal_modes": [],
-        "craft_features": [],
-        "stylistic_postures": [],
+        "poetic_forms": [],
+        "techniques": [],
+        "tones_voices": [],
         "key_images": [
             "Scenic Rim on horizon",
             "Thai curry chicken",
@@ -63,20 +63,20 @@
             "control",
             "institutional_failure"
         ],
-        "emotional_registers": [
+        "moods": [
             "clinical",
             "ominous"
         ],
-        "formal_modes": [
+        "poetic_forms": [
             "lyric"
         ],
-        "craft_features": [
+        "techniques": [
             "short_declarative_lines",
             "anaphora",
             "parataxis",
             "end_stopped_lines"
         ],
-        "stylistic_postures": [
+        "tones_voices": [
             "clinical"
         ],
         "key_images": [
@@ -138,16 +138,16 @@
             "the body",
             "language and its limits"
         ],
-        "emotional_registers": [
+        "moods": [
             "tension",
             "longing",
             "ambivalence",
             "vulnerability",
             "self-reproach"
         ],
-        "formal_modes": [],
-        "craft_features": [],
-        "stylistic_postures": [],
+        "poetic_forms": [],
+        "techniques": [],
+        "tones_voices": [],
         "key_images": [
             "kettle clicking off",
             "knife scar tracked with shame",
@@ -204,19 +204,19 @@
             "biological_process",
             "death"
         ],
-        "emotional_registers": [
+        "moods": [
             "clinical",
             "detached"
         ],
-        "formal_modes": [
+        "poetic_forms": [
             "lyric"
         ],
-        "craft_features": [
+        "techniques": [
             "short_declarative_lines",
             "anaphora",
             "parallelism"
         ],
-        "stylistic_postures": [
+        "tones_voices": [
             "clinical"
         ],
         "key_images": [
@@ -261,20 +261,20 @@
             "mortality",
             "meaning"
         ],
-        "emotional_registers": [
+        "moods": [
             "clinical",
             "detached"
         ],
-        "formal_modes": [
+        "poetic_forms": [
             "lyric"
         ],
-        "craft_features": [
+        "techniques": [
             "short_declarative_lines",
             "repetition",
             "parallelism",
             "parataxis"
         ],
-        "stylistic_postures": [
+        "tones_voices": [
             "clinical",
             "detached"
         ],

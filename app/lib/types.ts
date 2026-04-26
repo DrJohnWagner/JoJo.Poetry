@@ -11,31 +11,40 @@ export interface Award {
     title?: string
 }
 
-export interface ClusterPoem {
+export interface PoemSummaryData {
     id: UUID
     title: string
-    pinned: boolean
     project: string
-    themes: string[]
-    emotional_registers: string[]
-    formal_modes: string[]
-    craft_features: string[]
-    stylistic_postures: string[]
-}
-
-export interface Poem extends ClusterPoem {
-    url: string
-    date: string
     rating: number
     lines: number
     words: number
-    contest_fit: string[]
-    body: string
+    date: string
     awards: Award[]
-    key_images: string[]
+}
+
+export interface ClusterPoem extends PoemSummaryData {
+    pinned: boolean
+    themes: string[]
+    moods: string[]
+    poetic_forms: string[]
+    techniques: string[]
+    tones_voices: string[]
+}
+
+export interface Poem extends PoemSummaryData {
+    author?: Author
+    url: string
+    body: string
+    pinned: boolean
     notes: string[]
     socials: string[]
-    author?: Author
+    themes: string[]
+    moods: string[]
+    poetic_forms: string[]
+    techniques: string[]
+    tones_voices: string[]
+    contest_fit: string[]
+    key_images: string[]
 }
 
 export interface Pagination {
@@ -86,10 +95,7 @@ export function isEmptySearch(s: SearchState): boolean {
     return !s.q.trim() && !hasAdvanced(s)
 }
 
-export interface NeighbourResult {
-    id: UUID
-    title: string
-    project: string
+export interface NeighbourResult extends PoemSummaryData {
     score: number
 }
 export interface NeighbourListResult {
@@ -116,10 +122,8 @@ export interface ClusterItem {
     poems: ClusterPoem[]
 }
 
-export interface ClusterExcluded {
-    id: UUID
-    title: string
-    reason: string
+export interface ClusterExcluded extends PoemSummaryData {
+    reason: "zero signal" | "cluster too small"
 }
 
 export interface ClusterResponse {

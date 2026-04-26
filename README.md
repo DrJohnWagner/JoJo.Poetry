@@ -65,7 +65,7 @@ Two services, one flat JSON data source:
 ├── tests/server/                     # pytest suite (218 tests)
 ├── app/
 │   ├── page.tsx                      # Landing: listing + search + incremental load + recent poems aside
-│   ├── clusters/page.tsx             # Clustering: category checkboxes → ClusteringUI (+ RecentPoems aside on lg+)
+│   ├── clusters/page.tsx             # Clustering server entry: fetches initial/recent data and renders ClustersPageClient
 │   ├── poems/[id]/page.tsx           # Detail + inline editing + similar poems panel
 │   ├── poems/new/page.tsx            # Dedicated create page
 │   ├── layout.tsx, globals.css
@@ -75,7 +75,9 @@ Two services, one flat JSON data source:
 │   │   ├── LColumn.tsx               # Left column shell: fixed lg flex-basis (62%) + inner max-w-prose
 │   │   ├── RColumn.tsx               # Right aside shell: hidden <lg, fixed lg flex-basis (38%), 106px top padding
 │   │   ├── Header.tsx                # Site header (title + "Clusters" link + optional "New poem" link)
-│   │   ├── ClusteringUI.tsx          # Client: cluster results + pin updates; default PoemList with no category selected
+│   │   ├── ClustersPageClient.tsx    # Client owner of cluster checkbox state, fetchClusters calls, and aside switching logic
+│   │   ├── ClusteringUI.tsx          # Presentational clustered/list renderer (receives selected/loading/error/result props)
+│   │   ├── TopClusteredPoems.tsx     # Aside panel: one top-ranked poem (first in server-sorted list) per cluster
 │   │   ├── cluster/
 │   │   │   ├── ClusterCheckboxes.tsx # Category checkbox controls used by ClusteringUI
 │   │   │   ├── ClusterHeader.tsx     # Cluster summary line (categories used, cluster/poem counts, excluded count)
@@ -89,24 +91,28 @@ Two services, one flat JSON data source:
 │   │   ├── PoemDetail.tsx            # Reading view + Edit toggle
 │   │   ├── SimilarPoems.tsx          # Similar poems aside: all 5 axes (overall/theme/form/emotion/imagery) grouped
 │   │   ├── RecentPoems.tsx           # Recent poems aside: k most recent by date, title + project
-│   │   ├── PoemSummary.tsx           # Shared list item: title link + project line; used in both asides
 │   │   ├── SearchBar.tsx             # q + submit + Advanced modal trigger
 │   │   ├── SortBar.tsx               # Client-side sort buttons (title/date/lines/words/rating/medals)
 │   │   ├── AdvancedSearchDialog.tsx  # Native <dialog>-backed modal (title/body/project/notes/year/month/medals/tags)
 │   │   ├── PoemRow.tsx               # Single poem row (title, meta, collapsible body)
 │   │   ├── CopyButton.tsx            # Copy-to-clipboard icon button; variant="outline"|"filled" selects icon set
-│   │   ├── PoemStatistics.tsx        # Shared metadata line (date · rating · lines · words · medals)
-│   │   ├── PoemAward.tsx             # Medal icon + medal label + optional award link
-│   │   ├── PoemSocial.tsx            # Social URL rendered as hostname link
 │   │   ├── PoemMetadataEditor.tsx    # Shared rating/date/url grid + all six TagInput fields
 │   │   ├── PinToggle.tsx             # Server-confirmed pin/unpin
 │   │   ├── DeleteButton.tsx          # Two-step confirmation control
 │   │   ├── NotesEditor.tsx           # Multi-line textarea for author's notes (one line = one note)
 │   │   ├── HorizontalRule.tsx        # Shared <div class="rule my-5" /> divider
-│   │   └── PoemBody.tsx              # Body rendered as HTML: <br/> line breaks + anchor links
 │   │   ├── poem/
 │   │   │   ├── PoemTitle.tsx         # Client title block: h2/h4 by context, optional link/pin toggle, id-driven copy buttons
-│   │   │   └── PoemProject.tsx       # Italic project statement, null-safe, optional line clamp
+│   │   │   ├── PoemProject.tsx       # Italic project statement, null-safe, optional two-line clamp
+│   │   │   ├── PoemSummary.tsx       # Shared list item: title link + project line; used in both asides
+│   │   │   ├── PoemStatistics.tsx    # Shared metadata line (date · lines · words · medals · rating)
+│   │   │   ├── PoemAuthor.tsx        # pen_name + (full_name) span
+│   │   │   ├── PoemAwards.tsx        # List of awards; each row: medal icon · medal label · optional truncated award link
+│   │   │   ├── PoemFeatures.tsx      # Sorted, deduplicated tag values joined by " · "
+│   │   │   ├── PoemGroup.tsx         # Metadata group label span (eyebrow style)
+│   │   │   ├── PoemNotes.tsx         # Unordered list of per-poem notes
+│   │   │   ├── PoemSocial.tsx        # Social URL rendered as hostname link
+│   │   │   └── PoemBody.tsx          # Body rendered as HTML: <br/> line breaks + anchor links
 │   └── lib/
 │       ├── api.ts                    # Typed fetch wrappers (fetchPoems, fetchSimilarPoems, fetchRecentPoems, fetchClusters)
 │       ├── cluster.ts                # Cluster feature/group label helpers for cluster UI rendering
@@ -137,7 +143,7 @@ The authoritative schema is `database/schemas/poem.schema.json`;
 | `body`                                                                                | string (HTML fragment)     | yes                          | yes                 | yes\*                         | `` line breaks + literal whitespace for indentation. \*Search hits a plain-text projection. |
 | `awards`                                                                              | `[{url, medal, title?}]` | yes (may be empty)           | yes (API)           | via `medals` filter         | `medal` is surfaced to search; `title` is an optional award name displayed in the UI.          |
 | `date`                                                                                | ISO 8601 datetime          | yes                          | yes                 | year/month in advanced search | Timezone-aware; UTC in existing data.                                                              |
-| `themes`, `emotional_registers`, `formal_modes`, `craft_features`, `stylistic_postures`, `key_images`, `contest_fit` | `string[]`               | yes (may be empty)           | yes                 | yes                           | Free-vocabulary tags. `emotional_registers`: tonal/affective; `formal_modes`: metrical/structural forms; `craft_features`: devices and techniques; `stylistic_postures`: voice/stance. |
+| `themes`, `moods`, `poetic_forms`, `techniques`, `tones_voices`, `key_images`, `contest_fit` | `string[]`               | yes (may be empty)           | yes                 | yes                           | Free-vocabulary tags. `moods`: tonal/affective; `poetic_forms`: metrical/structural forms; `techniques`: devices and techniques; `tones_voices`: voice/stance. |
 | `project`                                                                             | string                     | yes                          | yes                 | yes                           | One-sentence authorial statement.                                                                  |
 | `rating`                                                                              | int 0–100                 | yes                          | yes                 | min/max band                  | Authorial self-rating.                                                                             |
 | `lines`, `words`                                                                    | int ≥ 0                   | yes                          | **derived**   | no                            | Recomputed from `body` on every write.                                                           |
@@ -412,8 +418,8 @@ Similarity is **multi-axis**. Each axis has a named score in [0, 1]:
 | Axis       | Structured input    | Semantic input  | Structured weight | Semantic weight |
 | ---------- | ------------------- | --------------- | ----------------- | --------------- |
 | theme      | `themes` Jaccard    | —               | 1.0               | 0.0             |
-| form       | `formal_modes` + `craft_features` + `stylistic_postures` J. | `form_text` | 0.8 | 0.2 |
-| emotion    | `emotional_registers` J. | —          | 1.0               | 0.0             |
+| form       | `poetic_forms` + `techniques` + `tones_voices` J. | `form_text` | 0.8 | 0.2 |
+| emotion    | `moods` J. | —          | 1.0               | 0.0             |
 | imagery    | `key_images` J.     | `image_text`    | 0.8               | 0.2             |
 
 The **overall score** is a weighted average across all axes plus `fit`
@@ -441,7 +447,7 @@ in `server/similarity/normalise.py`. The table is empty by default;
 add entries as the vocabulary grows.
 
 `form_text` and `image_text` are the sorted, space-joined
-union of `formal_modes`, `craft_features`, `stylistic_postures` and `key_images` sets respectively, used as TF-IDF
+union of `poetic_forms`, `techniques`, `tones_voices` and `key_images` sets respectively, used as TF-IDF
 inputs. `project_text` is the lowercased project statement.
 
 ### Determinism
@@ -522,15 +528,23 @@ sort, and infinite scroll. The aside shows the 12 most recent poems via
 `RecentPoems`, fetched server-side with `GET /api/poems/recent?k=12`.
 Each item shows the title (link) and project statement.
 
-**Clustering page** (`/clusters`): left column has `ClusteringUI` with
-`ClusterCheckboxes` — four category checkboxes (themes, emotional registers,
-craft features, stylistic postures). With no boxes selected, it renders `PoemList`
-from the initial server payload (list rows only; no search/sort controls).
-Selecting one or more categories triggers `POST /api/poems/cluster`
-automatically and renders clusters as a vertical list with labels, feature
-tags, and poem rows (title link, italic project statement, then all five tag
-arrays joined inline). Excluded poems appear in a section below. At `lg+`, the
-aside shows the same recent poems as the listing page.
+**Clustering page** (`/clusters`): `clusters/page.tsx` fetches initial poems
+and recent poems server-side, then renders `ClustersPageClient`.
+`ClustersPageClient` owns `ClusterCheckboxes` toggles, clustered response state,
+loading/error state, and `fetchClusters` calls. With no categories selected, it
+shows `PoemList` from the initial server payload (list rows only; no
+search/sort controls). Selecting one or more categories triggers
+`POST /api/poems/cluster` automatically and renders clusters as a vertical list
+with labels, feature tags, and poem rows (title link, italic project statement,
+then only tags from the selected checkbox groups joined inline). Excluded poems
+appear below.
+
+At `lg+`, the clustering aside is conditional:
+- While showing the default list view (no cluster result), it shows
+  `RecentPoems`.
+- While showing clustered results, it shows `TopClusteredPoems`, listing each
+  cluster label and its top-ranked poem (the first poem in that cluster's
+  server-ordered list).
 
 **Single-poem page** (`/poems/[id]`): the aside shows all five similarity
 axes via `SimilarPoems`. The page calls `GET /api/poems/{id}/similar`
@@ -541,7 +555,7 @@ omitted and the page renders normally. Each result shows only the poem
 title as a link; scores and breakdowns are not exposed.
 
 Both the listing and clustering asides use the shared `PoemSummary`
-component (title link + project line).
+component (title link + optional two-line-clamped project line).
 
 - **Wide viewport** (≥ `lg`): aside is shown in the right column and scrolls
   with the page.
@@ -557,15 +571,15 @@ shared metadata tags. The endpoint is read-safe (available in
 
 ```jsonc
 {
-  "categories": ["themes", "formal_modes"],  // required; 1+ from the list below
+  "categories": ["themes", "poetic_forms"],  // required; 1+ from the list below
   "k": 4,            // optional; omit for auto-k selection
   "min_cluster_size": 2,   // optional; default 2
   "top_features": 3        // optional; default 3, max 20
 }
 ```
 
-`categories` must be a non-empty subset of: `themes`, `emotional_registers`,
-`formal_modes`, `craft_features`, `stylistic_postures`. Unknown values return `422`.
+`categories` must be a non-empty subset of: `themes`, `moods`,
+`poetic_forms`, `techniques`, `tones_voices`. Unknown values return `422`.
 
 ### Algorithm
 
@@ -608,7 +622,7 @@ shared metadata tags. The endpoint is read-safe (available in
     {
       "label": "nature / sonnet",
       "size": 12,
-      "features": ["themes:nature", "formal_modes:sonnet", "themes:loss"],
+      "features": ["themes:nature", "poetic_forms:sonnet", "themes:loss"],
       "poems": [
         {
           "id": "<uuid>",
@@ -616,10 +630,10 @@ shared metadata tags. The endpoint is read-safe (available in
           "pinned": false,
           "project": "A poem about loss in the natural world.",
           "themes": ["nature", "loss"],
-          "emotional_registers": ["elegiac"],
-          "formal_modes": ["sonnet"],
-          "craft_features": ["enjambment"],
-          "stylistic_postures": ["lyric"]
+          "moods": ["elegiac"],
+          "poetic_forms": ["sonnet"],
+          "techniques": ["enjambment"],
+          "tones_voices": ["lyric"]
         }
       ]
     }
@@ -628,7 +642,7 @@ shared metadata tags. The endpoint is read-safe (available in
     { "id": "<uuid>", "title": "...", "reason": "cluster too small" }
   ],
   "k_used": 3,
-  "categories_used": ["themes", "formal_modes"]
+  "categories_used": ["themes", "poetic_forms"]
 }
 ```
 
@@ -684,8 +698,8 @@ datetime, no fallback needed.
   (`PoemEditorForm` in compact density) and the detail page
   (comfortable density). Fields editable inline in both contexts:
   `title`, `project`, `body`, `rating`, `pinned`, `date`, `url`,
-  `themes`, `emotional_registers`,
-  `formal_modes`, `craft_features`, `stylistic_postures`, `key_images`,
+  `themes`, `moods`,
+  `poetic_forms`, `techniques`, `tones_voices`, `key_images`,
   `contest_fit`, `socials`, `notes`. PATCH sends only the diff; local
   state is replaced from the server response; failure keeps edit
   mode open with an inline error.

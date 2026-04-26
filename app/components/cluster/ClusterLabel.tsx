@@ -1,10 +1,5 @@
 import type { ClusterItem } from "@/lib/types"
-
-const toLabel = (s: string) =>
-    s
-        .split("_")
-        .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-        .join(" ")
+import { toLabel } from "@/lib/format"
 
 export default function ClusterLabel({ cluster }: { cluster: ClusterItem }) {
     return (

@@ -2,6 +2,8 @@ from typing import List, Set
 from uuid import UUID
 from pydantic import BaseModel, ConfigDict, Field
 
+from database.schemas.poem import PoemSummaryData
+
 class NormalisedPoemFeatures(BaseModel):
     id: UUID
     title: str
@@ -41,12 +43,11 @@ class FusedScoreBreakdown(BaseModel):
     structured: StructuredScoreBreakdown
     semantic: SemanticScoreBreakdown
 
-class NeighbourResult(BaseModel):
-    id: UUID
-    title: str
-    project: str
+
+class NeighbourResult(PoemSummaryData):
     score: float
     breakdown: FusedScoreBreakdown
+
 
 class NeighbourListResult(BaseModel):
     query_id: UUID

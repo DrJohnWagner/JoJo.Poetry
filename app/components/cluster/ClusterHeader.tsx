@@ -1,12 +1,10 @@
 import type { ClusterResponse } from "@/lib/types"
 import { CLUSTER_GROUPS } from "./ClusterCheckboxes"
+import { countText, toLabel } from "@/lib/format"
 
 const CATEGORY_LABELS: ReadonlyMap<string, string> = new Map(
-    CLUSTER_GROUPS.map((g) => [g.id, g.label] as const)
+    CLUSTER_GROUPS.map((group) => [group, toLabel(group)] as const)
 )
-
-const countText = (n: number, singular: string, plural = `${singular}s`) =>
-    `${n} ${n === 1 ? singular : plural}`
 
 export default function ClusterHeader({
     result,

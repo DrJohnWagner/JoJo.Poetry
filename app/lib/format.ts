@@ -1,6 +1,13 @@
-import { constants } from "buffer"
+// import { constants } from "buffer"
 import { fetchPoem } from "./api"
 import type { Poem } from "./types"
+
+/** Return a human-readable string for a count of items. */
+export const countText = (
+    n: number,
+    singular: string,
+    plural = `${singular}s`
+) => `${n} ${n === 1 ? singular : plural}`
 
 /** Convert a snake_case string into a human-readable label. */
 export const toLabel = (s: string) =>
@@ -8,6 +15,12 @@ export const toLabel = (s: string) =>
         .split("_")
         .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
         .join(" ")
+        .replace("Tones Voices", "Tones/Voices")
+
+export const toSortedLabels = (values: string[]) =>
+    [...new Set(values.map(toLabel))].sort((left, right) =>
+        left.localeCompare(right)
+    )
 
 /** Convert the stored HTML-fragment body into plain text, preserving
  *  line breaks and authored whitespace. Mirrors the backend projection.
@@ -71,16 +84,13 @@ function poemToMarkdownFromPoem(poem: Poem, full: boolean): string {
     const tags: string[] = []
     if (poem.project) tags.push(`**Project:** ${poem.project}`)
     if (poem.themes.length) tags.push(`**Themes:** ${poem.themes.join(", ")}`)
-    if (poem.emotional_registers.length)
-        tags.push(`**Register:** ${poem.emotional_registers.join(", ")}`)
-    if (poem.formal_modes.length)
-        tags.push(`**Formal Modes:** ${poem.formal_modes.join(", ")}`)
-    if (poem.craft_features.length)
-        tags.push(`**Craft Features:** ${poem.craft_features.join(", ")}`)
-    if (poem.stylistic_postures.length)
-        tags.push(
-            `**Stylistic Postures:** ${poem.stylistic_postures.join(", ")}`
-        )
+    if (poem.moods.length) tags.push(`**Moods:** ${poem.moods.join(", ")}`)
+    if (poem.poetic_forms.length)
+        tags.push(`**Formal Modes:** ${poem.poetic_forms.join(", ")}`)
+    if (poem.techniques.length)
+        tags.push(`**Craft Features:** ${poem.techniques.join(", ")}`)
+    if (poem.tones_voices.length)
+        tags.push(`**Stylistic Postures:** ${poem.tones_voices.join(", ")}`)
     if (poem.key_images.length)
         tags.push(`**Key Images:** ${poem.key_images.join(", ")}`)
     if (poem.contest_fit.length)

@@ -1,32 +1,35 @@
+import { toLabel } from "@/lib/format"
+import type { ClusterGroup } from "@/lib/cluster"
+
+// Missing: "poetic_forms",
 export const CLUSTER_GROUPS = [
-    { id: "themes", label: "Themes" },
-    { id: "emotional_registers", label: "Emotional Registers" },
-    // { id: "formal_modes", label: "Formal Modes" },
-    { id: "craft_features", label: "Craft Features" },
-    { id: "stylistic_postures", label: "Stylistic Postures" },
-] as const
+    "themes",
+    "moods",
+    "techniques",
+    "tones_voices",
+] as const satisfies readonly ClusterGroup[]
 
 export default function ClusterCheckboxes({
     selected,
     toggle,
 }: {
-    selected: string[]
-    toggle: (cat: string) => void
+    selected: ClusterGroup[]
+    toggle: (cat: ClusterGroup) => void
 }) {
     return (
         <div>
             <p className="eyebrow">Cluster by:</p>
-            <ul className="mt-3 grid w-fit grid-cols-2 justify-items-start gap-x-4 gap-y-2 md:w-auto md:flex md:flex-wrap md:items-center">
-                {CLUSTER_GROUPS.map(({ id, label }) => (
-                    <li key={id}>
+            <ul className="mt-3 flex w-auto flex-wrap items-center gap-x-4 gap-y-2">
+                {CLUSTER_GROUPS.map((group) => (
+                    <li key={group}>
                         <label className="flex cursor-pointer items-center gap-2 font-sans text-sm text-ink">
                             <input
                                 type="checkbox"
-                                checked={selected.includes(id)}
-                                onChange={() => toggle(id)}
+                                checked={selected.includes(group)}
+                                onChange={() => toggle(group)}
                                 className="accent-ink"
                             />
-                            {label}
+                            {toLabel(group)}
                         </label>
                     </li>
                 ))}

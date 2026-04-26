@@ -1,5 +1,5 @@
 import type { NeighbourListResult, SimilarityBundle } from "@/lib/types"
-import PoemSummary from "@/components/PoemSummary"
+import PoemSummary from "@/components/poem/PoemSummary"
 
 const CATEGORIES: { key: keyof SimilarityBundle; label: string }[] = [
     { key: "overall",  label: "Overall" },
@@ -14,16 +14,11 @@ function NeighbourList({ result, label }: { result: NeighbourListResult; label: 
     return (
         <section aria-label={`${label} similar poems`} className="bg-paper/50">
             <h2 className="eyebrow">{label}</h2>
-            <ul className="mt-3 space-y-4">
+            <div className="mt-3 space-y-4">
                 {result.neighbours.map((n) => (
-                    <PoemSummary
-                        key={n.id}
-                        id={String(n.id)}
-                        title={n.title}
-                        project={n.project}
-                    />
+                    <PoemSummary key={n.id} poem={n} variant="abridged" />
                 ))}
-            </ul>
+            </div>
         </section>
     )
 }

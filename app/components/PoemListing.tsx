@@ -99,7 +99,13 @@ export default function PoemListing({
         fetchPoems(snapshot, items.length, PAGE_SIZE)
             .then((res) => {
                 if (searchRef.current !== snapshot) return
-                setItems((prev) => [...prev, ...res.items])
+                setItems((prev) => {
+                    const existingIds = new Set(prev.map((p) => p.id))
+                    const fresh = res.items.filter(
+                        (p) => !existingIds.has(p.id)
+                    )
+                    return [...prev, ...fresh]
+                })
                 setTotal(res.pagination.total)
                 setHasMore(res.pagination.has_more)
             })

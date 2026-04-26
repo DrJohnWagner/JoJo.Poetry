@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Dict, List, Tuple
+from typing import Dict, List, Literal, Tuple
 
 import numpy as np
 from sklearn.cluster import AgglomerativeClustering
@@ -180,16 +180,37 @@ def _poem_summaries(poems: List[Poem]) -> List[PoemSummary]:
         PoemSummary(
             id=poem.id,
             title=poem.title,
+            rating=poem.rating,
+            lines=poem.lines,
+            words=poem.words,
+            date=poem.date,
+            awards=poem.awards,
             pinned=poem.pinned,
             project=poem.project,
             themes=poem.themes,
-            emotional_registers=poem.emotional_registers,
-            formal_modes=poem.formal_modes,
-            craft_features=poem.craft_features,
-            stylistic_postures=poem.stylistic_postures,
+            moods=poem.moods,
+            poetic_forms=poem.poetic_forms,
+            techniques=poem.techniques,
+            tones_voices=poem.tones_voices,
         )
         for poem in ordered
     ]
+
+
+def _excluded_poem(
+    poem: Poem, reason: Literal["zero signal", "cluster too small"]
+) -> ExcludedPoem:
+    return ExcludedPoem(
+        id=poem.id,
+        title=poem.title,
+        project=poem.project,
+        rating=poem.rating,
+        lines=poem.lines,
+        words=poem.words,
+        date=poem.date,
+        awards=poem.awards,
+        reason=reason,
+    )
 
 
 def _empty_response(
@@ -234,13 +255,7 @@ def run_clustering(poems: List[Poem], req: ClusterRequest) -> ClusterResponse:
         if _has_signal(poem, categories):
             eligible_poems.append(poem)
         else:
-            excluded.append(
-                ExcludedPoem(
-                    id=poem.id,
-                    title=poem.title,
-                    reason="zero signal",
-                )
-            )
+            excluded.append(_excluded_poem(poem, "zero signal"))
 
     eligible_poems.sort(key=lambda poem: str(poem.id))
     eligible_count = len(eligible_poems)
@@ -267,13 +282,7 @@ def run_clustering(poems: List[Poem], req: ClusterRequest) -> ClusterResponse:
 
     if eligible_count < 3:
         for poem in eligible_poems:
-            excluded.append(
-                ExcludedPoem(
-                    id=poem.id,
-                    title=poem.title,
-                    reason="cluster too small",
-                )
-            )
+            excluded.append(_excluded_poem(poem, "cluster too small"))
 
         return _empty_response(
             total_poems=total_poems,
@@ -290,13 +299,7 @@ def run_clustering(poems: List[Poem], req: ClusterRequest) -> ClusterResponse:
 
     if k < 2:
         for poem in eligible_poems:
-            excluded.append(
-                ExcludedPoem(
-                    id=poem.id,
-                    title=poem.title,
-                    reason="cluster too small",
-                )
-            )
+            excluded.append(_excluded_poem(poem, "cluster too small"))
 
         return _empty_response(
             total_poems=total_poems,
@@ -322,13 +325,7 @@ def run_clustering(poems: List[Poem], req: ClusterRequest) -> ClusterResponse:
 
         if len(group_poems) < req.min_cluster_size:
             for poem in sorted(group_poems, key=lambda p: str(p.id)):
-                excluded.append(
-                    ExcludedPoem(
-                        id=poem.id,
-                        title=poem.title,
-                        reason="cluster too small",
-                    )
-                )
+                excluded.append(_excluded_poem(poem, "cluster too small"))
             continue
 
         label, top_feats = _features_and_label(

@@ -53,6 +53,22 @@
 .poem-project-text {
     @apply mt-1 italic leading-normal text-ink/90;
 }
+.poem-award-text {
+    @apply font-sans text-[0.78rem] text-ink/80;
+}
+
+.poem-statistics-text,
+.poem-group-text {
+    @apply eyebrow;
+}
+
+.poem-author-text,
+.poem-notes-text,
+.poem-features-text,
+.cluster-features-text {
+    @apply font-sans text-[0.78rem] text-ink/80;
+    /* font-sans text-[0.85rem] text-ink/80 */
+}
     .rule {
         @apply h-px bg-rule;
     }
@@ -71,7 +87,7 @@
         @apply underline decoration-muted underline-offset-2 hover:text-accent hover:decoration-accent;
     }
 
-    /* Tag list: quiet small-caps feel */
+        /* Tag list: quiet small-caps feel Unused????? */
     .taglist {
         @apply font-sans text-[0.82rem] text-muted;
     }

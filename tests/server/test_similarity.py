@@ -79,10 +79,10 @@ def _make_poem(**overrides):
         "awards": [],
         "date": "2024-01-01T00:00:00Z",
         "themes": [],
-        "emotional_registers": [],
-        "formal_modes": [],
-        "craft_features": [],
-        "stylistic_postures": [],
+        "moods": [],
+        "poetic_forms": [],
+        "techniques": [],
+        "tones_voices": [],
         "key_images": [],
         "project": "A poem for testing purposes.",
         "contest_fit": [],
@@ -165,7 +165,7 @@ def test_normalise_deduplicates_after_case_fold():
 
 
 def test_normalise_preserves_multi_word_phrases():
-    poem = _make_poem(craft_features=["extended metaphor", "interior monologue"])
+    poem = _make_poem(techniques=["extended metaphor", "interior monologue"])
     feat = _norm(poem)
     assert "extended metaphor" in feat.form
     assert "interior monologue" in feat.form
@@ -174,10 +174,10 @@ def test_normalise_preserves_multi_word_phrases():
 def test_normalise_all_empty_tag_arrays_give_empty_sets():
     poem = _make_poem(
         themes=[],
-        emotional_registers=[],
-        formal_modes=[],
-        craft_features=[],
-        stylistic_postures=[],
+        moods=[],
+        poetic_forms=[],
+        techniques=[],
+        tones_voices=[],
         key_images=[],
         contest_fit=[],
     )
@@ -196,7 +196,7 @@ def test_normalise_project_text_is_lowercased_and_stripped():
 
 
 def test_normalise_form_text_is_sorted_and_joined():
-    poem = _make_poem(formal_modes=["Sonnet", "Enjambment"])
+    poem = _make_poem(poetic_forms=["Sonnet", "Enjambment"])
     feat = _norm(poem)
     assert feat.form_text == "enjambment sonnet"
 
@@ -218,8 +218,8 @@ def test_normalise_id_and_title_are_preserved():
 def test_normalise_maps_all_five_tag_fields():
     poem = _make_poem(
         themes=["a"],
-        emotional_registers=["b"],
-        formal_modes=["c"],
+        moods=["b"],
+        poetic_forms=["c"],
         key_images=["d"],
         contest_fit=["e"],
     )
@@ -303,8 +303,8 @@ def test_structured_identical_poems_max_scores_on_all_axes():
     p1 = _norm(
         _make_poem(
             themes=["a"],
-            emotional_registers=["b"],
-            formal_modes=["c"],
+            moods=["b"],
+            poetic_forms=["c"],
             key_images=["d"],
             contest_fit=["e"],
         )
@@ -312,8 +312,8 @@ def test_structured_identical_poems_max_scores_on_all_axes():
     p2 = _norm(
         _make_poem(
             themes=["a"],
-            emotional_registers=["b"],
-            formal_modes=["c"],
+            moods=["b"],
+            poetic_forms=["c"],
             key_images=["d"],
             contest_fit=["e"],
         )
@@ -327,8 +327,8 @@ def test_structured_identical_poems_max_scores_on_all_axes():
 
 
 def test_structured_disjoint_poems_zero_on_all_axes():
-    p1 = _norm(_make_poem(themes=["alpha"], formal_modes=["sonnet"]))
-    p2 = _norm(_make_poem(themes=["beta"], formal_modes=["haiku"]))
+    p1 = _norm(_make_poem(themes=["alpha"], poetic_forms=["sonnet"]))
+    p2 = _norm(_make_poem(themes=["beta"], poetic_forms=["haiku"]))
     result = compute_structured_similarity(p1, p2)
     assert result.theme_sim == 0.0
     assert result.form_sim == 0.0
@@ -389,7 +389,7 @@ def test_semantic_fit_single_poem_does_not_raise():
     p = _norm(
         _make_poem(
             project="a poem about the sea",
-            formal_modes=["sonnet"],
+            poetic_forms=["sonnet"],
             key_images=["waves"],
         )
     )
@@ -431,8 +431,8 @@ def test_semantic_rebuild_replaces_previous_state():
 
 
 def test_semantic_all_empty_texts_return_zeros():
-    p1 = _norm(_make_poem(project="", formal_modes=[], key_images=[]))
-    p2 = _norm(_make_poem(project="", formal_modes=[], key_images=[]))
+    p1 = _norm(_make_poem(project="", poetic_forms=[], key_images=[]))
+    p2 = _norm(_make_poem(project="", poetic_forms=[], key_images=[]))
     index = SemanticSimilarityIndex()
     index.fit([p1, p2])
     result = index.get_similarity(p1.id, p2.id)
@@ -442,9 +442,9 @@ def test_semantic_all_empty_texts_return_zeros():
 
 
 def test_semantic_form_similarity_uses_char_ngrams():
-    # Two poems with identical formal_modes tags should have form_tfidf_sim ≈ 1.0
-    p1 = _norm(_make_poem(formal_modes=["villanelle", "refrain"]))
-    p2 = _norm(_make_poem(formal_modes=["villanelle", "refrain"]))
+    # Two poems with identical poetic_forms tags should have form_tfidf_sim ≈ 1.0
+    p1 = _norm(_make_poem(poetic_forms=["villanelle", "refrain"]))
+    p2 = _norm(_make_poem(poetic_forms=["villanelle", "refrain"]))
     index = SemanticSimilarityIndex()
     index.fit([p1, p2])
     result = index.get_similarity(p1.id, p2.id)
@@ -608,9 +608,9 @@ def test_service_k_larger_than_pool_returns_all_available():
 
 
 def test_service_results_ordered_score_desc():
-    query = _make_poem(themes=["nature", "loss"], formal_modes=["sonnet"])
-    poem_a = _make_poem(themes=["nature", "loss"], formal_modes=["sonnet"])
-    poem_b = _make_poem(themes=["war", "history"], formal_modes=["free verse"])
+    query = _make_poem(themes=["nature", "loss"], poetic_forms=["sonnet"])
+    poem_a = _make_poem(themes=["nature", "loss"], poetic_forms=["sonnet"])
+    poem_b = _make_poem(themes=["war", "history"], poetic_forms=["free verse"])
     svc = PoemSimilarityService()
     svc.rebuild([query, poem_a, poem_b])
     result = svc.get_overall_similar(query.id, k=10)
@@ -662,7 +662,7 @@ def test_service_theme_axis_score_field_matches_breakdown():
 
 
 def test_service_form_axis_score_field_matches_breakdown():
-    poems = [_make_poem(formal_modes=["sonnet"]) for _ in range(3)]
+    poems = [_make_poem(poetic_forms=["sonnet"]) for _ in range(3)]
     svc = PoemSimilarityService()
     svc.rebuild(poems)
     result = svc.get_form_similar(poems[0].id, k=10)
@@ -671,7 +671,7 @@ def test_service_form_axis_score_field_matches_breakdown():
 
 
 def test_service_register_axis_score_field_matches_breakdown():
-    poems = [_make_poem(emotional_registers=["melancholic"]) for _ in range(3)]
+    poems = [_make_poem(moods=["melancholic"]) for _ in range(3)]
     svc = PoemSimilarityService()
     svc.rebuild(poems)
     result = svc.get_emotion_similar(poems[0].id, k=10)
@@ -751,8 +751,8 @@ def similarity_db(tmp_path):
         title="Poem Alpha",
         date="2024-03-01T00:00:00Z",
         themes=["nature", "loss"],
-        formal_modes=["sonnet"],
-        emotional_registers=["melancholic"],
+        poetic_forms=["sonnet"],
+        moods=["melancholic"],
         key_images=["rain", "leaves"],
         contest_fit=["lyric prizes"],
         project="A meditation on nature and loss.",
@@ -762,8 +762,8 @@ def similarity_db(tmp_path):
         title="Poem Beta",
         date="2024-02-01T00:00:00Z",
         themes=["nature", "memory"],
-        formal_modes=["sonnet"],
-        emotional_registers=["nostalgic"],
+        poetic_forms=["sonnet"],
+        moods=["nostalgic"],
         key_images=["rain", "rivers"],
         contest_fit=["lyric prizes"],
         project="A meditation on nature and memory.",
@@ -773,8 +773,8 @@ def similarity_db(tmp_path):
         title="Poem Gamma",
         date="2024-01-01T00:00:00Z",
         themes=["war", "history"],
-        formal_modes=["free verse"],
-        emotional_registers=["defiant"],
+        poetic_forms=["free verse"],
+        moods=["defiant"],
         key_images=["fire", "smoke"],
         contest_fit=["political prizes"],
         project="A defiant poem about war and history.",
@@ -876,12 +876,15 @@ def test_similar_response_excludes_full_poem_fields(api_client):
     pid = _listing_ids(api_client)[0]
     body = api_client.get(f"/api/poems/{pid}/similar/overall?k=50").json()
     for n in body["neighbours"]:
+        # full poem fields still excluded
         assert "body" not in n
         assert "url" not in n
-        assert "rating" not in n
-        assert "lines" not in n
-        assert "words" not in n
-        assert "awards" not in n
+        # summary contract fields now included
+        assert "rating" in n
+        assert "lines" in n
+        assert "words" in n
+        assert "date" in n
+        assert "awards" in n
 
 
 def test_similar_self_not_in_neighbours(api_client):
@@ -958,14 +961,14 @@ def mutation_db(tmp_path):
         title="Poem A",
         date="2024-02-01T00:00:00Z",
         themes=["nature"],
-        formal_modes=["sonnet"],
+        poetic_forms=["sonnet"],
         url="https://example.com/a",
     )
     poem_b = _make_poem(
         title="Poem B",
         date="2024-01-01T00:00:00Z",
         themes=["history"],
-        formal_modes=["free verse"],
+        poetic_forms=["free verse"],
         url="https://example.com/b",
     )
     return _make_db(tmp_path, [poem_a, poem_b])
@@ -990,7 +993,7 @@ def test_new_poem_appears_as_neighbour_after_post(rw_client):
             "project": "A new poem about nature.",
             "rating": 50,
             "themes": ["nature"],
-            "formal_modes": ["sonnet"],
+            "poetic_forms": ["sonnet"],
         },
     )
     assert r.status_code == 201
@@ -1005,7 +1008,7 @@ def test_patch_updates_similarity_index(rw_client):
     # Give Poem B the same tags as Poem A so they become similar on theme axis
     rw_client.patch(
         f"/api/poems/{poem_b_id}",
-        json={"themes": ["nature"], "formal_modes": ["sonnet"]},
+        json={"themes": ["nature"], "poetic_forms": ["sonnet"]},
     )
     neighbours = rw_client.get(f"/api/poems/{poem_a_id}/similar/theme?k=10").json()["neighbours"]
     assert poem_b_id in {n["id"] for n in neighbours}

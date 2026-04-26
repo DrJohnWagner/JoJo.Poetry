@@ -57,7 +57,7 @@ export default function AdvancedSearchDialog({
                 // Click on backdrop (the dialog itself) closes; click on content does not.
                 if (e.target === ref.current) onClose()
             }}
-            className="backdrop:bg-ink/20 bg-paper text-ink p-0 rounded-sm border border-rule shadow-xl max-w-xl w-[90vw]"
+            className="w-[90vw] max-w-xl rounded-sm border border-rule bg-paper p-0 text-ink shadow-xl backdrop:bg-ink/20"
         >
             <form
                 method="dialog"
@@ -80,7 +80,7 @@ export default function AdvancedSearchDialog({
                 </header>
 
                 <div className="grid grid-cols-2 gap-x-6 gap-y-5">
-                    <label className="block col-span-2">
+                    <label className="col-span-2 block">
                         <span className="eyebrow">Title</span>
                         <input
                             type="text"
@@ -89,10 +89,10 @@ export default function AdvancedSearchDialog({
                                 onChange({ ...value, title: e.target.value })
                             }
                             placeholder="Substring match…"
-                            className="mt-1 w-full bg-transparent border-b border-rule focus:border-accent outline-none py-1 font-serif"
+                            className="mt-1 w-full border-b border-rule bg-transparent py-1 font-serif outline-none focus:border-accent"
                         />
                     </label>
-                    <label className="block col-span-2">
+                    <label className="col-span-2 block">
                         <span className="eyebrow">Body</span>
                         <input
                             type="text"
@@ -101,10 +101,10 @@ export default function AdvancedSearchDialog({
                                 onChange({ ...value, body: e.target.value })
                             }
                             placeholder="Substring match…"
-                            className="mt-1 w-full bg-transparent border-b border-rule focus:border-accent outline-none py-1 font-serif"
+                            className="mt-1 w-full border-b border-rule bg-transparent py-1 font-serif outline-none focus:border-accent"
                         />
                     </label>
-                    <label className="block col-span-2">
+                    <label className="col-span-2 block">
                         <span className="eyebrow">Project</span>
                         <input
                             type="text"
@@ -113,10 +113,10 @@ export default function AdvancedSearchDialog({
                                 onChange({ ...value, project: e.target.value })
                             }
                             placeholder="Substring match…"
-                            className="mt-1 w-full bg-transparent border-b border-rule focus:border-accent outline-none py-1 font-serif"
+                            className="mt-1 w-full border-b border-rule bg-transparent py-1 font-serif outline-none focus:border-accent"
                         />
                     </label>
-                    <label className="block col-span-2">
+                    <label className="col-span-2 block">
                         <span className="eyebrow">Author&#39;s Notes</span>
                         <input
                             type="text"
@@ -125,7 +125,7 @@ export default function AdvancedSearchDialog({
                                 onChange({ ...value, notes: e.target.value })
                             }
                             placeholder="Substring match…"
-                            className="mt-1 w-full bg-transparent border-b border-rule focus:border-accent outline-none py-1 font-serif"
+                            className="mt-1 w-full border-b border-rule bg-transparent py-1 font-serif outline-none focus:border-accent"
                         />
                     </label>
                     <label className="block">
@@ -144,7 +144,7 @@ export default function AdvancedSearchDialog({
                                             : Number(e.target.value),
                                 })
                             }
-                            className="mt-1 w-full bg-transparent border-b border-rule focus:border-accent outline-none py-1 font-serif"
+                            className="mt-1 w-full border-b border-rule bg-transparent py-1 font-serif outline-none focus:border-accent"
                         />
                     </label>
                     <label className="block">
@@ -160,7 +160,7 @@ export default function AdvancedSearchDialog({
                                             : Number(e.target.value),
                                 })
                             }
-                            className="mt-1 w-full bg-transparent border-b border-rule focus:border-accent outline-none py-1 font-serif"
+                            className="mt-1 w-full border-b border-rule bg-transparent py-1 font-serif outline-none focus:border-accent"
                         >
                             <option value="">Any</option>
                             {MONTHS.slice(1).map((m, i) => (
@@ -173,7 +173,7 @@ export default function AdvancedSearchDialog({
 
                     <fieldset className="col-span-2">
                         <legend className="eyebrow">Medals</legend>
-                        <p className="text-[0.78rem] text-muted mt-1 mb-2">
+                        <p className="mb-2 mt-1 text-[0.96rem] text-muted">
                             Any selected — “None” matches poems with no award
                             entries.
                         </p>
@@ -195,7 +195,7 @@ export default function AdvancedSearchDialog({
                     </fieldset>
                 </div>
 
-                <footer className="mt-8 flex items-center justify-end gap-6 eyebrow">
+                <footer className="eyebrow mt-8 flex items-center justify-end gap-6">
                     <button
                         type="button"
                         onClick={onClear}

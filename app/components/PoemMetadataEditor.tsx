@@ -59,10 +59,10 @@ export interface PoemMetadataValues {
     date: string
     url: string
     themes: string
-    emotional_registers: string
-    formal_modes: string
-    craft_features: string
-    stylistic_postures: string
+    moods: string
+    poetic_forms: string
+    techniques: string
+    tones_voices: string
     key_images: string
     contest_fit: string
     socials: string
@@ -125,24 +125,24 @@ export default function PoemMetadataEditor({
                 onChange={(v) => set("themes", v)}
             />
             <TagInput
-                label="Emotional registers"
-                value={values.emotional_registers}
-                onChange={(v) => set("emotional_registers", v)}
+                label="Moods"
+                value={values.moods}
+                onChange={(v) => set("moods", v)}
             />
             <TagInput
-                label="Formal modes"
-                value={values.formal_modes}
-                onChange={(v) => set("formal_modes", v)}
+                label="Poetic forms"
+                value={values.poetic_forms}
+                onChange={(v) => set("poetic_forms", v)}
             />
             <TagInput
-                label="Craft features"
-                value={values.craft_features}
-                onChange={(v) => set("craft_features", v)}
+                label="Techniques"
+                value={values.techniques}
+                onChange={(v) => set("techniques", v)}
             />
             <TagInput
-                label="Stylistic postures"
-                value={values.stylistic_postures}
-                onChange={(v) => set("stylistic_postures", v)}
+                label="Tones voices"
+                value={values.tones_voices}
+                onChange={(v) => set("tones_voices", v)}
             />
             <TagInput
                 label="Key images"

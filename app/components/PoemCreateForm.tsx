@@ -33,14 +33,13 @@ export default function PoemCreateForm() {
     // Optional — empty strings/arrays map to backend defaults if left blank
     const [date, setDate] = useState("")
     const [themes, setThemes] = useState("")
-    const [emotionalRegisters, setEmotionalRegisters] = useState("")
+    const [emotionalMoods, setEmotionalMoods] = useState("")
     const [formalModes, setFormalModes] = useState("")
     const [craftFeatures, setCraftFeatures] = useState("")
     const [stylisticPostures, setStylisticPostures] = useState("")
     const [keyImages, setKeyImages] = useState("")
     const [contestFit, setContestFit] = useState("")
     const [socials, setSocials] = useState("")
-    const [pinned, setPinned] = useState(false)
     const [notes, setNotes] = useState("")
 
     const [saving, setSaving] = useState(false)
@@ -54,14 +53,13 @@ export default function PoemCreateForm() {
         url !== "" ||
         date !== "" ||
         themes !== "" ||
-        emotionalRegisters !== "" ||
+        emotionalMoods !== "" ||
         formalModes !== "" ||
         craftFeatures !== "" ||
         stylisticPostures !== "" ||
         keyImages !== "" ||
         contestFit !== "" ||
         socials !== "" ||
-        pinned ||
         notes !== ""
 
     useEffect(() => {
@@ -87,10 +85,10 @@ export default function PoemCreateForm() {
         else if (k === "date") setDate(v as string)
         else if (k === "url") setUrl(v as string)
         else if (k === "themes") setThemes(v as string)
-        else if (k === "emotional_registers") setEmotionalRegisters(v as string)
-        else if (k === "formal_modes") setFormalModes(v as string)
-        else if (k === "craft_features") setCraftFeatures(v as string)
-        else if (k === "stylistic_postures") setStylisticPostures(v as string)
+        else if (k === "moods") setEmotionalMoods(v as string)
+        else if (k === "poetic_forms") setFormalModes(v as string)
+        else if (k === "techniques") setCraftFeatures(v as string)
+        else if (k === "tones_voices") setStylisticPostures(v as string)
         else if (k === "key_images") setKeyImages(v as string)
         else if (k === "contest_fit") setContestFit(v as string)
         else if (k === "socials") setSocials(v as string)
@@ -109,17 +107,16 @@ export default function PoemCreateForm() {
             body: plainTextToBody(body),
             project: project.trim(),
             rating,
-            pinned,
+            pinned: false,
         }
         if (date.trim()) payload.date = date.trim()
         if (themes.trim()) payload.themes = splitTags(themes)
-        if (emotionalRegisters.trim())
-            payload.emotional_registers = splitTags(emotionalRegisters)
-        if (formalModes.trim()) payload.formal_modes = splitTags(formalModes)
+        if (emotionalMoods.trim()) payload.moods = splitTags(emotionalMoods)
+        if (formalModes.trim()) payload.poetic_forms = splitTags(formalModes)
         if (craftFeatures.trim())
-            payload.craft_features = splitTags(craftFeatures)
+            payload.techniques = splitTags(craftFeatures)
         if (stylisticPostures.trim())
-            payload.stylistic_postures = splitTags(stylisticPostures)
+            payload.tones_voices = splitTags(stylisticPostures)
         if (keyImages.trim()) payload.key_images = splitTags(keyImages)
         if (contestFit.trim()) payload.contest_fit = splitTags(contestFit)
         if (socials.trim()) payload.socials = splitTags(socials)
@@ -202,10 +199,10 @@ export default function PoemCreateForm() {
                     date,
                     url,
                     themes,
-                    emotional_registers: emotionalRegisters,
-                    formal_modes: formalModes,
-                    craft_features: craftFeatures,
-                    stylistic_postures: stylisticPostures,
+                    moods: emotionalMoods,
+                    poetic_forms: formalModes,
+                    techniques: craftFeatures,
+                    tones_voices: stylisticPostures,
                     key_images: keyImages,
                     contest_fit: contestFit,
                     socials,
@@ -216,7 +213,7 @@ export default function PoemCreateForm() {
                 dateHint="ISO 8601. Blank = now (UTC)."
             />
 
-            <Labelled label="Pinned">
+            {/* <Labelled label="Pinned">
                 <label className="mt-2 inline-flex items-center gap-2 font-sans text-sm">
                     <input
                         type="checkbox"
@@ -225,7 +222,7 @@ export default function PoemCreateForm() {
                     />
                     Pin to top
                 </label>
-            </Labelled>
+            </Labelled> */}
 
             <div className="flex items-center gap-6 pt-4 font-sans text-[0.72rem] uppercase tracking-wider2">
                 <button

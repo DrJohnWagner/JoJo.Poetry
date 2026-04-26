@@ -6,23 +6,25 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from database.schemas.poem import PoemSummaryData
+
 VALID_CATEGORIES = frozenset(
     {
         "themes",
-        "emotional_registers",
-        "formal_modes",
-        "craft_features",
-        "stylistic_postures",
+        "moods",
+        "poetic_forms",
+        "techniques",
+        "tones_voices",
     }
 )
 
 # Maps API category name -> Poem field name
 CATEGORY_FIELD_MAP = {
     "themes": "themes",
-    "emotional_registers": "emotional_registers",
-    "formal_modes": "formal_modes",
-    "craft_features": "craft_features",
-    "stylistic_postures": "stylistic_postures",
+    "moods": "moods",
+    "poetic_forms": "poetic_forms",
+    "techniques": "techniques",
+    "tones_voices": "tones_voices",
 }
 
 
@@ -34,18 +36,15 @@ class ClusterRequest(BaseModel):
     min_cluster_size: int = Field(default=2, ge=1)
 
 
-class PoemSummary(BaseModel):
+class PoemSummary(PoemSummaryData):
     model_config = ConfigDict(extra="forbid")
 
-    id: UUID
-    title: str
     pinned: bool
-    project: str
     themes: List[str]
-    emotional_registers: List[str]
-    formal_modes: List[str]
-    craft_features: List[str]
-    stylistic_postures: List[str]
+    moods: List[str]
+    poetic_forms: List[str]
+    techniques: List[str]
+    tones_voices: List[str]
 
 
 class Cluster(BaseModel):
@@ -58,11 +57,9 @@ class Cluster(BaseModel):
     poems: List[PoemSummary]
 
 
-class ExcludedPoem(BaseModel):
+class ExcludedPoem(PoemSummaryData):
     model_config = ConfigDict(extra="forbid")
 
-    id: UUID
-    title: str
     reason: Literal["zero signal", "cluster too small"]
 
 
