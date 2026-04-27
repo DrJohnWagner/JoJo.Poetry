@@ -1,4 +1,4 @@
-"""Tests for authoritative ordering and pagination."""
+"""Tests for authoritative ordering."""
 
 from __future__ import annotations
 
@@ -39,7 +39,7 @@ def _ids(resp):
 # ------------------------------------------------------------ authoritative order
 
 def test_default_order_is_date_desc(client):
-    items = client.get("/api/poems?limit=200").json()["items"]
+    items = client.get("/api/poems").json()["items"]
     dates = [datetime.fromisoformat(i["date"].replace("Z", "+00:00")) for i in items]
     assert dates == sorted(dates, reverse=True)
     # None are pinned by default, so the whole list is date-desc.
@@ -55,7 +55,7 @@ def test_pinned_appears_before_unpinned_and_date_order_is_preserved(client):
     repo.update(oldest.id, {"pinned": True})
     repo.update(second_oldest.id, {"pinned": True})
 
-    items = client.get("/api/poems?limit=200").json()["items"]
+    items = client.get("/api/poems").json()["items"]
     # First two are pinned
     assert items[0]["pinned"] is True and items[1]["pinned"] is True
     # Pinned group is ordered date-desc: second_oldest (newer of the two) comes first.
@@ -80,7 +80,7 @@ def test_tiebreaker_is_id_ascending(client, db):
     from server.repository import get_repository
     get_repository().load()
 
-    items = client.get("/api/poems?limit=200").json()["items"]
+    items = client.get("/api/poems").json()["items"]
     # Find the two with the shared date and verify their relative order is id ascending.
     clashing = [i for i in items if i["date"].startswith("2026-05-01")]
     assert len(clashing) == 2
@@ -90,75 +90,43 @@ def test_tiebreaker_is_id_ascending(client, db):
 def test_search_uses_same_ranking(client):
     # Advanced search + simple search should produce identical date-desc ordering
     # over the same result set.
-    a = _ids(client.get("/api/poems?limit=200"))
-    b = _ids(client.get("/api/poems/search?year=2026&limit=200"))
+    a = _ids(client.get("/api/poems"))
+    b = _ids(client.get("/api/poems/search?year=2026"))
     assert a == b
 
 
-# --------------------------------------------------------------- pagination
-
-def test_initial_load_returns_three(client):
-    body = client.get("/api/poems").json()
-    assert len(body["items"]) == 3
-    assert body["pagination"] == {"total": 5, "offset": 0, "limit": 3, "has_more": True}
-
-
-def test_incremental_load_returns_next_three_without_gaps_or_dupes(client):
-    page1 = client.get("/api/poems?offset=0&limit=3").json()
-    page2 = client.get("/api/poems?offset=3&limit=3").json()
-    ids1 = [i["id"] for i in page1["items"]]
-    ids2 = [i["id"] for i in page2["items"]]
-    assert len(ids1) == 3 and len(ids2) == 2
-    # No duplicates
-    assert set(ids1).isdisjoint(ids2)
-    # Full-collection ordering
-    full = _ids(client.get("/api/poems?limit=200"))
-    assert ids1 + ids2 == full
-    assert page2["pagination"]["has_more"] is False
-
-
-def test_pagination_resets_implicitly_when_search_changes(client):
-    # The API is stateless; "reset" means the client must issue a fresh offset=0.
-    # We verify that changing filters produces a new total and the first page is
-    # the start of the new ordering.
-    base = client.get("/api/poems?offset=0&limit=3").json()
-    filt = client.get("/api/poems?q=cancer&offset=0&limit=3").json()
-    assert base["pagination"]["total"] == 5
-    assert filt["pagination"]["total"] == 2
-    # First page of the filtered set is the global-order prefix of the filtered set.
-    full_filtered = _ids(client.get("/api/poems?q=cancer&limit=200"))
-    assert [i["id"] for i in filt["items"]] == full_filtered[:3]
-
-
-def test_past_the_end_offset_yields_empty_and_no_more(client):
-    r = client.get("/api/poems?offset=100&limit=3").json()
-    assert r["items"] == []
-    assert r["pagination"]["has_more"] is False
+def test_filter_returns_subset_in_order(client):
+    full = _ids(client.get("/api/poems"))
+    filtered = _ids(client.get("/api/poems?q=cancer"))
+    assert len(filtered) == 2
+    # filtered must be a subsequence of full
+    full_pos = {id_: i for i, id_ in enumerate(full)}
+    assert full_pos[filtered[0]] < full_pos[filtered[1]]
 
 
 # --------------------------------------------------------- ordering after mutations
 
 def test_pin_moves_poem_to_top_after_patch(client):
-    all_ids = _ids(client.get("/api/poems?limit=200"))
+    all_ids = _ids(client.get("/api/poems"))
     target = all_ids[-1]  # last in authoritative order
     client.patch(f"/api/poems/{target}", json={"pinned": True})
-    assert _ids(client.get("/api/poems?limit=200"))[0] == target
+    assert _ids(client.get("/api/poems"))[0] == target
 
 
 def test_edit_to_date_reorders(client):
-    all_ids = _ids(client.get("/api/poems?limit=200"))
+    all_ids = _ids(client.get("/api/poems"))
     target = all_ids[-1]
     client.patch(
         f"/api/poems/{target}",
         json={"date": "2099-01-01T00:00:00Z"},
     )
-    assert _ids(client.get("/api/poems?limit=200"))[0] == target
+    assert _ids(client.get("/api/poems"))[0] == target
 
 
 def test_delete_shrinks_total_and_preserves_order(client):
-    before = _ids(client.get("/api/poems?limit=200"))
+    before = _ids(client.get("/api/poems"))
     victim = before[2]
     client.delete(f"/api/poems/{victim}")
-    after = _ids(client.get("/api/poems?limit=200"))
+    after = _ids(client.get("/api/poems"))
     assert victim not in after
     assert after == [i for i in before if i != victim]

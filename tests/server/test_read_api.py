@@ -35,49 +35,32 @@ def test_health(client):
     assert "Poems.json" in body["source"]
 
 
-def test_list_default_shape_and_pagination(client):
+def test_list_default_shape(client):
     r = client.get("/api/poems")
     assert r.status_code == 200
     body = r.json()
-    assert set(body) == {"items", "pagination"}
-    assert body["pagination"] == {"total": 5, "offset": 0, "limit": 3, "has_more": True}
+    assert set(body) == {"items"}
+    assert len(body["items"]) == 5
     item = body["items"][0]
     assert "copyright" not in item
+    assert "body" not in item
     assert set(item) >= {
         "id",
         "title",
-        "url",
         "date",
         "rating",
         "lines",
         "words",
         "pinned",
-        "themes",
-        "moods",
-        "poetic_forms",
-        "techniques",
-        "tones_voices",
-        "contest_fit",
         "project",
-        "body",
         "awards",
-        "key_images",
-        "notes",
-        "socials",
     }
-
-
-def test_list_pagination_window(client):
-    r = client.get("/api/poems?offset=2&limit=2")
-    body = r.json()
-    assert body["pagination"] == {"total": 5, "offset": 2, "limit": 2, "has_more": True}
-    assert len(body["items"]) == 2
 
 
 def test_search_q_matches_body_text(client):
     r = client.get("/api/poems", params={"q": "kettle"})
     body = r.json()
-    assert body["pagination"]["total"] == 1
+    assert len(body["items"]) == 1
     assert body["items"][0]["title"] == "Not a Metaphor"
 
 
@@ -99,7 +82,7 @@ def test_search_rating_bounds(client):
 
 def test_list_orders_pinned_first(client, tmp_path):
     # Pin a poem that would not naturally lead the ordering and confirm pinned-first wins.
-    all_items = client.get("/api/poems?limit=200").json()["items"]
+    all_items = client.get("/api/poems").json()["items"]
     ids = [i["id"] for i in all_items]
     target = ids[-1]
     # Use repository directly via the app to pin (no write endpoint yet)
@@ -112,7 +95,7 @@ def test_list_orders_pinned_first(client, tmp_path):
 
 
 def test_get_full_poem_by_id(client):
-    listing = client.get("/api/poems?limit=200").json()["items"]
+    listing = client.get("/api/poems").json()["items"]
     pid = listing[0]["id"]
     r = client.get(f"/api/poems/{pid}")
     assert r.status_code == 200
@@ -168,7 +151,7 @@ def test_recent_ordered_by_date_descending(client):
 def test_recent_no_pin_bias(client):
     # Pinned poem should not be forced to position 0 — pure date order
     items = client.get("/api/poems/recent?k=10").json()["items"]
-    list_items = client.get("/api/poems?limit=10").json()["items"]
+    list_items = client.get("/api/poems").json()["items"]
     # list_poems puts pinned first; recent should differ if any poem is pinned
     pinned = [p for p in list_items if p["pinned"]]
     if pinned:
@@ -177,7 +160,8 @@ def test_recent_no_pin_bias(client):
 
 def test_recent_item_has_expected_fields(client):
     item = client.get("/api/poems/recent?k=1").json()["items"][0]
-    assert {"id", "title", "project", "body", "date", "rating", "lines", "words", "awards"} <= set(item.keys())
+    assert {"id", "title", "project", "date", "rating", "lines", "words", "awards", "pinned"} <= set(item.keys())
+    assert "body" not in item
 
 
 def test_recent_k_zero_returns_422(client):

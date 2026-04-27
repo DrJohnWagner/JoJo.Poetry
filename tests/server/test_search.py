@@ -35,13 +35,12 @@ def test_empty_query_returns_empty(client):
     assert r.status_code == 200
     body = r.json()
     assert body["items"] == []
-    assert body["pagination"]["total"] == 0
 
 
 def test_search_shape_matches_list(client):
     r = client.get("/api/poems/search", params={"title": "Metaphor"})
-    assert set(r.json()) == {"items", "pagination"}
-    assert r.json()["pagination"]["total"] >= 1
+    assert set(r.json()) == {"items"}
+    assert len(r.json()["items"]) >= 1
 
 
 # -------------------------------------------------------------- OR semantics
@@ -141,13 +140,6 @@ def test_pinned_first_in_search(client):
     assert r.json()["items"][0]["id"] == source_ids[-1]
 
 
-def test_pagination_applies_to_search(client):
-    r = client.get("/api/poems/search", params={"year": 2026, "limit": 2, "offset": 1})
-    p = r.json()["pagination"]
-    assert p == {"total": 5, "offset": 1, "limit": 2, "has_more": True}
-    assert len(r.json()["items"]) == 2
-
-
 # ------------------------------------------------------------- rating band
 
 def test_rating_band_is_single_field(client):
@@ -166,7 +158,7 @@ def test_rating_band_is_single_field(client):
 def test_q_can_narrow_advanced_search(client):
     r = client.get(
         "/api/poems/search",
-        params={"q": "kettle", "year": 2026, "limit": 200},
+        params={"q": "kettle", "year": 2026},
     )
     assert _titles(r) == {"Not a Metaphor"}
 
@@ -174,6 +166,4 @@ def test_q_can_narrow_advanced_search(client):
 def test_q_only_does_not_turn_search_endpoint_into_listing(client):
     r = client.get("/api/poems/search", params={"q": "kettle"})
     assert r.status_code == 200
-    body = r.json()
-    assert body["items"] == []
-    assert body["pagination"]["total"] == 0
+    assert r.json()["items"] == []
