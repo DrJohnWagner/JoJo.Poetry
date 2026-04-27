@@ -5,8 +5,8 @@ publication rather than a web app. The site shows the poems, lets the
 author pin, edit, create, and delete them, and offers both a simple
 keyword search and a field-specific advanced search.
 
-This first draft is complete end-to-end: data model, backend API,
-typography-first frontend, Docker configuration, and a test suite.
+Complete end-to-end: data model, backend API, typography-first frontend,
+Docker configuration, and a test suite.
 
 ## Architecture
 
@@ -33,7 +33,7 @@ Two services, one flat JSON data source:
   Schema.
 - **Frontend** (`app/` with `app/components/` and `app/lib/`): Next.js App Router project. A
   server-rendered landing page hands off to a client listing
-  component that owns search, pagination, editing, and deletion. A
+  component that owns search, sort, editing, and deletion. A
   dedicated `/poems/new` page handles creation; `/poems/[id]`
   renders the detail view with inline editing.
 - **Data source** (`database/Poems.json`): a single flat JSON array
@@ -64,7 +64,7 @@ Two services, one flat JSON data source:
 ├── requirements-dev.txt              # Adds pytest, httpx, jsonschema
 ├── tests/server/                     # pytest suite
 ├── app/
-│   ├── page.tsx                      # Landing: listing + search + incremental load + recent poems aside
+│   ├── page.tsx                      # Landing: listing + search/sort + recent poems aside
 │   ├── clusters/page.tsx             # Clustering server entry: fetches initial/recent data and renders ClustersPageClient
 │   ├── poems/[id]/page.tsx           # Detail + inline editing + similar poems panel
 │   ├── poems/new/page.tsx            # Dedicated create page
@@ -83,8 +83,9 @@ Two services, one flat JSON data source:
 │   │   │   ├── ClusterHeader.tsx     # Cluster summary line (categories used, cluster/poem counts, excluded count)
 │   │   │   ├── ClusterLabel.tsx      # Per-cluster heading and poem count
 │   │   │   └── ClusterFeatures.tsx   # Per-cluster feature chips/labels
-│   │   ├── PoemListing.tsx           # Client: fetch, search/sort controls, infinite scroll, row edit/delete
-│   │   ├── PoemList.tsx              # Shared list renderer (<ol> of PoemRow), used by listing and clustering
+│   │   ├── poem/
+│   │   │   ├── PoemListing.tsx       # Client: fetch, search/sort controls, row edit/delete (full poem fetched on edit)
+│   │   │   ├── PoemList.tsx          # Shared list renderer (<ol> of PoemRow); accepts PoemSummaryData[], loadedPoems map
 │   │   ├── PoemEditorForm.tsx        # Shared editor (list row + detail)
 │   │   ├── PoemRowEditor.tsx         # Thin wrapper around PoemEditorForm for rows
 │   │   ├── PoemCreateForm.tsx        # Dedicated POST form with defaults + guards
@@ -94,17 +95,16 @@ Two services, one flat JSON data source:
 │   │   ├── SearchBar.tsx             # q + submit + Advanced modal trigger
 │   │   ├── SortBar.tsx               # Client-side sort buttons (title/date/lines/words/rating/medals)
 │   │   ├── AdvancedSearchDialog.tsx  # Native <dialog>-backed modal (title/body/project/notes/year/month/medals/tags)
-│   │   ├── PoemRow.tsx               # Single poem row (title, meta, collapsible body)
 │   │   ├── CopyButton.tsx            # Copy-to-clipboard icon button; variant="outline"|"filled" selects icon set
 │   │   ├── PoemMetadataEditor.tsx    # Shared rating/date/url grid + all six TagInput fields
 │   │   ├── PinToggle.tsx             # Server-confirmed pin/unpin
 │   │   ├── DeleteButton.tsx          # Two-step confirmation control
 │   │   ├── NotesEditor.tsx           # Multi-line textarea for author's notes (one line = one note)
 │   │   ├── HorizontalRule.tsx        # Shared <div class="rule my-5" /> divider
-│   │   ├── poem/
+│   │   │   ├── PoemRow.tsx           # Single poem row: PoemSummary + PoemBody toggle + edit/delete buttons
 │   │   │   ├── PoemTitle.tsx         # Client title block: h2/h4 by context, optional link/pin toggle, id-driven copy buttons
 │   │   │   ├── PoemProject.tsx       # Italic project statement, null-safe, optional two-line clamp
-│   │   │   ├── PoemSummary.tsx       # Shared list item: title link + project line; used in both asides
+│   │   │   ├── PoemSummary.tsx       # Shared list item: title link + project line; accepts PoemSummaryData
 │   │   │   ├── PoemStatistics.tsx    # Shared metadata line (date · lines · words · medals · rating)
 │   │   │   ├── PoemAuthor.tsx        # pen_name + (full_name) span
 │   │   │   ├── PoemAwards.tsx        # List of awards; each row: medal icon · medal label · optional truncated award link
@@ -112,11 +112,12 @@ Two services, one flat JSON data source:
 │   │   │   ├── PoemGroup.tsx         # Metadata group label span (eyebrow style)
 │   │   │   ├── PoemNotes.tsx         # Unordered list of per-poem notes
 │   │   │   ├── PoemSocial.tsx        # Social URL rendered as hostname link
-│   │   │   └── PoemBody.tsx          # Safe inline parser for lightweight markdown-like text (*, **, [text](url))
+│   │   │   ├── PoemEditor.tsx        # Inline editor; receives full Poem loaded on demand
+│   │   │   └── PoemBody.tsx          # Toggle show/hide; fetches body lazily by poemId on first open
 │   └── lib/
-│       ├── api.ts                    # Typed fetch wrappers (fetchPoems, fetchSimilarPoems, fetchRecentPoems, fetchClusters)
+│       ├── api.ts                    # Typed fetch wrappers (fetchPoems → PoemSummaryDataList, fetchPoem, fetchRecentPoems, fetchClusters)
 │       ├── cluster.ts                # Cluster feature/group label helpers for cluster UI rendering
-│       ├── types.ts                  # Author / Poem / SearchState / NeighbourListResult / SimilarityBundle / ClusterResponse / …
+│       ├── types.ts                  # PoemSummaryData / Poem / ClusterPoem / SearchState / SimilarityBundle / ClusterResponse / …
 │       ├── editable.ts               # Canonical editable-field contract
 │       └── format.ts                 # body ↔ plaintext, date formatting, cleanPoetryUrl, poemToMarkdown(id, full)
 ├── database/
@@ -125,7 +126,8 @@ Two services, one flat JSON data source:
 │   └── schemas/
 │       ├── poem.schema.json          # JSON Schema (Draft 2020-12)
 │       ├── poem.py                   # Pydantic Poem / Award / Author
-│       └── similarity.py             # Re-exports similarity response types for API use
+│       ├── similarity.py             # Re-exports similarity response types for API use
+│       └── poem.py                   # Pydantic PoemSummaryData / Poem / Award / Author
 ├── Dockerfile                        # Combined multi-stage image (Node 22 + Python 3.11, Debian bookworm-slim, no CMD)
 └── docker-compose.yml                # Orchestrates backend + frontend
 ```
@@ -196,10 +198,13 @@ read or write them.
   outside the runtime for editor autocomplete, external validators,
   and CI checks. Rejects unknown fields and enforces UUID-v4 `id`,
   bounded rating, and required-vs-optional structure.
-- **`poem.py`** — Pydantic models (`Poem`, `Award`, `Author`). Used
-  by the backend at runtime for load-time validation, PATCH-merge
-  validation, and response shaping. Applies the documented defaults
-  (`pinned=false`, `socials=[]`, `notes=[]`, `author=null`) when optional fields are absent.
+- **`poem.py`** — Pydantic models (`PoemSummaryData`, `Poem`, `Award`, `Author`).
+  `PoemSummaryData` is the base class containing the fields returned by the list
+  endpoints (`id`, `title`, `project`, `rating`, `lines`, `words`, `date`,
+  `awards`, `pinned`). `Poem` extends it with the full field set. Used at runtime
+  for load-time validation, PATCH-merge validation, and response shaping. Applies
+  the documented defaults (`pinned=false`, `socials=[]`, `notes=[]`, `author=null`)
+  when optional fields are absent.
 
 ## Configuration
 
@@ -339,7 +344,7 @@ The listing page applies a second, client-side sort layer on top of the server's
 | Rating | highest first     | `rating` (integer)          |
 | Awards | most first        | `awards.length` (integer)   |
 
-One button is always active (Date descending by default). Clicking the active button toggles direction; clicking an inactive button selects it at its default direction. The sort is re-applied automatically as new pages are loaded via infinite scroll.
+One button is always active (Date descending by default). Clicking the active button toggles direction; clicking an inactive button selects it at its default direction. The sort is re-applied automatically whenever the search state changes and a fresh set of items is fetched.
 
 ## The search system
 
@@ -373,8 +378,10 @@ Populated fields: `title`, `body`, `project`, `notes`
 multiple medals is OR (e.g. `medals=Gold&medals=None`). Unknown medals
 → 422.
 
-Both endpoints return the same `PoemList` wrapper (full `Poem` objects)
-and apply the same ordering and pagination.
+Both endpoints return the same `PoemSummaryDataList` wrapper (`{ items: PoemSummaryData[] }`)
+and apply the same ordering. Items contain summary fields only (`id`, `title`, `project`,
+`rating`, `lines`, `words`, `date`, `awards`, `pinned`) — not `body`, tags, or notes.
+Use `GET /api/poems/{id}` to retrieve a full `Poem` record.
 
 ## The similarity system
 
@@ -515,17 +522,20 @@ basis with `106px` top padding at `lg+`). `Header` (title + "Clusters"
 link + optional "New poem" link in RW mode) sits at the top of the left
 column on every page.
 
-**Listing page** (`/`): left column has the full poem listing with search,
-sort, and infinite scroll. The aside shows the 12 most recent poems via
-`RecentPoems`, fetched server-side with `GET /api/poems/recent?k=12`.
-Each item shows the title (link) and project statement.
+**Listing page** (`/`): left column has the full poem listing with search
+and sort. The entire matching set is fetched in one request —
+`GET /api/poems` (or `/api/poems/search` for advanced queries) — and
+re-sorted client-side without additional round-trips. Each row shows the
+summary metadata; poem body loads lazily when the user expands it. The
+aside shows the 12 most recent poems via `RecentPoems`, fetched
+server-side with `GET /api/poems/recent?k=12`.
 
-**Clustering page** (`/clusters`): `clusters/page.tsx` fetches initial poems
-and recent poems server-side, then renders `ClustersPageClient`.
-`ClustersPageClient` owns `ClusterCheckboxes` toggles, clustered response state,
-loading/error state, and `fetchClusters` calls. With no categories selected, it
-shows `PoemList` from the initial server payload (list rows only; no
-search/sort controls). Selecting one or more categories triggers
+**Clustering page** (`/clusters`): `clusters/page.tsx` fetches the full
+poem listing and recent poems server-side (both as `PoemSummaryDataList`),
+then renders `ClustersPageClient`. `ClustersPageClient` owns
+`ClusterCheckboxes` toggles, clustered response state, loading/error state,
+and `fetchClusters` calls. With no categories selected, it shows the initial
+poem listing (summary rows, pinned first; no search/sort controls). Selecting one or more categories triggers
 `POST /api/poems/cluster` automatically and renders clusters as a vertical list
 with labels, feature tags, and poem rows (title link, italic project statement,
 then only tags from the selected checkbox groups joined inline). Excluded poems
@@ -667,29 +677,25 @@ pinned status has no effect on this ordering.
 | --------- | ------- | ----------- |
 | `k` | `12` | `1 ≤ k ≤ 100` |
 
-Response: `RecentList` — a flat list of full `Poem` objects, ordered by
-date descending. Returns `422` for an out-of-range `k`. Works in
-read-only mode.
+Response: `PoemSummaryDataList` — `{ items: PoemSummaryData[] }` ordered by
+date descending. Items are summary records (no `body`, tags, or notes).
+Returns `422` for an out-of-range `k`. Works in read-only mode.
 
-## Ordering and pagination
+## Ordering
 
-Authoritative ordering (same on both list endpoints):
+Authoritative ordering (applied by both list endpoints before returning):
 
 1. **Pinned first** — `pinned=true` before `pinned=false`.
 2. **Within each group, `date` descending** (most recent first).
 3. **Tiebreaker:** `id` ascending (UUID string compare). Deterministic
    and stable, so identical inputs always produce identical order.
 
-Search filters the set; it never re-ranks. There is no relevance
-scoring.
+Search filters the set; it never re-ranks. There is no relevance scoring.
 
-Pagination contract: `offset ≥ 0`, `1 ≤ limit ≤ 200`. Server default
-`offset=0` / `limit=3`; the frontend requests `limit=5` per page.
-The listing uses infinite scroll — an `IntersectionObserver` sentinel
-below the list triggers the next window automatically as the user
-scrolls. Response metadata: `{ total, offset, limit, has_more }`.
-Ordering is applied before pagination; sequential windows never skip
-or duplicate.
+Both `GET /api/poems` and `GET /api/poems/search` return the full
+filtered set in a single response — no pagination. The frontend applies
+a client-side sort layer on top (see Client-side sorting), which
+re-orders the already-fetched set without a network round-trip.
 
 Invalid dates cannot enter the store — they fail validation at load
 and mutation — so the `date` sort key is always a real timezone-aware
@@ -700,12 +706,14 @@ datetime, no fallback needed.
 - **Pinning** — `PATCH /api/poems/{id}` with `{"pinned": true|false}`.
   The frontend `PinToggle` flips local state **only after** the
   server confirms with `200`. Pin toggles move the poem across the
-  pin boundary; the listing refetches from `offset=0` so the
+  pin boundary; the listing refetches the full set so the
   authoritative order stays in lock-step with the server.
-- **Editing** — a single canonical editable field set is declared in
-  `app/lib/editable.ts` and used by both the list-row editor
-  (`PoemEditorForm` in compact density) and the detail page
-  (comfortable density). Fields editable inline in both contexts:
+- **Editing** — list items are `PoemSummaryData`; the full `Poem` is
+  fetched on demand when the editor is opened (cached in `loadedPoems`
+  so subsequent edits don't refetch). A single canonical editable field
+  set is declared in `app/lib/editable.ts` and used by both the
+  list-row editor (`PoemEditorForm` in compact density) and the detail
+  page (comfortable density). Fields editable inline in both contexts:
   `title`, `project`, `body`, `rating`, `pinned`, `date`, `url`,
   `themes`, `moods`,
   `poetic_forms`, `techniques`, `tones_voices`, `key_images`,
@@ -727,9 +735,7 @@ datetime, no fallback needed.
   listener triggers the browser's native leave prompt. In-app, a
   _"Discard unsaved changes?"_ confirm fires when the user attempts
   to open another row's editor, delete the poem, or navigate away
-  from the create form. Refetches (from search changes or Load More)
-  keep the editing row visible by splicing it back onto the front if
-  it would otherwise fall outside the window.
+  from the create form.
 
 ## Tests
 
@@ -757,19 +763,20 @@ Test files:
 - `tests/server/test_repository.py` — configuration resolution; load/validate;
   duplicate-id and invalid-UUID rejection; immutability; atomic
   persistence; alternate-file configurability.
-- `tests/server/test_read_api.py` — `/health`; full-poem list shape; pagination; search;
-  pinned-first ordering; 422 malformed id; 404 unknown id; `/api/poems/recent`
-  (200 shape, default k, k limits, date-desc ordering, no pin bias, 422 for
-  out-of-range k, route not intercepted by `/{poem_id}`).
+- `tests/server/test_read_api.py` — `/health`; list response shape (`{ items }` only,
+  summary fields, no `body`); search; pinned-first ordering; 422 malformed id;
+  404 unknown id; `GET /api/poems/{id}` returns full poem including `body`;
+  `/api/poems/recent` (200 shape, default k, k limits, date-desc ordering,
+  no pin bias, 422 for out-of-range k, route not intercepted by `/{poem_id}`).
 - `tests/server/test_mutations.py` — PATCH partial semantics; derived recompute;
   unknown-field/id rejection; DELETE; **persistence-failure
   atomicity** (injected `OSError` keeps memory and disk consistent).
 - `tests/server/test_search.py` — OR across populated fields; within-field OR on
-  tags; year/month; Gold / None / multiple medals; pinned-first
-  preserved; pagination applies to search.
+  tags; year/month; Gold / None / multiple medals; pinned-first preserved;
+  empty advanced query returns empty; `q`-only on search endpoint returns empty.
 - `tests/server/test_ordering.py` — date-desc default; pinned-first with internal
-  date-desc; id-ascending tiebreaker; sequential pages neither skip
-  nor duplicate; pin / date / delete mutations reorder correctly.
+  date-desc; id-ascending tiebreaker; filtered result is a correctly-ordered
+  subsequence of the full listing; pin / date / delete mutations reorder correctly.
 - `tests/server/test_create.py` — valid creation; server-generated UUID v4;
   defaults for omitted optionals; rejection of client-supplied
   `id`/`lines`/`words`; required-field-missing rejection; ordering
