@@ -1,8 +1,8 @@
 "use client"
 
-import { useState } from "react"
+import { useMemo, useState } from "react"
 import { deletePoem, fetchPoem } from "@/lib/api"
-import type { ClusterResponse, Poem } from "@/lib/types"
+import type { ClusterResponse, Poem, PoemSummaryData } from "@/lib/types"
 import PoemList from "./poem/PoemList"
 import ClusterFeatures from "./cluster/ClusterFeatures"
 import ClusterHeader from "./cluster/ClusterHeader"
@@ -21,7 +21,7 @@ export default function ClusteringUI({
     result,
     onPinnedChange,
 }: {
-    initial: { items: Poem[]; total: number; has_more: boolean }
+    initial: PoemSummaryData[]
     selected: ClusterGroup[]
     loading: boolean
     error: string | null
@@ -51,7 +51,7 @@ export default function ClusteringUI({
     function handlePinChange(id: string, pinned: boolean) {
         onPinnedChange(id, pinned)
         setLoadedPoems((prev) => {
-            const target = prev[id]
+            const target = prev[id] ?? initial.find((p) => p.id === id)
             if (!target) return prev
             return { ...prev, [id]: { ...target, pinned } }
         })
@@ -98,13 +98,42 @@ export default function ClusteringUI({
         }
     }
 
+    const sortedClusters = useMemo(
+        () =>
+            result?.clusters.map((cluster) => ({
+                ...cluster,
+                poems: cluster.poems
+                    .filter((p) => !deletedIds.has(p.id))
+                    .map((p) => loadedPoems[p.id] ?? p)
+                    .sort((a, b) => {
+                        if (a.pinned !== b.pinned) return a.pinned ? -1 : 1
+                        return a.title.localeCompare(b.title)
+                    }),
+            })) ?? [],
+        [result, deletedIds, loadedPoems]
+    )
+
+    const displayPoems = useMemo(
+        () =>
+            initial
+                .filter((p) => !deletedIds.has(p.id))
+                .map((p) => loadedPoems[p.id] ?? p)
+                .sort((a, b) => {
+                    if (a.pinned !== b.pinned) return a.pinned ? -1 : 1
+                    return (
+                        new Date(b.date).getTime() -
+                            new Date(a.date).getTime() ||
+                        a.id.localeCompare(b.id)
+                    )
+                }),
+        [initial.items, deletedIds, loadedPoems]
+    )
+
     return (
         <section>
             {selected.length === 0 && (
                 <PoemList
-                    poems={initial.items
-                        .filter((p) => !deletedIds.has(p.id))
-                        .map((p) => loadedPoems[p.id] ?? p)}
+                    poems={displayPoems}
                     editingId={editingId}
                     onEdit={(poem) => void startEditing(poem)}
                     onCancel={stopEditing}
@@ -135,17 +164,13 @@ export default function ClusteringUI({
                     <ClusterHeader result={result} totalPoems={totalPoems} />
 
                     <div className="mt-8 space-y-10">
-                        {result.clusters.map((cluster, i) => (
+                        {sortedClusters.map((cluster, i) => (
                             <div key={i}>
                                 <ClusterLabel cluster={cluster} />
                                 <ClusterFeatures features={cluster.features} />
                                 <div className="mt-4">
                                     <ClusterList
-                                        poems={cluster.poems
-                                            .filter(
-                                                (p) => !deletedIds.has(p.id)
-                                            )
-                                            .map((p) => loadedPoems[p.id] ?? p)}
+                                        poems={cluster.poems}
                                         selected={selected}
                                         editingId={editingId}
                                         editingTitle={editingTitle}

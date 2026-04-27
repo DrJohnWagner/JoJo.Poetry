@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import type { Poem } from "@/lib/types"
+import type { Poem, PoemSummaryData } from "@/lib/types"
 import { useAppConfig } from "../AppConfig"
 import PoemSummary from "./PoemSummary"
 import PoemBody from "./PoemBody"
@@ -10,6 +10,7 @@ import PoemButtons from "./PoemButtons"
 
 export default function PoemRow({
     poem,
+    editPoem,
     editing,
     onEdit,
     onCancel,
@@ -18,7 +19,8 @@ export default function PoemRow({
     onDelete,
     onPinChanged,
 }: {
-    poem: Poem
+    poem: PoemSummaryData
+    editPoem?: Poem
     editing: boolean
     onEdit: () => void
     onCancel: () => void
@@ -28,10 +30,9 @@ export default function PoemRow({
     onPinChanged: (pinned: boolean) => void
 }) {
     const { readOnly } = useAppConfig()
-    const [bodyOpen, setBodyOpen] = useState(false)
     const [liveTitle, setLiveTitle] = useState(poem.title)
 
-    if (editing) {
+    if (editing && editPoem) {
         return (
             <article>
                 <p className="label-text mb-4">
@@ -39,7 +40,7 @@ export default function PoemRow({
                     &rdquo;
                 </p>
                 <PoemEditor
-                    poem={poem}
+                    poem={editPoem}
                     density="compact"
                     onSaved={onSaved}
                     onCancel={onCancel}
@@ -54,15 +55,11 @@ export default function PoemRow({
         <article>
             <PoemSummary
                 poem={poem}
-                features={poem.themes}
+                features={[]}
                 pinned={poem.pinned}
                 onPinChange={onPinChanged}
             />
-            <PoemBody
-                body={poem.body}
-                open={bodyOpen}
-                onOpenChange={setBodyOpen}
-            />
+            <PoemBody poemId={poem.id} />
             {!readOnly && <PoemButtons onEdit={onEdit} onDelete={onDelete} />}
         </article>
     )

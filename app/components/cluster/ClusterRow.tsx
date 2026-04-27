@@ -3,6 +3,7 @@
 import type { Poem } from "@/lib/types"
 import { useAppConfig } from "../AppConfig"
 import PoemButtons from "../poem/PoemButtons"
+import PoemBody from "../poem/PoemBody"
 import PoemSummary from "../poem/PoemSummary"
 import PoemEditor from "../poem/PoemEditor"
 import { getFeatureLabels, type ClusterGroup } from "@/lib/cluster"
@@ -65,6 +66,7 @@ export default function ClusterRow({
                 pinned={poem.pinned}
                 onPinChange={onPinChanged}
             />
+            <PoemBody poemId={poem.id} />
             {!readOnly && <PoemButtons onEdit={onEdit} onDelete={onDelete} />}
         </article>
     )

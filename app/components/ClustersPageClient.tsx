@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import type { ClusterResponse, Poem, RecentList } from "@/lib/types"
+import type { ClusterResponse, PoemSummaryData, PoemSummaryDataList } from "@/lib/types"
 import { fetchClusters } from "@/lib/api"
 import type { ClusterGroup } from "@/lib/cluster"
 import Page from "@/components/Page"
@@ -17,8 +17,8 @@ export default function ClustersPageClient({
     initial,
     recent,
 }: {
-    initial: { items: Poem[]; total: number; has_more: boolean }
-    recent: RecentList
+    initial: PoemSummaryData[]
+    recent: PoemSummaryDataList
 }) {
     const [selected, setSelected] = useState<ClusterGroup[]>([])
     const [loading, setLoading] = useState(false)

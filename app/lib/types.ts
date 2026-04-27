@@ -20,10 +20,10 @@ export interface PoemSummaryData {
     words: number
     date: string
     awards: Award[]
+    pinned: boolean
 }
 
 export interface ClusterPoem extends PoemSummaryData {
-    pinned: boolean
     themes: string[]
     moods: string[]
     poetic_forms: string[]
@@ -35,7 +35,6 @@ export interface Poem extends PoemSummaryData {
     author?: Author
     url: string
     body: string
-    pinned: boolean
     notes: string[]
     socials: string[]
     themes: string[]
@@ -47,16 +46,8 @@ export interface Poem extends PoemSummaryData {
     key_images: string[]
 }
 
-export interface Pagination {
-    total: number
-    offset: number
-    limit: number
-    has_more: boolean
-}
-
-export interface PoemList {
-    items: Poem[]
-    pagination: Pagination
+export interface PoemSummaryDataList {
+    items: PoemSummaryData[]
 }
 
 /** Filters that drive BOTH the simple and the advanced search calls. */
@@ -103,9 +94,6 @@ export interface NeighbourListResult {
     neighbours: NeighbourResult[]
 }
 
-export interface RecentList {
-    items: Poem[]
-}
 
 export interface SimilarityBundle {
     overall: NeighbourListResult

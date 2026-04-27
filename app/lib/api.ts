@@ -1,5 +1,4 @@
-import type { ClusterResponse, RecentList, SimilarityBundle } from './types'
-import type { Poem, PoemList, SearchState } from "./types"
+import type { ClusterResponse, Poem, PoemSummaryData, PoemSummaryDataList, SearchState, SimilarityBundle } from './types'
 import { hasAdvanced } from "./types"
 
 const SERVER_BASE =
@@ -38,26 +37,14 @@ async function req<T>(path: string, init?: RequestInit): Promise<T> {
     return (await res.json()) as T
 }
 
-export function buildListQuery(
-    s: SearchState,
-    offset: number,
-    limit: number
-): string {
+function buildListQuery(s: SearchState): string {
     const p = new URLSearchParams()
-    p.set("offset", String(offset))
-    p.set("limit", String(limit))
     if (s.q.trim()) p.set("q", s.q.trim())
     return p.toString()
 }
 
-export function buildAdvancedQuery(
-    s: SearchState,
-    offset: number,
-    limit: number
-): string {
+function buildAdvancedQuery(s: SearchState): string {
     const p = new URLSearchParams()
-    p.set("offset", String(offset))
-    p.set("limit", String(limit))
     if (s.q.trim()) p.set("q", s.q.trim())
     if (s.year !== null) p.set("year", String(s.year))
     if (s.month !== null) p.set("month", String(s.month))
@@ -69,17 +56,14 @@ export function buildAdvancedQuery(
     return p.toString()
 }
 
-export function fetchPoems(
-    s: SearchState,
-    offset: number,
-    limit: number
-): Promise<PoemList> {
+export function fetchPoems(s: SearchState): Promise<PoemSummaryDataList> {
     if (hasAdvanced(s)) {
-        return req<PoemList>(
-            `/api/poems/search?${buildAdvancedQuery(s, offset, limit)}`
+        return req<PoemSummaryDataList>(
+            `/api/poems/search?${buildAdvancedQuery(s)}`
         )
     }
-    return req<PoemList>(`/api/poems?${buildListQuery(s, offset, limit)}`)
+    const qs = buildListQuery(s)
+    return req<PoemSummaryDataList>(`/api/poems${qs ? `?${qs}` : ""}`)
 }
 
 export function fetchPoem(id: string): Promise<Poem> {
@@ -105,8 +89,9 @@ export function deletePoem(id: string): Promise<void> {
         method: "DELETE",
     })
 }
-export function fetchRecentPoems(k: number = 12): Promise<RecentList> {
-    return req<RecentList>(`/api/poems/recent?k=${k}`)
+
+export function fetchRecentPoems(k: number = 12): Promise<PoemSummaryDataList> {
+    return req<PoemSummaryDataList>(`/api/poems/recent?k=${k}`)
 }
 
 export function fetchSimilarPoems(id: string): Promise<SimilarityBundle> {
@@ -119,3 +104,5 @@ export function fetchClusters(categories: string[]): Promise<ClusterResponse> {
         body: JSON.stringify({ categories }),
     })
 }
+
+export type { PoemSummaryData }

@@ -1,22 +1,24 @@
 "use client"
 
-import type { Poem } from "@/lib/types"
+import type { Poem, PoemSummaryData } from "@/lib/types"
 import PoemRow from "./PoemRow"
 
 interface Props {
-    poems: Poem[]
+    poems: PoemSummaryData[]
     editingId?: string | null
-    onEdit?: (poem: Poem) => void
+    loadedPoems?: Record<string, Poem>
+    onEdit?: (poem: PoemSummaryData) => void
     onCancel?: () => void
-    onSaved?: (updated: Poem, previous: Poem) => void
+    onSaved?: (updated: Poem, previous: PoemSummaryData) => void
     onDirtyChange?: (dirty: boolean) => void
-    onDelete?: (poem: Poem) => void
-    onPinChanged?: (poem: Poem, pinned: boolean) => void
+    onDelete?: (poem: PoemSummaryData) => void
+    onPinChanged?: (poem: PoemSummaryData, pinned: boolean) => void
 }
 
 export default function PoemList({
     poems,
     editingId = null,
+    loadedPoems,
     onEdit,
     onCancel,
     onSaved,
@@ -30,6 +32,7 @@ export default function PoemList({
                 <li key={p.id}>
                     <PoemRow
                         poem={p}
+                        editPoem={loadedPoems?.[p.id]}
                         editing={editingId === p.id}
                         onEdit={() => onEdit?.(p)}
                         onCancel={() => onCancel?.()}

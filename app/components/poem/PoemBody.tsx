@@ -1,4 +1,7 @@
-import { Fragment, type ReactNode } from "react"
+"use client"
+
+import { Fragment, useState, type ReactNode } from "react"
+import { fetchPoem } from "@/lib/api"
 
 function renderInline(line: string, lineIndex: number): ReactNode[] {
     const nodes: ReactNode[] = []
@@ -59,32 +62,46 @@ function renderBody(body: string): ReactNode[] {
     ))
 }
 
-export default function PoemBody({
-    body,
-    open,
-    onOpenChange,
-}: {
-    body: string
-    open?: boolean
-    onOpenChange?: (open: boolean) => void
-}) {
-    if (onOpenChange !== undefined && open !== undefined) {
-        return (
-            <div className="my-3">
-                <button
-                    onClick={() => onOpenChange(!open)}
-                    className="label-text hover:text-ink"
-                >
-                    {open ? "Hide poem" : "Show poem"}
-                </button>
-                {open && (
-                    <div className="mt-4">
-                        <div className="poem-body">{renderBody(body)}</div>
-                    </div>
-                )}
-            </div>
-        )
+export default function PoemBody({ poemId }: { poemId: string }) {
+    const [open, setOpen] = useState(false)
+    const [body, setBody] = useState<string | null>(null)
+    const [loading, setLoading] = useState(false)
+    const [error, setError] = useState<string | null>(null)
+
+    async function handleOpen() {
+        setOpen(true)
+        if (body !== null) return
+        setLoading(true)
+        setError(null)
+        try {
+            const poem = await fetchPoem(poemId)
+            setBody(poem.body)
+        } catch (e) {
+            setError(e instanceof Error ? e.message : "Failed to load poem")
+        } finally {
+            setLoading(false)
+        }
     }
 
-    return <div className="poem-body">{renderBody(body)}</div>
+    return (
+        <div className="my-3">
+            <button
+                onClick={() => (open ? setOpen(false) : void handleOpen())}
+                className="label-text hover:text-ink"
+            >
+                {open ? "Hide poem" : "Show poem"}
+            </button>
+            {open && loading && (
+                <p className="mt-3 label-text text-muted">Loading…</p>
+            )}
+            {open && error && (
+                <p className="mt-3 label-text text-red-600">{error}</p>
+            )}
+            {open && body !== null && (
+                <div className="mt-4">
+                    <div className="poem-body">{renderBody(body)}</div>
+                </div>
+            )}
+        </div>
+    )
 }
