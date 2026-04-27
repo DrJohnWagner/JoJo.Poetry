@@ -43,6 +43,7 @@ class PoemSummaryData(BaseModel):
     words: int = Field(ge=0)
     date: datetime
     awards: List[Award]
+    pinned: bool = False
 
 
 class Poem(PoemSummaryData):
@@ -69,7 +70,6 @@ class Poem(PoemSummaryData):
     contest_fit: List[str]
 
     # Optional with defaults
-    pinned: bool = False
     notes: List[str] = Field(default_factory=list)
     socials: List[str] = Field(default_factory=list)
     author: Optional[Author] = None

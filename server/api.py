@@ -13,7 +13,7 @@ from uuid import UUID, uuid4
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response, status
 from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
-from database.schemas.poem import Author, Award, Poem
+from database.schemas.poem import Author, Award, Poem, PoemSummaryData
 
 from server.repository import (
     DuplicateIdError,
@@ -75,26 +75,10 @@ class HealthResponse(BaseModel):
     source: str
 
 
-class Pagination(BaseModel):
+class PoemSummaryDataList(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
-    total: int = Field(description="Total matching items before pagination.")
-    offset: int
-    limit: int
-    has_more: bool
-
-
-class PoemList(BaseModel):
-    model_config = ConfigDict(extra="forbid")
-
-    items: List[Poem]
-    pagination: Pagination
-
-
-class RecentList(BaseModel):
-    model_config = ConfigDict(extra="forbid")
-
-    items: List[Poem]
+    items: List[PoemSummaryData]
 
 
 # --------------------------------------------------------------- request models
@@ -290,7 +274,7 @@ def health(
     )
 
 
-@router.get("/api/poems", response_model=PoemList, tags=["poems"])
+@router.get("/api/poems", response_model=PoemSummaryDataList, tags=["poems"])
 def list_poems(
     repo: PoemRepository = Depends(get_repository),
     _: None = Depends(check_for_external_changes),
@@ -333,20 +317,11 @@ def list_poems(
     date_to: Optional[datetime] = Query(
         None, description="Inclusive upper bound on poem date (ISO 8601)."
     ),
-    offset: int = Query(0, ge=0),
-    limit: int = Query(
-        3,
-        ge=1,
-        le=200,
-        description="Page size. Default 3 matches the incremental-load UX.",
-    ),
-) -> PoemList:
-    """Paginated, filtered list of poem summaries in authoritative order.
+) -> PoemSummaryDataList:
+    """Filtered list of poem summaries in authoritative order.
 
     **Ordering.** Pinned poems first, then ``date`` descending, with
     ``id`` ascending as a deterministic tiebreaker.
-
-    **Shape.** Returns full :class:`Poem` records.
 
     **Search semantics.** ``q`` is a case-insensitive substring match
     over title, a plain-text projection of the body (``<br/>`` stripped),
@@ -375,20 +350,10 @@ def list_poems(
             date_to,
         )
     ]
-    total = len(filtered)
-    window = filtered[offset : offset + limit]
-    return PoemList(
-        items=list(window),
-        pagination=Pagination(
-            total=total,
-            offset=offset,
-            limit=limit,
-            has_more=(offset + len(window)) < total,
-        ),
-    )
+    return PoemSummaryDataList(items=filtered)
 
 
-@router.get("/api/poems/search", response_model=PoemList, tags=["poems"])
+@router.get("/api/poems/search", response_model=PoemSummaryDataList, tags=["poems"])
 def advanced_search(
     repo: PoemRepository = Depends(get_repository),
     _: None = Depends(check_for_external_changes),
@@ -429,14 +394,7 @@ def advanced_search(
         default_factory=list,
         description="Medal tier to match. Any of: Gold, Silver, Bronze, Honorable Mention, None. 'None' matches poems with no awards.",
     ),
-    offset: int = Query(0, ge=0),
-    limit: int = Query(
-        3,
-        ge=1,
-        le=200,
-        description="Page size. Default 3 matches the incremental-load UX.",
-    ),
-) -> PoemList:
+) -> PoemSummaryDataList:
     """Advanced field-specific search with optional free-text narrowing.
 
     If ``q`` is supplied it is applied first using the same semantics as
@@ -485,10 +443,7 @@ def advanced_search(
         or bool(medals)
     )
     if not any_populated:
-        return PoemList(
-            items=[],
-            pagination=Pagination(total=0, offset=offset, limit=limit, has_more=False),
-        )
+        return PoemSummaryDataList(items=[])
 
     def match(p: Poem) -> bool:
         if title and _text_hit(title, p.title):
@@ -521,28 +476,18 @@ def advanced_search(
         if _matches(p, q, [], [], [], [], [], [], None, None, None, None, None)
     ]
     filtered = [p for p in narrowed if match(p)]
-    total = len(filtered)
-    window = filtered[offset : offset + limit]
-    return PoemList(
-        items=list(window),
-        pagination=Pagination(
-            total=total,
-            offset=offset,
-            limit=limit,
-            has_more=(offset + len(window)) < total,
-        ),
-    )
+    return PoemSummaryDataList(items=filtered)
 
 
-@router.get("/api/poems/recent", response_model=RecentList, tags=["poems"])
+@router.get("/api/poems/recent", response_model=PoemSummaryDataList, tags=["poems"])
 def recent_poems(
     repo: PoemRepository = Depends(get_repository),
     _: None = Depends(check_for_external_changes),
     k: int = Query(8, ge=1, le=100, description="Number of poems to return."),
-) -> RecentList:
+) -> PoemSummaryDataList:
     """k most recent poems ordered by date descending, with no pin-first bias."""
     poems = sorted(repo.list(), key=lambda p: (-p.date.timestamp(), str(p.id)))
-    return RecentList(items=poems[:k])
+    return PoemSummaryDataList(items=poems[:k])
 
 
 @router.post("/api/poems/cluster", response_model=ClusterResponse, tags=["poems"])
