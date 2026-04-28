@@ -65,6 +65,7 @@ Two services, one flat JSON data source:
 ├── tests/server/                     # pytest suite
 ├── app/
 │   ├── page.tsx                      # Landing: listing + search/sort + recent poems aside
+│   ├── awards/page.tsx               # Awards server entry: fetches awarded poems and renders AwardsPageClient
 │   ├── clusters/page.tsx             # Clustering server entry: fetches initial/recent data and renders ClustersPageClient
 │   ├── poems/[id]/page.tsx           # Detail + inline editing + similar poems panel
 │   ├── poems/new/page.tsx            # Dedicated create page
@@ -74,50 +75,54 @@ Two services, one flat JSON data source:
 │   │   ├── Page.tsx                  # Two-column flex wrapper (full-width, centred)
 │   │   ├── LColumn.tsx               # Left column shell: fixed lg flex-basis (62%) + inner max-w-prose
 │   │   ├── RColumn.tsx               # Right aside shell: hidden <lg, fixed lg flex-basis (38%), 106px top padding
-│   │   ├── Header.tsx                # Site header (title + "Clusters" link + optional "New poem" link)
+│   │   ├── Header.tsx                # Site header (title + "Clusters" + "Awards" links + optional "New poem" link)
+│   │   ├── AwardsPageClient.tsx      # Layout shell for the awards page (no client state; composes AwardsList + AwardedPoems)
 │   │   ├── ClustersPageClient.tsx    # Client owner of cluster checkbox state, fetchClusters calls, and aside switching logic
 │   │   ├── ClusteringUI.tsx          # Presentational clustered/list renderer (receives selected/loading/error/result props)
 │   │   ├── TopClusteredPoems.tsx     # Aside panel: one top-ranked poem (first in server-sorted list) per cluster
+│   │   ├── RecentPoems.tsx           # Recent poems aside: k most recent by date, rendered via PoemSummary (abridged)
+│   │   ├── HorizontalRule.tsx        # Shared rule divider; margin prop (Tailwind spacing scale integer, default 5) applied via inline style
+│   │   ├── AdvancedSearchDialog.tsx  # Native <dialog>-backed modal (title/body/project/notes/year/month/medals/tags)
+│   │   ├── CopyButton.tsx            # Copy-to-clipboard icon button; variant="outline"|"filled" selects icon set
+│   │   ├── PinToggle.tsx             # Server-confirmed pin/unpin
+│   │   ├── ErrorMessage.tsx
+│   │   ├── awards/
+│   │   │   ├── AwardEntry.tsx        # Two grid-rows per award: medal-label+date row, then medal-icon+poem-title+contest-title row
+│   │   │   ├── AwardedPoems.tsx      # Aside list of awarded poems ranked by cumulative medal score (Gold=4 … HM=1)
+│   │   │   ├── AwardsList.tsx        # Client: flattens poem×award pairs, sortable by date/medal/poem/contest; 3-col grid
+│   │   │   └── AwardsSortBar.tsx     # Sort controls for AwardsList (date default, medal, poem title, contest title)
 │   │   ├── cluster/
 │   │   │   ├── ClusterCheckboxes.tsx # Category checkbox controls used by ClusteringUI
 │   │   │   ├── ClusterHeader.tsx     # Cluster summary line (categories used, cluster/poem counts, excluded count)
 │   │   │   ├── ClusterLabel.tsx      # Per-cluster heading and poem count
 │   │   │   └── ClusterFeatures.tsx   # Per-cluster feature chips/labels
-│   │   ├── poem/
-│   │   │   ├── PoemListing.tsx       # Client: fetch, search/sort controls, row edit/delete (full poem fetched on edit)
-│   │   │   ├── PoemList.tsx          # Shared list renderer (<ol> of PoemRow); accepts PoemSummaryData[], loadedPoems map
-│   │   ├── PoemEditorForm.tsx        # Shared editor (list row + detail)
-│   │   ├── PoemRowEditor.tsx         # Thin wrapper around PoemEditorForm for rows
-│   │   ├── PoemCreateForm.tsx        # Dedicated POST form with defaults + guards
-│   │   ├── PoemDetail.tsx            # Reading view + Edit toggle
-│   │   ├── SimilarPoems.tsx          # Similar poems aside: all 5 axes (overall/theme/form/emotion/imagery) grouped
-│   │   ├── RecentPoems.tsx           # Recent poems aside: k most recent by date, rendered via PoemSummary (abridged)
-│   │   ├── SearchBar.tsx             # q + submit + Advanced modal trigger
-│   │   ├── SortBar.tsx               # Client-side sort buttons (title/date/lines/words/rating/medals)
-│   │   ├── AdvancedSearchDialog.tsx  # Native <dialog>-backed modal (title/body/project/notes/year/month/medals/tags)
-│   │   ├── CopyButton.tsx            # Copy-to-clipboard icon button; variant="outline"|"filled" selects icon set
-│   │   ├── PoemMetadataEditor.tsx    # Shared rating/date/url grid + all six TagInput fields
-│   │   ├── PinToggle.tsx             # Server-confirmed pin/unpin
-│   │   ├── DeleteButton.tsx          # Two-step confirmation control
-│   │   ├── NotesEditor.tsx           # Multi-line textarea for author's notes (one line = one note)
-│   │   ├── HorizontalRule.tsx        # Shared <div class="rule my-5" /> divider
-│   │   │   ├── PoemRow.tsx           # Single poem row: PoemSummary + PoemBody toggle + edit/delete buttons
-│   │   │   ├── PoemTitle.tsx         # Client title block: h2/h4 by context, optional link/pin toggle, id-driven copy buttons
-│   │   │   ├── PoemProject.tsx       # Italic project statement, null-safe, optional two-line clamp
-│   │   │   ├── PoemSummary.tsx       # Shared list item: title link + project line; accepts PoemSummaryData
-│   │   │   ├── PoemStatistics.tsx    # Shared metadata line (date · lines · words · medals · rating)
-│   │   │   ├── PoemAuthor.tsx        # pen_name + (full_name) span
-│   │   │   ├── PoemAwards.tsx        # List of awards; each row: medal icon · medal label · optional truncated award link
-│   │   │   ├── PoemFeatures.tsx      # Sorted, deduplicated tag values joined by " · "
-│   │   │   ├── PoemGroup.tsx         # Metadata group label span (eyebrow style)
-│   │   │   ├── PoemNotes.tsx         # Unordered list of per-poem notes
-│   │   │   ├── PoemSocial.tsx        # Social URL rendered as hostname link
-│   │   │   ├── PoemEditor.tsx        # Inline editor; receives full Poem loaded on demand
-│   │   │   └── PoemBody.tsx          # Toggle show/hide; fetches body lazily by poemId on first open
+│   │   └── poem/
+│   │       ├── PoemListing.tsx       # Client: fetch, search/sort controls, row edit/delete (full poem fetched on edit)
+│   │       ├── PoemList.tsx          # Shared list renderer (<ol> of PoemRow); accepts PoemSummaryData[], loadedPoems map
+│   │       ├── PoemRow.tsx           # Single poem row: PoemSummary + PoemBody toggle + edit/delete buttons
+│   │       ├── PoemSummary.tsx       # Shared list item: title + stats + project + features; showAwards prop adds medal tooltip row
+│   │       ├── PoemContestTooltip.tsx# CSS-only group-hover tooltip on a medal icon: medal tier, contest title (linked), closed date
+│   │       ├── PoemSearchBar.tsx     # q + submit + Advanced modal trigger
+│   │       ├── PoemSortBar.tsx       # Client-side sort buttons (title/date/lines/words/rating/medals)
+│   │       ├── PoemStatistics.tsx    # Shared metadata line (date · lines · words · medals · rating)
+│   │       ├── PoemTitle.tsx         # Client title block: h2/h4 by context, optional link/pin toggle, id-driven copy buttons
+│   │       ├── PoemProject.tsx       # Italic project statement, null-safe, optional two-line clamp
+│   │       ├── PoemAuthor.tsx        # pen_name + (full_name) span
+│   │       ├── PoemAwards.tsx        # List of awards; each row: medal icon · medal label · optional truncated award link
+│   │       ├── PoemFeatures.tsx      # Sorted, deduplicated tag values joined by " · "
+│   │       ├── PoemGroup.tsx         # Metadata group label span (eyebrow style)
+│   │       ├── PoemNotes.tsx         # Unordered list of per-poem notes
+│   │       ├── PoemSocial.tsx        # Social URL rendered as hostname link
+│   │       ├── PoemEditor.tsx        # Inline editor; receives full Poem loaded on demand
+│   │       ├── PoemDetail.tsx        # Reading view + Edit toggle
+│   │       ├── PoemCreateForm.tsx    # Dedicated POST form with defaults + guards
+│   │       ├── PoemMetadataEditor.tsx# Shared rating/date/url grid + all six TagInput fields
+│   │       ├── SimilarPoems.tsx      # Similar poems aside: all 5 axes (overall/theme/form/emotion/imagery) grouped
+│   │       └── PoemBody.tsx          # Toggle show/hide; fetches body lazily by poemId on first open
 │   └── lib/
-│       ├── api.ts                    # Typed fetch wrappers (fetchPoems → PoemSummaryDataList, fetchPoem, fetchRecentPoems, fetchClusters)
+│       ├── api.ts                    # Typed fetch wrappers (fetchPoems, fetchPoem, fetchRecentPoems, fetchAwardedPoems, fetchClusters)
 │       ├── cluster.ts                # Cluster feature/group label helpers for cluster UI rendering
-│       ├── types.ts                  # PoemSummaryData / Poem / ClusterPoem / SearchState / SimilarityBundle / ClusterResponse / …
+│       ├── types.ts                  # PoemSummaryData / Poem / Award / ClusterPoem / SearchState / SimilarityBundle / ClusterResponse / …
 │       ├── editable.ts               # Canonical editable-field contract
 │       └── format.ts                 # body ↔ plaintext, date formatting, cleanPoetryUrl, poemToMarkdown(id, full)
 ├── database/
@@ -143,7 +148,7 @@ The authoritative schema is `database/schemas/poem.schema.json`;
 | `title`                                                                               | string                     | yes                          | yes                 | yes                           |                                                                                                    |
 | `url`                                                                                 | URI                        | yes                          | yes                 | no                            | Canonical external link.                                                                           |
 | `body`                                                                                | string (plain text)        | yes                          | yes                 | yes                            | Stored and edited as plain text; newline and indentation are preserved on render. |
-| `awards`                                                                              | `[{url, medal, title?}]` | yes (may be empty)           | yes (API)           | via `medals` filter         | `medal` is surfaced to search; `title` is an optional award name displayed in the UI.          |
+| `awards`                                                                              | `[{url, medal, title, closed}]` | yes (may be empty)           | yes (API)           | via `medals` filter         | `medal` is surfaced to search; `title` is the contest name; `closed` is an ISO 8601 datetime string recording when the contest closed.          |
 | `date`                                                                                | ISO 8601 datetime          | yes                          | yes                 | year/month in advanced search | Timezone-aware; UTC in existing data.                                                              |
 | `themes`, `moods`, `poetic_forms`, `techniques`, `tones_voices`, `key_images`, `contest_fit` | `string[]`               | yes (may be empty)           | yes                 | yes                           | Free-vocabulary tags. `moods`: tonal/affective; `poetic_forms`: metrical/structural forms; `techniques`: devices and techniques; `tones_voices`: voice/stance. |
 | `project`                                                                             | string                     | yes                          | yes                 | yes                           | One-sentence authorial statement.                                                                  |
@@ -518,9 +523,9 @@ Each value is a full `NeighbourListResult` with its own `k`.
 All pages use the same two-column layout shell: `Page` (full-width flex
 wrapper), `LColumn` (content shell with an `lg` fixed basis of 62% and an
 inner `max-w-prose` measure), and `RColumn` (hidden below `lg`; fixed 38%
-basis with `106px` top padding at `lg+`). `Header` (title + "Clusters"
-link + optional "New poem" link in RW mode) sits at the top of the left
-column on every page.
+basis with `106px` top padding at `lg+`). `Header` (title + "Clusters" +
+"Awards" links + optional "New poem" link in RW mode) sits at the top of
+the left column on every page.
 
 **Listing page** (`/`): left column has the full poem listing with search
 and sort. The entire matching set is fetched in one request —
@@ -529,6 +534,19 @@ re-sorted client-side without additional round-trips. Each row shows the
 summary metadata; poem body loads lazily when the user expands it. The
 aside shows the 12 most recent poems via `RecentPoems`, fetched
 server-side with `GET /api/poems/recent?k=12`.
+
+**Awards page** (`/awards`): `awards/page.tsx` fetches `GET /api/poems/awards`
+server-side and renders `AwardsPageClient`. The left column shows `AwardsList`
+— a flat list of every (poem, award) pair sorted by closed date descending by
+default, with `AwardsSortBar` controls to re-sort by medal tier, poem title, or
+contest title. Each entry occupies two grid rows: medal label + date in the
+first row; coloured medal icon + poem title (linked) + contest title (linked)
+in the second. The right column shows `AwardedPoems`, a ranked list of
+awarded poems ordered by cumulative medal score (Gold=4, Silver=3, Bronze=2,
+Honorable Mention=1). The shared `PoemSummary` component accepts a
+`showAwards` prop that renders a horizontal row of `PoemContestTooltip` icons
+below the feature line; each icon shows a CSS-only group-hover tooltip with
+the medal tier, contest title (linked to the contest URL), and closed date.
 
 **Clustering page** (`/clusters`): `clusters/page.tsx` fetches the full
 poem listing and recent poems server-side (both as `PoemSummaryDataList`),
@@ -557,8 +575,8 @@ omitted and the page renders normally. Each result is rendered with the
 shared summary view (title + abridged stats/project). Scores and
 breakdowns are not exposed in the UI.
 
-Both the listing and clustering asides use the shared `PoemSummary`
-component (title link + optional two-line-clamped project line).
+All listing and aside contexts use the shared `PoemSummary` component
+(title link + optional two-line-clamped project line).
 
 - **Wide viewport** (≥ `lg`): aside is shown in the right column and scrolls
   with the page.
@@ -681,6 +699,17 @@ Response: `PoemSummaryDataList` — `{ items: PoemSummaryData[] }` ordered by
 date descending. Items are summary records (no `body`, tags, or notes).
 Returns `422` for an out-of-range `k`. Works in read-only mode.
 
+## Awards endpoint
+
+`GET /api/poems/awards`
+
+Returns all poems that have at least one award, in authoritative order
+(pinned-first, date-desc, id-asc). Each item is a `PoemSummaryData`
+record including the full `awards` array with `url`, `medal`, `title`,
+and `closed` fields. Works in read-only mode.
+
+Response: `PoemSummaryDataList` — `{ items: PoemSummaryData[] }`.
+
 ## Ordering
 
 Authoritative ordering (applied by both list endpoints before returning):
@@ -767,7 +796,9 @@ Test files:
   summary fields, no `body`); search; pinned-first ordering; 422 malformed id;
   404 unknown id; `GET /api/poems/{id}` returns full poem including `body`;
   `/api/poems/recent` (200 shape, default k, k limits, date-desc ordering,
-  no pin bias, 422 for out-of-range k, route not intercepted by `/{poem_id}`).
+  no pin bias, 422 for out-of-range k, route not intercepted by `/{poem_id}`);
+  `/api/poems/awards` (200 shape, all returned poems have at least one award,
+  at least one result in the fixture).
 - `tests/server/test_mutations.py` — PATCH partial semantics; derived recompute;
   unknown-field/id rejection; DELETE; **persistence-failure
   atomicity** (injected `OSError` keeps memory and disk consistent).
@@ -821,8 +852,9 @@ Test files:
   changes will need a `schema_version` and a one-shot migration.
 - **No relevance ranking.** Search filters but does not rank; order
   is always authoritative (pinned → date-desc → id-asc).
-- **`awards` has no inline UI yet.** It is an object array; the
-  backend accepts PATCH, but the UI surfaces it as read-only only.
+- **`awards` has no inline editor.** The awards page and medal tooltips
+  display `awards` read-only; the backend accepts PATCH, but there is no
+  form UI for creating or modifying award records.
 - **Browser-native modals** are used for discard/confirm prompts
   (`window.confirm`, `beforeunload`). Fine for a first draft; a
   styled in-page prompt would match the literary aesthetic better.
@@ -839,8 +871,7 @@ Test files:
 
 ## Sensible next steps
 
-1. **Object-array editor** for `awards` in both the create and edit
-   surfaces.
+1. **Object-array editor** for `awards` in both the create and edit surfaces.
 2. **Optimistic concurrency** via `ETag` / `If-Match` headers so a
    stale-client PATCH fails with `409` instead of silently winning.
 3. **Schema versioning** (`schema_version` on each record) plus a
