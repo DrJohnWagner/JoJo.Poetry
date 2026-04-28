@@ -1,4 +1,4 @@
-import type { Poem } from "@/lib/types"
+import type { PoemSummaryData } from "@/lib/types"
 import PoemSummary from "./poem/PoemSummary"
 
 export default function PoemListSection({
@@ -6,12 +6,12 @@ export default function PoemListSection({
     poems,
 }: {
     label: string
-    poems: Poem[]
+    poems: PoemSummaryData[]
 }) {
     if (poems.length === 0) return null
     return (
         <section aria-label={`${label} poems`} className="bg-paper/50">
-            <h2 className="label-text">{label}</h2>
+            <h2 className="text-label">{label}</h2>
             <div className="mt-3 space-y-4">
                 {poems.map((poem) => (
                     <PoemSummary key={poem.id} poem={poem} variant="abridged" />

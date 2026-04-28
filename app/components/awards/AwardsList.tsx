@@ -62,7 +62,7 @@ export default function AwardsList({ poems }: { poems: PoemSummaryData[] }) {
 
     return (
         <section aria-label="Awards">
-            {/* <h2 className="label-text mb-4">Awards</h2> */}
+            {/* <h2 className="text-label mb-4">Awards</h2> */}
             <AwardsSortBar sort={sort} onChange={setSort} />
             {sorted.map(({ poem, award }, i) => (
                 <div key={`${poem.id}-${award.url}`}>

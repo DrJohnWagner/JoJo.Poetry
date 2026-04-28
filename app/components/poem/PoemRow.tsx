@@ -35,7 +35,7 @@ export default function PoemRow({
     if (editing && editPoem) {
         return (
             <article>
-                <p className="label-text mb-4">
+                <p className="text-label mb-4">
                     Editing &middot; &ldquo;{liveTitle.trim() || "(Untitled)"}
                     &rdquo;
                 </p>

@@ -126,7 +126,7 @@ export default function ClusteringUI({
                         a.id.localeCompare(b.id)
                     )
                 }),
-        [initial.items, deletedIds, loadedPoems]
+        [initial, deletedIds, loadedPoems]
     )
 
     return (
@@ -215,7 +215,7 @@ export default function ClusteringUI({
                     {result.excluded.length > 0 && (
                         <div className="mt-10">
                             <HorizontalRule />
-                            <p className="label-text mb-4">
+                            <p className="text-label mb-4">
                                 Unclustered — cluster too small
                             </p>
                             <div className="space-y-4">

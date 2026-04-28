@@ -176,7 +176,7 @@ export default function PoemListing({
 
             <div className="mt-16 flex items-center gap-6">
                 {loading && (
-                    <span className="label-text text-muted">Loading…</span>
+                    <span className="text-label text-muted">Loading…</span>
                 )}
                 <ErrorMessage message={err} className="text-sm inline" />
             </div>

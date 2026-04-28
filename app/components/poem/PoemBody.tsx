@@ -88,17 +88,17 @@ export default function PoemBody({ poemId }: { poemId: string }) {
         <div className="my-3">
             <button
                 onClick={() => (open ? setOpen(false) : void handleOpen())}
-                className="label-text hover:text-ink"
+                className="text-label hover:text-ink"
             >
                 {open ? "Hide poem" : "Show poem"}
             </button>
             {open && loading && (
-                <p className="label-text mt-3 text-muted">Loading…</p>
+                <p className="text-label mt-3 text-muted">Loading…</p>
             )}
             {open && <ErrorMessage message={error} />}
             {open && body !== null && (
                 <div className="mt-4">
-                    <div className="poem-body">{renderBody(body)}</div>
+                    <div className="text-body text-body-poem">{renderBody(body)}</div>
                 </div>
             )}
         </div>

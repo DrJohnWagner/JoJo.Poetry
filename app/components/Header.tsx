@@ -11,10 +11,10 @@ export default function Header() {
                 href="/"
                 className="inline-block text-ink no-underline hover:no-underline"
             >
-                <h1 className="font-display text-3xl leading-none tracking-tight md:text-4xl">
+                <h1 className="text-display md:text-4xl">
                     JoJo.Poetry
                 </h1>
-                <p className="label-text mt-2">Collected poems</p>
+                <p className="text-label mt-2">Collected poems</p>
             </Link>
             <div className="flex items-end gap-5">
                 <Link href="/" className="button-primary hover:no-underline">

@@ -42,7 +42,7 @@ export default function ClusterRow({
     if (editing) {
         return (
             <article>
-                <p className="label-text mb-4">
+                <p className="text-label mb-4">
                     Editing &middot; &ldquo;{editingTitle.trim() || "(Untitled)"}
                     &rdquo;
                 </p>

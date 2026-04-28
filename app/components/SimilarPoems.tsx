@@ -14,7 +14,7 @@ export default function SimilarPoems({ bundle }: { bundle: SimilarityBundle }) {
     if (!hasAny) return null
     return (
         <div className="space-y-6">
-            <h2 className="label-text text-center">Similar Poems</h2>
+            <h2 className="text-label text-center">Similar Poems</h2>
             {CATEGORIES.map(({ key, label }) => (
                 <PoemListSection
                     key={key}

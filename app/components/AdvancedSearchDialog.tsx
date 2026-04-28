@@ -73,7 +73,7 @@ export default function AdvancedSearchDialog({
                         type="button"
                         onClick={onClose}
                         aria-label="Close"
-                        className="label-text hover:text-accent"
+                        className="text-label hover:text-accent"
                     >
                         close
                     </button>
@@ -81,7 +81,7 @@ export default function AdvancedSearchDialog({
 
                 <div className="grid grid-cols-2 gap-x-6 gap-y-5">
                     <label className="col-span-2 block">
-                        <span className="label-text">Title</span>
+                        <span className="text-label">Title</span>
                         <input
                             type="text"
                             value={value.title}
@@ -93,7 +93,7 @@ export default function AdvancedSearchDialog({
                         />
                     </label>
                     <label className="col-span-2 block">
-                        <span className="label-text">Body</span>
+                        <span className="text-label">Body</span>
                         <input
                             type="text"
                             value={value.body}
@@ -105,7 +105,7 @@ export default function AdvancedSearchDialog({
                         />
                     </label>
                     <label className="col-span-2 block">
-                        <span className="label-text">Project</span>
+                        <span className="text-label">Project</span>
                         <input
                             type="text"
                             value={value.project}
@@ -117,7 +117,7 @@ export default function AdvancedSearchDialog({
                         />
                     </label>
                     <label className="col-span-2 block">
-                        <span className="label-text">Author&#39;s Notes</span>
+                        <span className="text-label">Author&#39;s Notes</span>
                         <input
                             type="text"
                             value={value.notes}
@@ -129,7 +129,7 @@ export default function AdvancedSearchDialog({
                         />
                     </label>
                     <label className="block">
-                        <span className="label-text">Year</span>
+                        <span className="text-label">Year</span>
                         <input
                             type="number"
                             min={1900}
@@ -148,7 +148,7 @@ export default function AdvancedSearchDialog({
                         />
                     </label>
                     <label className="block">
-                        <span className="label-text">Month</span>
+                        <span className="text-label">Month</span>
                         <select
                             value={value.month ?? ""}
                             onChange={(e) =>
@@ -172,7 +172,7 @@ export default function AdvancedSearchDialog({
                     </label>
 
                     <fieldset className="col-span-2">
-                        <legend className="label-text">Medals</legend>
+                        <legend className="text-label">Medals</legend>
                         <p className="mb-2 mt-1 text-[0.96rem] text-muted">
                             Any selected — “None” matches poems with no award
                             entries.
@@ -195,7 +195,7 @@ export default function AdvancedSearchDialog({
                     </fieldset>
                 </div>
 
-                <footer className="label-text mt-8 flex items-center justify-end gap-6">
+                <footer className="text-label mt-8 flex items-center justify-end gap-6">
                     <button
                         type="button"
                         onClick={onClear}

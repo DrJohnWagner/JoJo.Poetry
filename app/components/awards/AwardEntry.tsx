@@ -29,20 +29,20 @@ export default function AwardEntry({
     return (
         <>
             {/* Row 1: medal text | date spanning cols 2–3 */}
-            <span className="label-text self-baseline justify-self-center">
+            <span className="text-label self-baseline justify-self-center">
                 {medalLabel}
             </span>
-            <p className="label-text col-span-2">{formatDate(award.closed)}</p>
+            <p className="text-label col-span-2">{formatDate(award.closed)}</p>
 
             {/* Row 2: medal icon | poem title | contest title */}
             <FaMedal
                 className="self-center justify-self-center"
                 style={{ color: medalColor(award.medal), fontSize: "1.7em" }}
             />
-            <h3 className="self-center font-sans text-[0.9rem] text-ink/80">
+            <h3 className="self-center">
                 <Link
                     href={`/poems/${poem.id}`}
-                    className="self-center font-sans text-[0.9rem] text-ink/80"
+                    className="text-entry"
                 >
                     {poem.title}
                 </Link>
@@ -52,7 +52,7 @@ export default function AwardEntry({
                     href={award.url}
                     target="_blank"
                     rel="noreferrer"
-                    className="self-center font-sans text-[0.9rem] text-ink/80"
+                    className="text-entry"
                 >
                     {award.title} ↗
                 </a>

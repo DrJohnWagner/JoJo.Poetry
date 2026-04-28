@@ -25,7 +25,7 @@ export default function PoemAward({ award }: { award: Award }) {
     return (
         <>
             <FaMedal style={{ color: medalColor(award.medal) }} />
-            <span className="poem-award-text">{medal}</span>
+            <span className="text-meta">{medal}</span>
             {award.title ? (
                 <a href={award.url} target="_blank" rel="noreferrer">
                     {truncateAwardTitle(

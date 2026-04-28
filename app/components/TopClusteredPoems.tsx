@@ -19,7 +19,7 @@ export default function TopClusteredPoems({
 
     return (
         <div className="space-y-6">
-            <h2 className="label-text text-center">
+            <h2 className="text-label text-center">
                 Top-Rated Clustered Poems
             </h2>
             {groups.map(({ key, label, poems }) => (
