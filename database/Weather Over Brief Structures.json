@@ -1,10 +1,10 @@
 {
     "rating": 88,
-    "project": "The poem adopts a distant, aerial perspective to reframe cancer and cellular division as neutral biological processes stripped of human emotional interpretation.",
+    "project": "The poem adopts a distant, elevated perspective to reframe cancer as part of natural biological processes, systematically stripping away human emotional language in favor of architectural and mechanical metaphors.",
     "themes": [
-        "biological_process",
+        "cancer",
         "mortality",
-        "meaning"
+        "biological_process"
     ],
     "moods": [
         "clinical",
@@ -14,31 +14,31 @@
         "lyric"
     ],
     "techniques": [
+        "anaphora",
         "short_declarative_lines",
-        "repetition",
         "parallelism",
-        "parataxis"
+        "direct_address"
     ],
     "tones_voices": [
         "clinical",
         "detached"
     ],
     "key_images": [
-        "scaffolds",
-        "corridors",
-        "chambers",
-        "cells",
-        "blueprints",
-        "beams",
-        "brightness on a screen",
-        "multiplying cells"
+        "scaffolds rising in soft light",
+        "corridors threading with current",
+        "walls doubling",
+        "chambers extending",
+        "brightness circled on screen",
+        "cells multiplying in clusters",
+        "beams softening",
+        "standing figure"
     ],
     "contest_fit": [
         "medical",
         "science",
-        "philosophy",
+        "illness",
         "mortality",
-        "perspective"
+        "biology"
     ],
     "id": "97fb0882-30aa-4643-a085-68a992006260",
     "title": "Weather Over Brief Structures",
@@ -47,11 +47,11 @@
         "full_name": "John Wagner"
     },
     "url": "https://allpoetry.com/poem/19002197",
-    "body": "From this height, the bodies are temporary scaffolds.<br/>\n<br/>\nThey rise in soft light,<br/>\nassemble their corridors,<br/>\nthread themselves with current,<br/>\nbelieving the architecture will hold.<br/>\n<br/>\nIt does, for a while.<br/>\n<br/>\nInside each one,<br/>\ndivisions occur with devotion—<br/>\nwalls doubling,<br/>\nchambers extending,<br/>\nsmall obediences to instruction.<br/>\n<br/>\nThey call some of these errors.<br/>\n<br/>\nFrom here,<br/>\nthere is no error.<br/>\nOnly pattern.<br/>\n<br/>\nCells lean into their mandate.<br/>\nThey copy.<br/>\nThey press.<br/>\nThey fill available dark.<br/>\n<br/>\nWhen the larger structure weakens,<br/>\nit is not betrayal.<br/>\nIt is density exceeding frame.<br/>\n<br/>\nYou would name it invasion.<br/>\nYou would name it tragedy.<br/>\nYou would circle brightness on a screen<br/>\nand give it weight beyond geometry.<br/>\n<br/>\nFrom this altitude,<br/>\nbrightness is simply concentration.<br/>\n<br/>\nThe body labors to remain singular.<br/>\nIt seals, cuts, burns,<br/>\nrevises its own blueprints.<br/>\nSometimes the revision succeeds.<br/>\nSometimes the beams soften.<br/>\n<br/>\nNeither outcome alters the field.<br/>\n<br/>\nWhat you call a life<br/>\nis a brief coherence of matter,<br/>\na gathering<br/>\nof signal and warmth.<br/>\n<br/>\nWhat you call a loss<br/>\nis the redistribution of that coherence.<br/>\n<br/>\nNothing is punished.<br/>\nNothing is spared.<br/>\n<br/>\nThe smallest cluster of multiplying cells<br/>\nand the tallest standing figure<br/>\nshare the same duration.<br/>\n<br/>\nBoth lean toward increase.<br/>\nBoth exceed themselves.<br/>\n<br/>\nFrom here,<br/>\nthe effort is luminous<br/>\nand without exception.",
+    "body": "From this height, the bodies are temporary scaffolds.\n\nThey rise in soft light,\nassemble their corridors,\nthread themselves with current,\nbelieving the architecture will hold.\n\nIt does, for a while.\n\nInside each one,\ndivisions occur with devotion—\nwalls doubling,\nchambers extending,\nsmall obediences to instruction.\n\nThey call some of these errors.\n\nFrom here,\nthere is no error.\nOnly pattern.\n\nCells lean into their mandate.\nThey copy.\nThey press.\nThey fill available dark.\n\nWhen the larger structure weakens,\nit is not betrayal.\nIt is density exceeding frame.\n\nYou would name it invasion.\nYou would name it tragedy.\nYou would circle brightness on a screen\nand give it weight beyond geometry.\n\nFrom this altitude,\nbrightness is simply concentration.\n\nThe body labors to remain singular.\nIt seals, cuts, burns,\nrevises its own blueprints.\nSometimes the revision succeeds.\nSometimes the beams soften.\n\nNeither outcome alters the field.\n\nWhat you call a life\nis a brief coherence of matter,\na gathering\nof signal and warmth.\n\nWhat you call a loss\nis the redistribution\nof that coherence.\n\nNothing is punished.\nNothing is spared.\n\nThe smallest cluster\nof multiplying cells\nand the tallest standing figure\nshare the same duration.\n\nBoth lean toward increase.\nBoth exceed themselves.\n\nFrom here,\nthe effort is luminous\nand without exception.",
     "awards": [],
     "socials": [],
     "date": "2026-03-19T19:34:00Z",
-    "lines": 50,
+    "lines": 52,
     "words": 208,
     "notes": [
         "The perspective here is aerial and clinical, observing cellular division and bodily processes from a detached vantage point. The voice shifts between biological observation and human interpretation, questioning how we name and understand the processes of growth, illness, and mortality. What appears as tragedy from ground level transforms into pattern when viewed from sufficient distance."

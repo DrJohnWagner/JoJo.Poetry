@@ -98,6 +98,10 @@ export function fetchSimilarPoems(id: string): Promise<SimilarityBundle> {
     return req<SimilarityBundle>(`/api/poems/${encodeURIComponent(id)}/similar`)
 }
 
+export function fetchAwardedPoems(): Promise<PoemSummaryDataList> {
+    return req<PoemSummaryDataList>("/api/poems/awards")
+}
+
 export function fetchClusters(categories: string[]): Promise<ClusterResponse> {
     return req<ClusterResponse>("/api/poems/cluster", {
         method: "POST",

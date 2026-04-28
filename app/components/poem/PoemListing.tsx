@@ -3,8 +3,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { deletePoem, fetchPoem, fetchPoems } from "@/lib/api"
 import type { Poem, PoemSummaryData, SearchState } from "@/lib/types"
-import SearchBar from "../SearchBar"
-import SortBar, { DEFAULT_SORT, type SortState } from "../SortBar"
+import SearchBar from "./PoemSearchBar"
+import SortBar, { DEFAULT_SORT, type SortState } from "./PoemSortBar"
 import PoemList from "./PoemList"
 import ErrorMessage from "../ErrorMessage"
 
@@ -34,9 +34,14 @@ export default function PoemListing({
     const [loadedPoems, setLoadedPoems] = useState<Record<string, Poem>>({})
 
     const editingIdRef = useRef<string | null>(null)
-    editingIdRef.current = editingId
+    useEffect(() => {
+        editingIdRef.current = editingId
+    }, [editingId])
+
     const dirtyRef = useRef(false)
-    dirtyRef.current = dirty
+    useEffect(() => {
+        dirtyRef.current = dirty
+    }, [dirty])
 
     function confirmDiscard(reason: string): boolean {
         if (!dirtyRef.current) return true
@@ -44,7 +49,9 @@ export default function PoemListing({
     }
 
     const searchRef = useRef(search)
-    searchRef.current = search
+    useEffect(() => {
+        searchRef.current = search
+    }, [search])
 
     const refetchFromTop = useCallback(() => {
         const snapshot = searchRef.current

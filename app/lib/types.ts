@@ -8,7 +8,8 @@ export interface Author {
 export interface Award {
     url: string
     medal: string
-    title?: string
+    title: string
+    closed: string // ISO datetime string
 }
 
 export interface PoemSummaryData {

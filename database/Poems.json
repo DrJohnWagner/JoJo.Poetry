@@ -1,41 +1,49 @@
 [
     {
-        "rating": 80,
-        "project": "Microhistorical poem of a Brisbane COVID lockdown night — a provisional community forms through shared food, music, and dancing while the city stands still outside.",
+        "rating": 78,
+        "project": "The poem chronicles a single evening and morning of communal living, using precise domestic details to map the rhythm of shared meals, conversation, and quiet intimacy among friends in an urban apartment.",
         "themes": [
             "community",
-            "COVID lockdown",
-            "friendship",
-            "ordinary life",
-            "Brisbane",
-            "provisional belonging"
+            "domestic_life",
+            "intimacy"
         ],
         "moods": [
-            "warm",
-            "nostalgic",
-            "bittersweet",
+            "tender",
+            "communal"
+        ],
+        "poetic_forms": [
+            "lyric"
+        ],
+        "techniques": [
+            "catalogue",
+            "indentation_as_structure",
+            "parataxis",
+            "short_declarative_lines"
+        ],
+        "tones_voices": [
+            "plainspoken",
             "documentary"
         ],
-        "poetic_forms": [],
-        "techniques": [],
-        "tones_voices": [],
         "key_images": [
-            "Scenic Rim on horizon",
+            "shared flat nine storeys up",
+            "porch facing south",
+            "Brisbane River",
+            "Mount Barney",
+            "kitchen guests",
+            "Tom Waits on portable speakers",
+            "washing vegetables",
             "Thai curry chicken",
-            "Margaret River cabernet",
-            "Victoria Bridge empty",
-            "Courtney Barnett",
-            "dancing",
-            "French press coffee on porch",
-            "Mount Cordeaux"
+            "yellow candlelight",
+            "Victoria Bridge",
+            "French press coffee"
         ],
         "contest_fit": [
-            "community",
-            "pandemic and lockdown",
-            "Australia",
-            "everyday life",
             "friendship",
-            "food and cooking"
+            "urban life",
+            "domestic scenes",
+            "Australian setting",
+            "young adults",
+            "hospitality"
         ],
         "id": "2fc1c84b-3e65-4788-abaf-333205e709e6",
         "title": "Just Enough Freedom",
@@ -44,9 +52,11 @@
             "full_name": "John Wagner"
         },
         "url": "https://allpoetry.com/poem/18872799",
-        "body": "A shared flat,<br/>\nnine storeys up,<br/>\nwith a view of the city.<br/>\n<br/>\nThe porch faces south—<br/>\n    the Scenic Rim on the horizon,<br/>\n    city streets close by,<br/>\n    blocks of flats, a park,<br/>\n    the Brisbane River between,<br/>\n        close enough to touch;<br/>\n    no morning sun,<br/>\n        but a couch,<br/>\n        cushioned seats,<br/>\n        and a coffee table—<br/>\n            a porch built for six.<br/>\n<br/>\n<br/>\nBut the city is quiet, still—<br/>\nno cars, no motion, no sound<br/>\n    rising from the street,<br/>\nlights in flats flickering<br/>\nas people carry on<br/>\n    with their evening.<br/>\n<br/>\nWe stay where we are.<br/>\n<br/>\n<br/>\nGuests gather again in the kitchen—<br/>\na couple visiting from Adelaide,<br/>\ntwo Sydney students on break,<br/>\nthe host puts Tom Waits<br/>\non portable speakers.<br/>\n<br/>\nWe wash vegetables, rinse rice,<br/>\nopen cans of bamboo shoots,<br/>\ndice fresh chicken thighs.<br/>\nSome cook, others put out<br/>\nplates, chopsticks, forks,<br/>\nand knives.<br/>\n<br/>\nGlasses are set on the bench.<br/>\nWine is opened, sodas and beers.<br/>\n<br/>\nThrough the kitchen window,<br/>\nlights still flicker in flats,<br/>\nutes remain parked,<br/>\nMount Barney holds.<br/>\n<br/>\n<br/>\nWe finish, plate, and take our meals<br/>\nto the porch, arrange, rearrange.<br/>\nThe couch is full of conversation.<br/>\nThose in chairs laugh. Wine is poured.<br/>\nI teach a student how to use chopsticks.<br/>\n<br/>\nThai curry chicken on rice.<br/>\nA Margaret River cabernet.<br/>\nGarlic butter naan.<br/>\n<br/>\nYellow candlelight replaces<br/>\nthe white of incandescent bulbs.<br/>\n<br/>\n<br/>\nI carry plates to the kitchen.<br/>\nSteve puts on Courtney Barnett.<br/>\nAnne reaches for someone’s hand.<br/>\n<br/>\nThey all dance.<br/>\nI wash.<br/>\nClaire dries.<br/>\n<br/>\n<br/>\nOutside, Victoria Bridge is empty.<br/>\nClaire takes more wine and we join.<br/>\nCourtney is replaced by The National.<br/>\n    We sing and dance.<br/>\nAnne and I head for the porch. We smoke.<br/>\nLoud music fails to disturb the city.<br/>\n<br/>\nWe go back in. I dance with Claire.<br/>\nNight turns to morning.<br/>\nMorning leads to bed.<br/>\n<br/>\nWe wake late.<br/>\nPress coffee on the porch.<br/>\nSlice bread.<br/>\nArrange, rearrange sliced devon.<br/>\n<br/>\nBelow us the cars start to move.<br/>\nStreet life reaches us again.<br/>\nVictoria Bridge is no longer empty.<br/>\nMount Cordeaux is close enough to touch.<br/>\n<br/>\nThe city moves again.<br/>\n<br/>\n<br/>\nWe stand, take<br/>\n    our French press,<br/>\n    coffee cups,<br/>\n    light cream<br/>\n        to the kitchen<br/>\n            and begin to cook. ",
+        "body": "A shared flat,\nnine storeys up,\nwith a view of the city.\n\nThe porch faces south—\n    the Scenic Rim on the horizon,\n    city streets close by,\n    blocks of flats, a park,\n    the Brisbane River between,\n        close enough to touch;\n    no morning sun,\n        but a couch,\n        cushioned seats,\n        and a coffee table—\n            a porch built for six.\n\n\nBut the city is quiet, still—\nno cars, no motion, no sound\n    rising from the street,\nlights in flats flickering\nas people carry on\n    with their evening.\n\nWe stay where we are.\n\n\nGuests gather again in the kitchen—\na couple visiting from Adelaide,\ntwo Sydney students on break,\nthe host puts Tom Waits\non portable speakers.\n\nWe wash vegetables, rinse rice,\nopen cans of bamboo shoots,\ndice fresh chicken thighs.\nSome cook, others put out\nplates, chopsticks, forks,\nand knives.\n\nGlasses are set on the bench.\nWine is opened, sodas and beers.\n\nThrough the kitchen window,\nlights still flicker in flats,\nutes remain parked,\nMount Barney holds.\n\n\nWe finish, plate, and take our meals\nto the porch, arrange, rearrange.\nThe couch is full of conversation.\nThose in chairs laugh. Wine is poured.\nI teach a student how to use chopsticks.\n\nThai curry chicken on rice.\nA Margaret River cabernet.\nGarlic butter naan.\n\nYellow candlelight replaces\nthe white of incandescent bulbs.\n\n\nI carry plates to the kitchen.\nSteve puts on Courtney Barnett.\nAnne reaches for someone’s hand.\n\nThey all dance.\nI wash.\nClaire dries.\n\n\nOutside, Victoria Bridge is empty.\nClaire takes more wine and we join.\nCourtney is replaced by The National.\n    We sing and dance.\nAnne and I head for the porch. We smoke.\nLoud music fails to disturb the city.\n\nWe go back in. I dance with Claire.\nNight turns to morning.\nMorning leads to bed.\n\nWe wake late.\nPress coffee on the porch.\nSlice bread.\nArrange, rearrange sliced devon.\n\nBelow us the cars start to move.\nStreet life reaches us again.\nVictoria Bridge is no longer empty.\nMount Cordeaux is close enough to touch.\n\nThe city moves again.\n\n\nWe stand, take\n    our French press,\n    coffee cups,\n    light cream\n        to the kitchen\n            and begin to cook. ",
         "awards": [],
-        "socials": [],
+        "socials": [
+            "https://www.instagram.com/p/DWSzr9DDWf1/"
+        ],
         "date": "2026-01-09T23:43:00Z",
         "lines": 78,
         "words": 353,
@@ -56,12 +66,12 @@
         "pinned": false
     },
     {
-        "rating": 84,
-        "project": "The poem constructs an interior architectural space that functions as a detailed anatomical metaphor, mapping the physical systems and structural elements of a body onto the components of a building.",
+        "rating": 87,
+        "project": "The poem constructs an architectural interior that functions as an anatomical metaphor, using precise structural details to map the hidden mechanisms and gradual deterioration of a living body.",
         "themes": [
             "biological_process",
             "control",
-            "institutional_failure"
+            "mortality"
         ],
         "moods": [
             "clinical",
@@ -72,12 +82,13 @@
         ],
         "techniques": [
             "short_declarative_lines",
-            "anaphora",
-            "parataxis",
+            "parallelism",
+            "catalogue",
             "end_stopped_lines"
         ],
         "tones_voices": [
-            "clinical"
+            "clinical",
+            "restrained"
         ],
         "key_images": [
             "narrow corridor with damp walls",
@@ -85,20 +96,22 @@
             "pale load-bearing columns",
             "pressing ceiling",
             "thick slow air",
-            "filtered light",
+            "filtered thinned light",
             "shoulder-width alcoves",
-            "soft wall lining",
+            "soft yielding material",
             "pulsing pipes",
             "lifted floor beneath intact tile",
-            "hairline fractures across plaster"
+            "hairline fractures across plaster",
+            "invisible straining beams"
         ],
         "contest_fit": [
             "architecture",
-            "body",
-            "medicine",
+            "medical",
+            "anatomy",
+            "structural engineering",
+            "aging",
             "infrastructure",
-            "systems",
-            "anatomy"
+            "bodily systems"
         ],
         "id": "2e7e6cb5-172f-4fcf-b347-411be390e5d5",
         "title": "Load-Bearing Interior",
@@ -107,15 +120,18 @@
             "full_name": "John Wagner"
         },
         "url": "https://allpoetry.com/poem/19004401",
-        "body": "It is not empty here.<br/>\n<br/>\nThe room begins in a narrow corridor,<br/>\nwalls close and damp,<br/>\nwhere a steady drip measures<br/>\nthe distance between surfaces.<br/>\n<br/>\nBeyond that,<br/>\nit opens.<br/>\n<br/>\nColumns rise without ornament,<br/>\npale and load-bearing,<br/>\nholding up a ceiling<br/>\nthat presses downward<br/>\nwithout ever touching.<br/>\n<br/>\nThe air is thick,<br/>\nslow to circulate.<br/>\nLight does not enter directly.<br/>\nIt filters through layers,<br/>\narriving thinned,<br/>\narriving altered,<br/>\nas if it had passed through<br/>\ntoo many hands.<br/>\n<br/>\nAlong the perimeter,<br/>\nthere are smaller chambers—<br/>\nalcoves no wider than a shoulder,<br/>\nlined in soft material<br/>\nthat gives<br/>\nand gives<br/>\nand does not recover.<br/>\n<br/>\nPipes run through the walls.<br/>\nSome pulse.<br/>\nSome have gone still.<br/>\nA faint current hums in the distance,<br/>\nirregular,<br/>\nthen absent.<br/>\n<br/>\nIn the center,<br/>\nthe floor has lifted slightly,<br/>\na quiet swelling<br/>\nbeneath intact tile.<br/>\nIt does not announce itself.<br/>\nIt simply changes the level<br/>\non which everything stands.<br/>\n<br/>\nThe ceiling adjusts in response.<br/>\nBeams strain invisibly.<br/>\nHairline fractures map themselves<br/>\nacross plaster,<br/>\nfine as capillaries.<br/>\n<br/>\nThere are no windows.<br/>\n<br/>\nIf there were,<br/>\nthey would look out<br/>\nonto another structure<br/>\npressing close,<br/>\nits weight leaning inward.<br/>\n<br/>\nThe room expands<br/>\nwhere it can.<br/>\nIt narrows<br/>\nwhere it must.<br/>\n<br/>\nNothing in it is decorative.<br/>\nEvery surface carries something.<br/>\n<br/>\nWhen the current stops entirely,<br/>\nthe air does not clear.<br/>\nThe columns remain upright.<br/>\nThe lifted floor does not settle.<br/>\n<br/>\nThe structure holds<br/>\nwhat it has made.",
+        "body": "It is not empty here.\n\nThe room begins in a narrow corridor,\nwalls close and damp,\nwhere a steady drip measures\nthe distance between surfaces.\n\nBeyond that,\nit opens.\n\nColumns rise without ornament,\npale and load-bearing,\nholding up a ceiling\nthat presses downward\nwithout ever touching.\n\nThe air is thick,\nslow to circulate.\nLight does not enter directly.\nIt filters through layers,\narriving thinned,\narriving altered,\nas if it had passed through\ntoo many hands.\n\nAlong the perimeter,\nthere are smaller chambers—\nalcoves no wider than a shoulder,\nlined in soft material\nthat gives\nand gives\nand does not recover.\n\nPipes run through the walls.\nSome pulse.\nSome have gone still.\nA faint current hums in the distance,\nirregular,\nthen absent.\n\nIn the center,\nthe floor has lifted slightly,\na quiet swelling\nbeneath intact tile.\nIt does not announce itself.\nIt simply changes the level\non which everything stands.\n\nThe ceiling adjusts in response.\nBeams strain invisibly.\nHairline fractures map themselves\nacross plaster,\nfine as capillaries.\n\nThere are no windows.\n\nIf there were,\nthey would look out\nonto another structure\npressing close,\nits weight leaning inward.\n\nThe room expands\nwhere it can.\nIt narrows\nwhere it must.\n\nNothing in it is decorative.\nEvery surface carries something.\n\nWhen the current stops entirely,\nthe air does not clear.\nThe columns remain upright.\nThe lifted floor does not settle.\n\nThe structure holds\nwhat it has made.",
         "awards": [
             {
                 "url": "https://allpoetry.com/contest/2891112",
                 "medal": "Gold",
-                "title": "What Do You See?"
+                "title": "What Do You See?",
+                "closed": "2026-03-30T01:22:04-07:00"
             }
         ],
-        "socials": [],
+        "socials": [
+            "https://www.instagram.com/p/DWNc6CKjQDl/"
+        ],
         "date": "2026-03-20T20:50:00Z",
         "lines": 63,
         "words": 233,
@@ -125,45 +141,43 @@
         "pinned": false
     },
     {
-        "rating": 88,
-        "project": "A speaker resists aestheticizing a moment of charged physical proximity, finally surrendering language for presence itself.",
+        "rating": 87,
+        "project": "The poem tracks a moment of charged silence between two people, explicitly rejecting metaphorical language in favor of direct physical observation and psychological pressure.",
         "themes": [
             "desire",
-            "restraint",
-            "shame",
-            "embodied presence",
-            "silence",
-            "self-consciousness",
             "intimacy",
-            "the body",
-            "language and its limits"
+            "language"
         ],
         "moods": [
-            "tension",
-            "longing",
-            "ambivalence",
-            "vulnerability",
-            "self-reproach"
+            "restrained",
+            "tender"
         ],
-        "poetic_forms": [],
-        "techniques": [],
-        "tones_voices": [],
+        "poetic_forms": [
+            "lyric"
+        ],
+        "techniques": [
+            "indentation_as_structure",
+            "short_declarative_lines",
+            "caesural_breaks",
+            "direct_address"
+        ],
+        "tones_voices": [
+            "intimate",
+            "compressed"
+        ],
         "key_images": [
             "kettle clicking off",
-            "knife scar tracked with shame",
+            "woman leaning in doorway",
+            "faint knife scar on arm",
             "dust in sunlight",
-            "knuckle tapping the counter twice",
-            "river (rejected)"
+            "knuckle tapping counter"
         ],
         "contest_fit": [
             "desire",
-            "the body",
-            "domestic space",
+            "intimacy",
+            "domestic moments",
             "silence",
-            "language and its limits",
-            "self-awareness",
-            "restraint",
-            "intimacy"
+            "attraction"
         ],
         "id": "f6077c31-23d0-4652-8249-e2f965406167",
         "title": "Not a Metaphor",
@@ -172,17 +186,19 @@
             "full_name": "John Wagner"
         },
         "url": "https://allpoetry.com/poem/18912395",
-        "body": "I rehearse a line I think is clever<br/>\n    while the kettle clicks off.<br/>\n<br/>\nShe leans in the doorway<br/>\n    and clever dies first.<br/>\n<br/>\nMy breathing goes wrong.<br/>\nNot poetic-wrong—<br/>\n    asthma wrong, like misjudging<br/>\n        a staircase.<br/>\n<br/>\nHer arm rests on the counter.<br/>\nA faint knife scar.<br/>\nI don’t ask about it.<br/>\n    I track it.<br/>\n        Already ashamed.<br/>\n<br/>\nThe room begins to pair things:<br/>\n        her silence with my name,<br/>\n        the hum of the fridge with waiting.<br/>\n<br/>\nShe barely moves.<br/>\nNeither do I.<br/>\nThe space between us thickens,<br/>\n    visible as dust in sunlight.<br/>\n<br/>\nShe almost says something—<br/>\n    stops.<br/>\nThe almost<br/>\n        lands heavier.<br/>\n<br/>\nI think of a river and immediately hate myself.<br/>\nHer knuckle taps the counter twice.<br/>\n        Enough.<br/>\n<br/>\nWhat I expect to end<br/>\n    doesn’t.<br/>\nMy attention keeps sliding forward,<br/>\n    past manners,<br/>\n    past restraint.<br/>\n<br/>\nI am no longer deciding<br/>\n        what this is.<br/>\n<br/>\nI try, once more,<br/>\n    to make her stand<br/>\n        for anything else.<br/>\nShe exhales.<br/>\nThe idea collapses.<br/>\n<br/>\nNothing is crossed out.<br/>\nI stop reaching for language<br/>\n    and stay with the pressure of her presence,<br/>\n    unsymbolised,<br/>\n    unforgiving.<br/>\n    Close enough<br/>\n        that even silence<br/>\n            is contact.",
+        "body": "I rehearse a line I think is clever\n    while the kettle clicks off.\n\nShe leans in the doorway\n    and clever dies first.\n\nMy breathing goes wrong.\nNot poetic-wrong—\n    asthma wrong, like misjudging\n        a staircase.\n\nHer arm rests on the counter.\nA faint knife scar.\nI don’t ask about it.\n    I track it.\n        Already ashamed.\n\nThe room begins to pair things:\n        her silence with my name,\n        the hum of the fridge with waiting.\n\nShe barely moves.\nNeither do I.\nThe space between us thickens,\n    visible as dust in sunlight.\n\nShe almost says something—\n    stops.\nThe almost\n        lands heavier.\n\nI think of a river and immediately hate myself.\nHer knuckle taps the counter twice.\n        Enough.\n\nWhat I expect to end\n    doesn’t.\nMy attention keeps sliding forward,\n    past manners,\n    past restraint.\n\nI am no longer deciding\n        what this is.\n\nI try, once more,\n    to make her stand\n        for anything else.\nShe exhales.\nThe idea collapses.\n\nNothing is crossed out.\nI stop reaching for language\n    and stay with the pressure of her presence,\n    unsymbolised,\n    unforgiving.\n    Close enough\n        that even silence\n            is contact.",
         "awards": [
             {
                 "url": "https://allpoetry.com/contest/2889727",
                 "medal": "Gold",
-                "title": "Forty"
+                "title": "Forty",
+                "closed": "2026-03-07T05:32:21-08:00"
             },
             {
                 "url": "https://allpoetry.com/contest/2889193",
                 "medal": "Gold",
-                "title": "Part Sinner Part Saint: Threshold"
+                "title": "Part Sinner Part Saint: Threshold",
+                "closed": "2026-03-20T09:31:40-07:00"
             }
         ],
         "socials": [
@@ -198,15 +214,15 @@
     },
     {
         "rating": 88,
-        "project": "The poem inhabits the perspective of cancer cells, narrating their growth and spread through the body as a process of exploration and division rather than destruction.",
+        "project": "The poem adopts the perspective of cancerous cells describing their growth and spread through a body, presenting malignancy as a neutral process of expansion without moral judgment.",
         "themes": [
-            "cancer",
             "biological_process",
-            "death"
+            "cancer",
+            "control"
         ],
         "moods": [
             "clinical",
-            "detached"
+            "ominous"
         ],
         "poetic_forms": [
             "lyric"
@@ -217,7 +233,8 @@
             "parallelism"
         ],
         "tones_voices": [
-            "clinical"
+            "clinical",
+            "detached"
         ],
         "key_images": [
             "corridors of red",
@@ -226,14 +243,14 @@
             "bright pulses",
             "cooled rooms",
             "slowed rivers",
-            "narrowed space"
+            "forgotten boundaries"
         ],
         "contest_fit": [
             "medical",
-            "illness",
             "biology",
-            "mortality",
-            "science"
+            "illness",
+            "perspective",
+            "death"
         ],
         "id": "d0dc543f-6922-4e8d-9ebb-cbd562936fe0",
         "title": "Unchecked",
@@ -242,7 +259,7 @@
             "full_name": "John Wagner"
         },
         "url": "https://allpoetry.com/poem/19002938",
-        "body": "I began as a softness<br/>\nin a place already full.<br/>\n<br/>\nThere was warmth,<br/>\na steady wash of iron,<br/>\ncorridors of red<br/>\nopening and closing<br/>\nwithout decision.<br/>\n<br/>\nI learned the walls by touch.<br/>\n<br/>\nThey yielded.<br/>\nThey tightened.<br/>\nThey thinned.<br/>\n<br/>\nWhere there was current,<br/>\nI followed it.<br/>\nWhere there was stillness,<br/>\nI pressed until it altered.<br/>\n<br/>\nDivision was not ambition.<br/>\nIt was repetition.<br/>\nA quiet doubling<br/>\nthat felt like continuity.<br/>\n<br/>\nThe larger body dimmed gradually.<br/>\n<br/>\nSignals that once arrived<br/>\nin bright pulses<br/>\ncame irregularly,<br/>\nthen not at all.<br/>\nThe rooms cooled.<br/>\nThe rivers slowed.<br/>\n<br/>\nI did not register alarm.<br/>\nOnly difference.<br/>\n<br/>\nSpace narrowed.<br/>\nThen widened strangely,<br/>\nas if boundaries had forgotten<br/>\ntheir instructions.<br/>\n<br/>\nAt the end,<br/>\nthere was no verdict.<br/>\n<br/>\nOnly the absence<br/>\nof resistance.<br/>\n<br/>\nI would have continued.",
+        "body": "I began as a softness\nin a place already full.\n\nThere was warmth,\na steady wash of iron,\ncorridors of red\nopening and closing\nwithout decision.\n\nI learned the walls by touch.\n\nThey yielded.\nThey tightened.\nThey thinned.\n\nWhere there was current,\nI followed it.\nWhere there was stillness,\nI pressed until it altered.\n\nDivision was not ambition.\nIt was repetition.\nA quiet doubling\nthat felt like continuity.\n\nThe larger body dimmed gradually.\n\nSignals that once arrived\nin bright pulses\ncame irregularly,\nthen not at all.\nThe rooms cooled.\nThe rivers slowed.\n\nI did not register alarm.\nOnly difference.\n\nSpace narrowed.\nThen widened strangely,\nas if boundaries had forgotten\ntheir instructions.\n\nAt the end,\nthere was no verdict.\n\nOnly the absence\nof resistance.\n\nI would have continued.",
         "awards": [],
         "socials": [],
         "date": "2026-03-20T03:06:00Z",
@@ -255,11 +272,11 @@
     },
     {
         "rating": 88,
-        "project": "The poem adopts a distant, aerial perspective to reframe cancer and cellular division as neutral biological processes stripped of human emotional interpretation.",
+        "project": "The poem adopts a distant, elevated perspective to reframe cancer as part of natural biological processes, systematically stripping away human emotional language in favor of architectural and mechanical metaphors.",
         "themes": [
-            "biological_process",
+            "cancer",
             "mortality",
-            "meaning"
+            "biological_process"
         ],
         "moods": [
             "clinical",
@@ -269,31 +286,31 @@
             "lyric"
         ],
         "techniques": [
+            "anaphora",
             "short_declarative_lines",
-            "repetition",
             "parallelism",
-            "parataxis"
+            "direct_address"
         ],
         "tones_voices": [
             "clinical",
             "detached"
         ],
         "key_images": [
-            "scaffolds",
-            "corridors",
-            "chambers",
-            "cells",
-            "blueprints",
-            "beams",
-            "brightness on a screen",
-            "multiplying cells"
+            "scaffolds rising in soft light",
+            "corridors threading with current",
+            "walls doubling",
+            "chambers extending",
+            "brightness circled on screen",
+            "cells multiplying in clusters",
+            "beams softening",
+            "standing figure"
         ],
         "contest_fit": [
             "medical",
             "science",
-            "philosophy",
+            "illness",
             "mortality",
-            "perspective"
+            "biology"
         ],
         "id": "97fb0882-30aa-4643-a085-68a992006260",
         "title": "Weather Over Brief Structures",
@@ -302,11 +319,11 @@
             "full_name": "John Wagner"
         },
         "url": "https://allpoetry.com/poem/19002197",
-        "body": "From this height, the bodies are temporary scaffolds.<br/>\n<br/>\nThey rise in soft light,<br/>\nassemble their corridors,<br/>\nthread themselves with current,<br/>\nbelieving the architecture will hold.<br/>\n<br/>\nIt does, for a while.<br/>\n<br/>\nInside each one,<br/>\ndivisions occur with devotion—<br/>\nwalls doubling,<br/>\nchambers extending,<br/>\nsmall obediences to instruction.<br/>\n<br/>\nThey call some of these errors.<br/>\n<br/>\nFrom here,<br/>\nthere is no error.<br/>\nOnly pattern.<br/>\n<br/>\nCells lean into their mandate.<br/>\nThey copy.<br/>\nThey press.<br/>\nThey fill available dark.<br/>\n<br/>\nWhen the larger structure weakens,<br/>\nit is not betrayal.<br/>\nIt is density exceeding frame.<br/>\n<br/>\nYou would name it invasion.<br/>\nYou would name it tragedy.<br/>\nYou would circle brightness on a screen<br/>\nand give it weight beyond geometry.<br/>\n<br/>\nFrom this altitude,<br/>\nbrightness is simply concentration.<br/>\n<br/>\nThe body labors to remain singular.<br/>\nIt seals, cuts, burns,<br/>\nrevises its own blueprints.<br/>\nSometimes the revision succeeds.<br/>\nSometimes the beams soften.<br/>\n<br/>\nNeither outcome alters the field.<br/>\n<br/>\nWhat you call a life<br/>\nis a brief coherence of matter,<br/>\na gathering<br/>\nof signal and warmth.<br/>\n<br/>\nWhat you call a loss<br/>\nis the redistribution of that coherence.<br/>\n<br/>\nNothing is punished.<br/>\nNothing is spared.<br/>\n<br/>\nThe smallest cluster of multiplying cells<br/>\nand the tallest standing figure<br/>\nshare the same duration.<br/>\n<br/>\nBoth lean toward increase.<br/>\nBoth exceed themselves.<br/>\n<br/>\nFrom here,<br/>\nthe effort is luminous<br/>\nand without exception.",
+        "body": "From this height, the bodies are temporary scaffolds.\n\nThey rise in soft light,\nassemble their corridors,\nthread themselves with current,\nbelieving the architecture will hold.\n\nIt does, for a while.\n\nInside each one,\ndivisions occur with devotion—\nwalls doubling,\nchambers extending,\nsmall obediences to instruction.\n\nThey call some of these errors.\n\nFrom here,\nthere is no error.\nOnly pattern.\n\nCells lean into their mandate.\nThey copy.\nThey press.\nThey fill available dark.\n\nWhen the larger structure weakens,\nit is not betrayal.\nIt is density exceeding frame.\n\nYou would name it invasion.\nYou would name it tragedy.\nYou would circle brightness on a screen\nand give it weight beyond geometry.\n\nFrom this altitude,\nbrightness is simply concentration.\n\nThe body labors to remain singular.\nIt seals, cuts, burns,\nrevises its own blueprints.\nSometimes the revision succeeds.\nSometimes the beams soften.\n\nNeither outcome alters the field.\n\nWhat you call a life\nis a brief coherence of matter,\na gathering\nof signal and warmth.\n\nWhat you call a loss\nis the redistribution\nof that coherence.\n\nNothing is punished.\nNothing is spared.\n\nThe smallest cluster\nof multiplying cells\nand the tallest standing figure\nshare the same duration.\n\nBoth lean toward increase.\nBoth exceed themselves.\n\nFrom here,\nthe effort is luminous\nand without exception.",
         "awards": [],
         "socials": [],
         "date": "2026-03-19T19:34:00Z",
-        "lines": 50,
+        "lines": 52,
         "words": 208,
         "notes": [
             "The perspective here is aerial and clinical, observing cellular division and bodily processes from a detached vantage point. The voice shifts between biological observation and human interpretation, questioning how we name and understand the processes of growth, illness, and mortality. What appears as tragedy from ground level transforms into pattern when viewed from sufficient distance."

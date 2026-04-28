@@ -1,10 +1,10 @@
 {
-    "rating": 84,
-    "project": "The poem constructs an interior architectural space that functions as a detailed anatomical metaphor, mapping the physical systems and structural elements of a body onto the components of a building.",
+    "rating": 87,
+    "project": "The poem constructs an architectural interior that functions as an anatomical metaphor, using precise structural details to map the hidden mechanisms and gradual deterioration of a living body.",
     "themes": [
         "biological_process",
         "control",
-        "institutional_failure"
+        "mortality"
     ],
     "moods": [
         "clinical",
@@ -15,12 +15,13 @@
     ],
     "techniques": [
         "short_declarative_lines",
-        "anaphora",
-        "parataxis",
+        "parallelism",
+        "catalogue",
         "end_stopped_lines"
     ],
     "tones_voices": [
-        "clinical"
+        "clinical",
+        "restrained"
     ],
     "key_images": [
         "narrow corridor with damp walls",
@@ -28,20 +29,22 @@
         "pale load-bearing columns",
         "pressing ceiling",
         "thick slow air",
-        "filtered light",
+        "filtered thinned light",
         "shoulder-width alcoves",
-        "soft wall lining",
+        "soft yielding material",
         "pulsing pipes",
         "lifted floor beneath intact tile",
-        "hairline fractures across plaster"
+        "hairline fractures across plaster",
+        "invisible straining beams"
     ],
     "contest_fit": [
         "architecture",
-        "body",
-        "medicine",
+        "medical",
+        "anatomy",
+        "structural engineering",
+        "aging",
         "infrastructure",
-        "systems",
-        "anatomy"
+        "bodily systems"
     ],
     "id": "2e7e6cb5-172f-4fcf-b347-411be390e5d5",
     "title": "Load-Bearing Interior",
@@ -50,15 +53,18 @@
         "full_name": "John Wagner"
     },
     "url": "https://allpoetry.com/poem/19004401",
-    "body": "It is not empty here.<br/>\n<br/>\nThe room begins in a narrow corridor,<br/>\nwalls close and damp,<br/>\nwhere a steady drip measures<br/>\nthe distance between surfaces.<br/>\n<br/>\nBeyond that,<br/>\nit opens.<br/>\n<br/>\nColumns rise without ornament,<br/>\npale and load-bearing,<br/>\nholding up a ceiling<br/>\nthat presses downward<br/>\nwithout ever touching.<br/>\n<br/>\nThe air is thick,<br/>\nslow to circulate.<br/>\nLight does not enter directly.<br/>\nIt filters through layers,<br/>\narriving thinned,<br/>\narriving altered,<br/>\nas if it had passed through<br/>\ntoo many hands.<br/>\n<br/>\nAlong the perimeter,<br/>\nthere are smaller chambers—<br/>\nalcoves no wider than a shoulder,<br/>\nlined in soft material<br/>\nthat gives<br/>\nand gives<br/>\nand does not recover.<br/>\n<br/>\nPipes run through the walls.<br/>\nSome pulse.<br/>\nSome have gone still.<br/>\nA faint current hums in the distance,<br/>\nirregular,<br/>\nthen absent.<br/>\n<br/>\nIn the center,<br/>\nthe floor has lifted slightly,<br/>\na quiet swelling<br/>\nbeneath intact tile.<br/>\nIt does not announce itself.<br/>\nIt simply changes the level<br/>\non which everything stands.<br/>\n<br/>\nThe ceiling adjusts in response.<br/>\nBeams strain invisibly.<br/>\nHairline fractures map themselves<br/>\nacross plaster,<br/>\nfine as capillaries.<br/>\n<br/>\nThere are no windows.<br/>\n<br/>\nIf there were,<br/>\nthey would look out<br/>\nonto another structure<br/>\npressing close,<br/>\nits weight leaning inward.<br/>\n<br/>\nThe room expands<br/>\nwhere it can.<br/>\nIt narrows<br/>\nwhere it must.<br/>\n<br/>\nNothing in it is decorative.<br/>\nEvery surface carries something.<br/>\n<br/>\nWhen the current stops entirely,<br/>\nthe air does not clear.<br/>\nThe columns remain upright.<br/>\nThe lifted floor does not settle.<br/>\n<br/>\nThe structure holds<br/>\nwhat it has made.",
+    "body": "It is not empty here.\n\nThe room begins in a narrow corridor,\nwalls close and damp,\nwhere a steady drip measures\nthe distance between surfaces.\n\nBeyond that,\nit opens.\n\nColumns rise without ornament,\npale and load-bearing,\nholding up a ceiling\nthat presses downward\nwithout ever touching.\n\nThe air is thick,\nslow to circulate.\nLight does not enter directly.\nIt filters through layers,\narriving thinned,\narriving altered,\nas if it had passed through\ntoo many hands.\n\nAlong the perimeter,\nthere are smaller chambers—\nalcoves no wider than a shoulder,\nlined in soft material\nthat gives\nand gives\nand does not recover.\n\nPipes run through the walls.\nSome pulse.\nSome have gone still.\nA faint current hums in the distance,\nirregular,\nthen absent.\n\nIn the center,\nthe floor has lifted slightly,\na quiet swelling\nbeneath intact tile.\nIt does not announce itself.\nIt simply changes the level\non which everything stands.\n\nThe ceiling adjusts in response.\nBeams strain invisibly.\nHairline fractures map themselves\nacross plaster,\nfine as capillaries.\n\nThere are no windows.\n\nIf there were,\nthey would look out\nonto another structure\npressing close,\nits weight leaning inward.\n\nThe room expands\nwhere it can.\nIt narrows\nwhere it must.\n\nNothing in it is decorative.\nEvery surface carries something.\n\nWhen the current stops entirely,\nthe air does not clear.\nThe columns remain upright.\nThe lifted floor does not settle.\n\nThe structure holds\nwhat it has made.",
     "awards": [
         {
             "url": "https://allpoetry.com/contest/2891112",
             "medal": "Gold",
-            "title": "What Do You See?"
+            "title": "What Do You See?",
+            "closed": "2026-03-30T01:22:04-07:00"
         }
     ],
-    "socials": [],
+    "socials": [
+        "https://www.instagram.com/p/DWNc6CKjQDl/"
+    ],
     "date": "2026-03-20T20:50:00Z",
     "lines": 63,
     "words": 233,

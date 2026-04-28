@@ -1,43 +1,41 @@
 {
-    "rating": 88,
-    "project": "A speaker resists aestheticizing a moment of charged physical proximity, finally surrendering language for presence itself.",
+    "rating": 87,
+    "project": "The poem tracks a moment of charged silence between two people, explicitly rejecting metaphorical language in favor of direct physical observation and psychological pressure.",
     "themes": [
         "desire",
-        "restraint",
-        "shame",
-        "embodied presence",
-        "silence",
-        "self-consciousness",
         "intimacy",
-        "the body",
-        "language and its limits"
+        "language"
     ],
     "moods": [
-        "tension",
-        "longing",
-        "ambivalence",
-        "vulnerability",
-        "self-reproach"
+        "restrained",
+        "tender"
     ],
-    "poetic_forms": [],
-    "techniques": [],
-    "tones_voices": [],
+    "poetic_forms": [
+        "lyric"
+    ],
+    "techniques": [
+        "indentation_as_structure",
+        "short_declarative_lines",
+        "caesural_breaks",
+        "direct_address"
+    ],
+    "tones_voices": [
+        "intimate",
+        "compressed"
+    ],
     "key_images": [
         "kettle clicking off",
-        "knife scar tracked with shame",
+        "woman leaning in doorway",
+        "faint knife scar on arm",
         "dust in sunlight",
-        "knuckle tapping the counter twice",
-        "river (rejected)"
+        "knuckle tapping counter"
     ],
     "contest_fit": [
         "desire",
-        "the body",
-        "domestic space",
+        "intimacy",
+        "domestic moments",
         "silence",
-        "language and its limits",
-        "self-awareness",
-        "restraint",
-        "intimacy"
+        "attraction"
     ],
     "id": "f6077c31-23d0-4652-8249-e2f965406167",
     "title": "Not a Metaphor",
@@ -46,17 +44,19 @@
         "full_name": "John Wagner"
     },
     "url": "https://allpoetry.com/poem/18912395",
-    "body": "I rehearse a line I think is clever<br/>\n    while the kettle clicks off.<br/>\n<br/>\nShe leans in the doorway<br/>\n    and clever dies first.<br/>\n<br/>\nMy breathing goes wrong.<br/>\nNot poetic-wrong—<br/>\n    asthma wrong, like misjudging<br/>\n        a staircase.<br/>\n<br/>\nHer arm rests on the counter.<br/>\nA faint knife scar.<br/>\nI don’t ask about it.<br/>\n    I track it.<br/>\n        Already ashamed.<br/>\n<br/>\nThe room begins to pair things:<br/>\n        her silence with my name,<br/>\n        the hum of the fridge with waiting.<br/>\n<br/>\nShe barely moves.<br/>\nNeither do I.<br/>\nThe space between us thickens,<br/>\n    visible as dust in sunlight.<br/>\n<br/>\nShe almost says something—<br/>\n    stops.<br/>\nThe almost<br/>\n        lands heavier.<br/>\n<br/>\nI think of a river and immediately hate myself.<br/>\nHer knuckle taps the counter twice.<br/>\n        Enough.<br/>\n<br/>\nWhat I expect to end<br/>\n    doesn’t.<br/>\nMy attention keeps sliding forward,<br/>\n    past manners,<br/>\n    past restraint.<br/>\n<br/>\nI am no longer deciding<br/>\n        what this is.<br/>\n<br/>\nI try, once more,<br/>\n    to make her stand<br/>\n        for anything else.<br/>\nShe exhales.<br/>\nThe idea collapses.<br/>\n<br/>\nNothing is crossed out.<br/>\nI stop reaching for language<br/>\n    and stay with the pressure of her presence,<br/>\n    unsymbolised,<br/>\n    unforgiving.<br/>\n    Close enough<br/>\n        that even silence<br/>\n            is contact.",
+    "body": "I rehearse a line I think is clever\n    while the kettle clicks off.\n\nShe leans in the doorway\n    and clever dies first.\n\nMy breathing goes wrong.\nNot poetic-wrong—\n    asthma wrong, like misjudging\n        a staircase.\n\nHer arm rests on the counter.\nA faint knife scar.\nI don’t ask about it.\n    I track it.\n        Already ashamed.\n\nThe room begins to pair things:\n        her silence with my name,\n        the hum of the fridge with waiting.\n\nShe barely moves.\nNeither do I.\nThe space between us thickens,\n    visible as dust in sunlight.\n\nShe almost says something—\n    stops.\nThe almost\n        lands heavier.\n\nI think of a river and immediately hate myself.\nHer knuckle taps the counter twice.\n        Enough.\n\nWhat I expect to end\n    doesn’t.\nMy attention keeps sliding forward,\n    past manners,\n    past restraint.\n\nI am no longer deciding\n        what this is.\n\nI try, once more,\n    to make her stand\n        for anything else.\nShe exhales.\nThe idea collapses.\n\nNothing is crossed out.\nI stop reaching for language\n    and stay with the pressure of her presence,\n    unsymbolised,\n    unforgiving.\n    Close enough\n        that even silence\n            is contact.",
     "awards": [
         {
             "url": "https://allpoetry.com/contest/2889727",
             "medal": "Gold",
-            "title": "Forty"
+            "title": "Forty",
+            "closed": "2026-03-07T05:32:21-08:00"
         },
         {
             "url": "https://allpoetry.com/contest/2889193",
             "medal": "Gold",
-            "title": "Part Sinner Part Saint: Threshold"
+            "title": "Part Sinner Part Saint: Threshold",
+            "closed": "2026-03-20T09:31:40-07:00"
         }
     ],
     "socials": [
