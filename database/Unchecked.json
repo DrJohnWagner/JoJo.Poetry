@@ -1,14 +1,14 @@
 {
     "rating": 88,
-    "project": "The poem inhabits the perspective of cancer cells, narrating their growth and spread through the body as a process of exploration and division rather than destruction.",
+    "project": "The poem adopts the perspective of cancerous cells describing their growth and spread through a body, presenting malignancy as a neutral process of expansion without moral judgment.",
     "themes": [
-        "cancer",
         "biological_process",
-        "death"
+        "cancer",
+        "control"
     ],
     "moods": [
         "clinical",
-        "detached"
+        "ominous"
     ],
     "poetic_forms": [
         "lyric"
@@ -19,7 +19,8 @@
         "parallelism"
     ],
     "tones_voices": [
-        "clinical"
+        "clinical",
+        "detached"
     ],
     "key_images": [
         "corridors of red",
@@ -28,14 +29,14 @@
         "bright pulses",
         "cooled rooms",
         "slowed rivers",
-        "narrowed space"
+        "forgotten boundaries"
     ],
     "contest_fit": [
         "medical",
-        "illness",
         "biology",
-        "mortality",
-        "science"
+        "illness",
+        "perspective",
+        "death"
     ],
     "id": "d0dc543f-6922-4e8d-9ebb-cbd562936fe0",
     "title": "Unchecked",
@@ -44,7 +45,7 @@
         "full_name": "John Wagner"
     },
     "url": "https://allpoetry.com/poem/19002938",
-    "body": "I began as a softness<br/>\nin a place already full.<br/>\n<br/>\nThere was warmth,<br/>\na steady wash of iron,<br/>\ncorridors of red<br/>\nopening and closing<br/>\nwithout decision.<br/>\n<br/>\nI learned the walls by touch.<br/>\n<br/>\nThey yielded.<br/>\nThey tightened.<br/>\nThey thinned.<br/>\n<br/>\nWhere there was current,<br/>\nI followed it.<br/>\nWhere there was stillness,<br/>\nI pressed until it altered.<br/>\n<br/>\nDivision was not ambition.<br/>\nIt was repetition.<br/>\nA quiet doubling<br/>\nthat felt like continuity.<br/>\n<br/>\nThe larger body dimmed gradually.<br/>\n<br/>\nSignals that once arrived<br/>\nin bright pulses<br/>\ncame irregularly,<br/>\nthen not at all.<br/>\nThe rooms cooled.<br/>\nThe rivers slowed.<br/>\n<br/>\nI did not register alarm.<br/>\nOnly difference.<br/>\n<br/>\nSpace narrowed.<br/>\nThen widened strangely,<br/>\nas if boundaries had forgotten<br/>\ntheir instructions.<br/>\n<br/>\nAt the end,<br/>\nthere was no verdict.<br/>\n<br/>\nOnly the absence<br/>\nof resistance.<br/>\n<br/>\nI would have continued.",
+    "body": "I began as a softness\nin a place already full.\n\nThere was warmth,\na steady wash of iron,\ncorridors of red\nopening and closing\nwithout decision.\n\nI learned the walls by touch.\n\nThey yielded.\nThey tightened.\nThey thinned.\n\nWhere there was current,\nI followed it.\nWhere there was stillness,\nI pressed until it altered.\n\nDivision was not ambition.\nIt was repetition.\nA quiet doubling\nthat felt like continuity.\n\nThe larger body dimmed gradually.\n\nSignals that once arrived\nin bright pulses\ncame irregularly,\nthen not at all.\nThe rooms cooled.\nThe rivers slowed.\n\nI did not register alarm.\nOnly difference.\n\nSpace narrowed.\nThen widened strangely,\nas if boundaries had forgotten\ntheir instructions.\n\nAt the end,\nthere was no verdict.\n\nOnly the absence\nof resistance.\n\nI would have continued.",
     "awards": [],
     "socials": [],
     "date": "2026-03-20T03:06:00Z",

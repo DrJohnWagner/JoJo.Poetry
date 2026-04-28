@@ -1,4 +1,19 @@
-export default function HorizontalRule({ show = true }: { show?: boolean }) {
+export default function HorizontalRule({
+    show = true,
+    margin = 5,
+}: {
+    show?: boolean
+    margin?: number
+}) {
     if (!show) return null
-    return <div className="rule my-5" />
+    const my = `${margin * 0.25}rem`
+    return (
+        <div
+            className="rule"
+            style={{
+                marginTop: my,
+                marginBottom: my,
+            }}
+        />
+    )
 }

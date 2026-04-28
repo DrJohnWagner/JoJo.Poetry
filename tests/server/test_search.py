@@ -47,24 +47,30 @@ def test_search_shape_matches_list(client):
 
 def test_or_across_populated_fields(client):
     # title match: "Metaphor" -> Not a Metaphor
-    # themes match: "COVID lockdown" -> Just Enough Freedom
+    # themes match: "biological_process" -> Load-Bearing Interior, Weather Over Brief Structures, Unchecked
     # Poem must match EITHER.
     r = client.get(
         "/api/poems/search",
-        params=[("title", "Metaphor"), ("themes", "COVID lockdown")],
+        params=[("title", "Metaphor"), ("themes", "biological_process")],
     )
-    assert _titles(r) == {"Not a Metaphor", "Just Enough Freedom"}
+    assert _titles(r) == {
+        "Not a Metaphor",
+        "Load-Bearing Interior",
+        "Weather Over Brief Structures",
+        "Unchecked",
+    }
 
 
 def test_tag_within_field_is_or(client):
     r = client.get(
         "/api/poems/search",
-        params=[("themes", "COVID lockdown"), ("themes", "cancer")],
+        params=[("themes", "biological_process"), ("themes", "cancer")],
     )
-    # Just Enough Freedom (COVID lockdown) + Unchecked (cancer)
+    # Unchecked (cancer), Load-Bearing Interior (biological_process), Weather Over Brief Structures (both)
     assert _titles(r) == {
-        "Just Enough Freedom",
         "Unchecked",
+        "Load-Bearing Interior",
+        "Weather Over Brief Structures",
     }
 
 
@@ -147,11 +153,12 @@ def test_rating_band_is_single_field(client):
     r = client.get(
         "/api/poems/search", params={"min_rating": 85, "max_rating": 88}
     )
-    # Not a Metaphor 88, Unchecked 88, Weather Over Brief Structures 88
+    # Not a Metaphor 87, Unchecked 88, Weather Over Brief Structures 88, Load-Bearing Interior 87
     assert _titles(r) == {
         "Not a Metaphor",
         "Unchecked",
         "Weather Over Brief Structures",
+        "Load-Bearing Interior",
     }
 
 

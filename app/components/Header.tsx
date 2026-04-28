@@ -26,6 +26,12 @@ export default function Header() {
                 >
                     Clusters
                 </Link>
+                <Link
+                    href="/awards"
+                    className="button-primary hover:no-underline"
+                >
+                    Awards
+                </Link>
                 {!readOnly && (
                     <Link
                         href="/poems/new"

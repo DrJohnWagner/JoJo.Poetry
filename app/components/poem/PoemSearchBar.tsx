@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react"
 import { hasAdvanced, type SearchState } from "@/lib/types"
-import AdvancedSearchDialog from "./AdvancedSearchDialog"
+import AdvancedSearchDialog from "../AdvancedSearchDialog"
 
 const EMPTY_ADVANCED = {
     year: null,

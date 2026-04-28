@@ -33,7 +33,6 @@ from server.clustering.types import (
 from server.similarity.service import rebuild_similarity_service
 from server.similarity.types import NeighbourListResult
 
-
 # ------------------------------------------------------------------ constants
 
 MEDAL_VOCAB = ("Gold", "Silver", "Bronze", "Honorable Mention", "None")
@@ -490,6 +489,17 @@ def recent_poems(
     return PoemSummaryDataList(items=poems[:k])
 
 
+@router.get("/api/poems/awards", response_model=PoemSummaryDataList, tags=["poems"])
+def poems_with_awards(
+    repo: PoemRepository = Depends(get_repository),
+    _: None = Depends(check_for_external_changes),
+) -> PoemSummaryDataList:
+    """Return all poems that have one or more awards."""
+    poems = _ordered(repo.list())
+    awarded = [p for p in poems if p.awards and len(p.awards) > 0]
+    return PoemSummaryDataList(items=awarded)
+
+
 @router.post("/api/poems/cluster", response_model=ClusterResponse, tags=["poems"])
 def cluster_poems(
     payload: ClusterRequest,
@@ -604,6 +614,8 @@ def patch_poem(
     response_class=Response,
     tags=["poems"],
 )
+
+
 def delete_poem(
     poem_id: UUID,
     repo: PoemRepository = Depends(get_repository),

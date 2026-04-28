@@ -1,6 +1,20 @@
+from __future__ import annotations
+
 """Tests for the read endpoints."""
 
-from __future__ import annotations
+
+def test_poems_with_awards(client):
+    r = client.get("/api/poems/awards")
+    assert r.status_code == 200
+    body = r.json()
+    assert set(body) == {"items"}
+    # All returned poems must have at least one award
+    for poem in body["items"]:
+        assert poem["awards"]
+        assert len(poem["awards"]) > 0
+    # There is at least one such poem in the fixture
+    assert len(body["items"]) > 0
+
 
 import shutil
 from pathlib import Path
@@ -65,19 +79,24 @@ def test_search_q_matches_body_text(client):
 
 
 def test_search_tag_filter_is_and(client):
-    # biological_process AND mortality: only WOBS has both
+    # biological_process AND mortality: Load-Bearing Interior and Weather Over Brief Structures have both
     r = client.get(
         "/api/poems", params=[("themes", "biological_process"), ("themes", "mortality")]
     )
     body = r.json()
     titles = {i["title"] for i in body["items"]}
-    assert titles == {"Weather Over Brief Structures"}
+    assert titles == {"Load-Bearing Interior", "Weather Over Brief Structures"}
 
 
 def test_search_rating_bounds(client):
     r = client.get("/api/poems", params={"min_rating": 86})
     titles = {i["title"] for i in r.json()["items"]}
-    assert titles == {"Not a Metaphor", "Unchecked", "Weather Over Brief Structures"}
+    assert titles == {
+        "Not a Metaphor",
+        "Unchecked",
+        "Weather Over Brief Structures",
+        "Load-Bearing Interior",
+    }
 
 
 def test_list_orders_pinned_first(client, tmp_path):

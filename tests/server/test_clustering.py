@@ -64,6 +64,11 @@ def _make_poem(**overrides):
         "notes": [],
         "socials": [],
     }
+    # Patch in required Award fields if any awards are present
+    if "awards" in overrides and overrides["awards"]:
+        for a in overrides["awards"]:
+            a.setdefault("title", "Test Award")
+            a.setdefault("closed", "2024-01-01T00:00:00Z")
     base.update(overrides)
     return Poem.model_validate(base)
 

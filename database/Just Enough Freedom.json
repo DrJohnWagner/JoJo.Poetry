@@ -1,40 +1,48 @@
 {
-    "rating": 80,
-    "project": "Microhistorical poem of a Brisbane COVID lockdown night — a provisional community forms through shared food, music, and dancing while the city stands still outside.",
+    "rating": 78,
+    "project": "The poem chronicles a single evening and morning of communal living, using precise domestic details to map the rhythm of shared meals, conversation, and quiet intimacy among friends in an urban apartment.",
     "themes": [
         "community",
-        "COVID lockdown",
-        "friendship",
-        "ordinary life",
-        "Brisbane",
-        "provisional belonging"
+        "domestic_life",
+        "intimacy"
     ],
     "moods": [
-        "warm",
-        "nostalgic",
-        "bittersweet",
+        "tender",
+        "communal"
+    ],
+    "poetic_forms": [
+        "lyric"
+    ],
+    "techniques": [
+        "catalogue",
+        "indentation_as_structure",
+        "parataxis",
+        "short_declarative_lines"
+    ],
+    "tones_voices": [
+        "plainspoken",
         "documentary"
     ],
-    "poetic_forms": [],
-    "techniques": [],
-    "tones_voices": [],
     "key_images": [
-        "Scenic Rim on horizon",
+        "shared flat nine storeys up",
+        "porch facing south",
+        "Brisbane River",
+        "Mount Barney",
+        "kitchen guests",
+        "Tom Waits on portable speakers",
+        "washing vegetables",
         "Thai curry chicken",
-        "Margaret River cabernet",
-        "Victoria Bridge empty",
-        "Courtney Barnett",
-        "dancing",
-        "French press coffee on porch",
-        "Mount Cordeaux"
+        "yellow candlelight",
+        "Victoria Bridge",
+        "French press coffee"
     ],
     "contest_fit": [
-        "community",
-        "pandemic and lockdown",
-        "Australia",
-        "everyday life",
         "friendship",
-        "food and cooking"
+        "urban life",
+        "domestic scenes",
+        "Australian setting",
+        "young adults",
+        "hospitality"
     ],
     "id": "2fc1c84b-3e65-4788-abaf-333205e709e6",
     "title": "Just Enough Freedom",
@@ -43,9 +51,11 @@
         "full_name": "John Wagner"
     },
     "url": "https://allpoetry.com/poem/18872799",
-    "body": "A shared flat,<br/>\nnine storeys up,<br/>\nwith a view of the city.<br/>\n<br/>\nThe porch faces south—<br/>\n    the Scenic Rim on the horizon,<br/>\n    city streets close by,<br/>\n    blocks of flats, a park,<br/>\n    the Brisbane River between,<br/>\n        close enough to touch;<br/>\n    no morning sun,<br/>\n        but a couch,<br/>\n        cushioned seats,<br/>\n        and a coffee table—<br/>\n            a porch built for six.<br/>\n<br/>\n<br/>\nBut the city is quiet, still—<br/>\nno cars, no motion, no sound<br/>\n    rising from the street,<br/>\nlights in flats flickering<br/>\nas people carry on<br/>\n    with their evening.<br/>\n<br/>\nWe stay where we are.<br/>\n<br/>\n<br/>\nGuests gather again in the kitchen—<br/>\na couple visiting from Adelaide,<br/>\ntwo Sydney students on break,<br/>\nthe host puts Tom Waits<br/>\non portable speakers.<br/>\n<br/>\nWe wash vegetables, rinse rice,<br/>\nopen cans of bamboo shoots,<br/>\ndice fresh chicken thighs.<br/>\nSome cook, others put out<br/>\nplates, chopsticks, forks,<br/>\nand knives.<br/>\n<br/>\nGlasses are set on the bench.<br/>\nWine is opened, sodas and beers.<br/>\n<br/>\nThrough the kitchen window,<br/>\nlights still flicker in flats,<br/>\nutes remain parked,<br/>\nMount Barney holds.<br/>\n<br/>\n<br/>\nWe finish, plate, and take our meals<br/>\nto the porch, arrange, rearrange.<br/>\nThe couch is full of conversation.<br/>\nThose in chairs laugh. Wine is poured.<br/>\nI teach a student how to use chopsticks.<br/>\n<br/>\nThai curry chicken on rice.<br/>\nA Margaret River cabernet.<br/>\nGarlic butter naan.<br/>\n<br/>\nYellow candlelight replaces<br/>\nthe white of incandescent bulbs.<br/>\n<br/>\n<br/>\nI carry plates to the kitchen.<br/>\nSteve puts on Courtney Barnett.<br/>\nAnne reaches for someone’s hand.<br/>\n<br/>\nThey all dance.<br/>\nI wash.<br/>\nClaire dries.<br/>\n<br/>\n<br/>\nOutside, Victoria Bridge is empty.<br/>\nClaire takes more wine and we join.<br/>\nCourtney is replaced by The National.<br/>\n    We sing and dance.<br/>\nAnne and I head for the porch. We smoke.<br/>\nLoud music fails to disturb the city.<br/>\n<br/>\nWe go back in. I dance with Claire.<br/>\nNight turns to morning.<br/>\nMorning leads to bed.<br/>\n<br/>\nWe wake late.<br/>\nPress coffee on the porch.<br/>\nSlice bread.<br/>\nArrange, rearrange sliced devon.<br/>\n<br/>\nBelow us the cars start to move.<br/>\nStreet life reaches us again.<br/>\nVictoria Bridge is no longer empty.<br/>\nMount Cordeaux is close enough to touch.<br/>\n<br/>\nThe city moves again.<br/>\n<br/>\n<br/>\nWe stand, take<br/>\n    our French press,<br/>\n    coffee cups,<br/>\n    light cream<br/>\n        to the kitchen<br/>\n            and begin to cook. ",
+    "body": "A shared flat,\nnine storeys up,\nwith a view of the city.\n\nThe porch faces south—\n    the Scenic Rim on the horizon,\n    city streets close by,\n    blocks of flats, a park,\n    the Brisbane River between,\n        close enough to touch;\n    no morning sun,\n        but a couch,\n        cushioned seats,\n        and a coffee table—\n            a porch built for six.\n\n\nBut the city is quiet, still—\nno cars, no motion, no sound\n    rising from the street,\nlights in flats flickering\nas people carry on\n    with their evening.\n\nWe stay where we are.\n\n\nGuests gather again in the kitchen—\na couple visiting from Adelaide,\ntwo Sydney students on break,\nthe host puts Tom Waits\non portable speakers.\n\nWe wash vegetables, rinse rice,\nopen cans of bamboo shoots,\ndice fresh chicken thighs.\nSome cook, others put out\nplates, chopsticks, forks,\nand knives.\n\nGlasses are set on the bench.\nWine is opened, sodas and beers.\n\nThrough the kitchen window,\nlights still flicker in flats,\nutes remain parked,\nMount Barney holds.\n\n\nWe finish, plate, and take our meals\nto the porch, arrange, rearrange.\nThe couch is full of conversation.\nThose in chairs laugh. Wine is poured.\nI teach a student how to use chopsticks.\n\nThai curry chicken on rice.\nA Margaret River cabernet.\nGarlic butter naan.\n\nYellow candlelight replaces\nthe white of incandescent bulbs.\n\n\nI carry plates to the kitchen.\nSteve puts on Courtney Barnett.\nAnne reaches for someone’s hand.\n\nThey all dance.\nI wash.\nClaire dries.\n\n\nOutside, Victoria Bridge is empty.\nClaire takes more wine and we join.\nCourtney is replaced by The National.\n    We sing and dance.\nAnne and I head for the porch. We smoke.\nLoud music fails to disturb the city.\n\nWe go back in. I dance with Claire.\nNight turns to morning.\nMorning leads to bed.\n\nWe wake late.\nPress coffee on the porch.\nSlice bread.\nArrange, rearrange sliced devon.\n\nBelow us the cars start to move.\nStreet life reaches us again.\nVictoria Bridge is no longer empty.\nMount Cordeaux is close enough to touch.\n\nThe city moves again.\n\n\nWe stand, take\n    our French press,\n    coffee cups,\n    light cream\n        to the kitchen\n            and begin to cook. ",
     "awards": [],
-    "socials": [],
+    "socials": [
+        "https://www.instagram.com/p/DWSzr9DDWf1/"
+    ],
     "date": "2026-01-09T23:43:00Z",
     "lines": 78,
     "words": 353,

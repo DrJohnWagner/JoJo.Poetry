@@ -29,7 +29,8 @@ class Award(BaseModel):
 
     url: HttpUrl
     medal: str = Field(min_length=1)
-    title: Optional[str] = None
+    title: str = Field(min_length=1)
+    closed: str = Field(min_length=1, description="ISO format datetime string")
 
 
 class PoemSummaryData(BaseModel):
