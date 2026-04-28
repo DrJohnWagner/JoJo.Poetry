@@ -130,9 +130,8 @@ Two services, one flat JSON data source:
 │   ├── <Title>.json                  # Per-poem mirror files (reference only)
 │   └── schemas/
 │       ├── poem.schema.json          # JSON Schema (Draft 2020-12)
-│       ├── poem.py                   # Pydantic Poem / Award / Author
-│       ├── similarity.py             # Re-exports similarity response types for API use
-│       └── poem.py                   # Pydantic PoemSummaryData / Poem / Award / Author
+│       ├── poem.py                   # Pydantic PoemSummaryData / Poem / Award / Author
+│       └── similarity.py             # Re-exports similarity response types for API use
 ├── Dockerfile                        # Combined multi-stage image (Node 22 + Python 3.11, Debian bookworm-slim, no CMD)
 └── docker-compose.yml                # Orchestrates backend + frontend
 ```
@@ -350,6 +349,26 @@ The listing page applies a second, client-side sort layer on top of the server's
 | Awards | most first        | `awards.length` (integer)   |
 
 One button is always active (Date descending by default). Clicking the active button toggles direction; clicking an inactive button selects it at its default direction. The sort is re-applied automatically whenever the search state changes and a fresh set of items is fetched.
+
+## CSS typography system
+
+All typographic styles are defined in `app/globals.css` under `@layer components` as a flat `text-*` namespace. Layout is always inline Tailwind; `globals.css` is for typography only.
+
+| Class | Role | Key properties |
+| ----- | ---- | -------------- |
+| `text-display` | Site-level h1 | `font-display`, `text-3xl`, `leading-none`, `tracking-tight` |
+| `text-title` | Poem/section titles | `font-display`, `leading-snug`, `tracking-tight` |
+| `text-title-lg` / `text-title-sm` | Size modifiers, applied alongside `text-title` | `text-xl` / `text-base` |
+| `text-title-link` | Link variant of a title | `text-ink`, `no-underline`, `hover:text-accent` |
+| `text-label` | Small all-caps sans label | `font-sans`, `0.76 rem`, `uppercase`, `tracking-wider2`, `text-muted` |
+| `text-meta` | Small sans secondary text | `font-sans`, `0.78 rem`, `text-ink/80` |
+| `text-entry` | Slightly larger sans for data rows | `font-sans`, `0.9 rem`, `text-ink/80` |
+| `text-project` | Italic serif project statement | `font-serif`, `italic`, `leading-normal`, `text-ink/90` |
+| `text-cluster-heading` | Cluster section headings | `font-serif`, `semibold`, `uppercase`, `leading-tight` |
+| `text-body` | Poem body prose | `font-serif`, `text-lg`, `leading-tight` |
+| `text-body-poem` | Rendering layer on top of `text-body` | `whitespace-pre-wrap`, no hyphens, oldstyle numerals; link styles |
+
+Button classes (`button-primary`, `button-sort`, `button-text*`) are also in `globals.css` but carry layout (border, padding, transition) in addition to typography. They are kept as a distinct group pending a separate refactor.
 
 ## The search system
 
