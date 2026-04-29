@@ -24,13 +24,164 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Optional
 
-from pydantic import Field
+from pydantic import BaseModel, Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 DEFAULT_POEMS_DATABASE = REPO_ROOT / "database" / "Poems.json"
 
 
+class Author(BaseModel):
+    pen_name: str
+    full_name: str
+
+
+AUTHOR = Author(
+    pen_name="JoJo",
+    full_name="John Wagner",
+)
+
+# Groups and features...
+
+THEMES: dict[str, list[str]] = {
+    "love_intimacy": [
+        "love",
+        "intimacy",
+        "desire",
+        "seduction",
+        "partnership",
+        "parenthood",
+        "family",
+    ],
+    "loss_emotional_core": [
+        "grief",
+        "loss",
+        "absence",
+        "memory",
+        "longing",
+        "loneliness",
+    ],
+    "relationships_breakdown": [
+        "infidelity",
+        "separation",
+        "divorce",
+        "power_dynamics",
+        "submission",
+        "control",
+    ],
+    "body_biology": ["illness", "cancer", "death", "mortality", "biological_process"],
+    "social_political": [
+        "war",
+        "violence",
+        "genocide",
+        "politics",
+        "injustice",
+        "institutional_failure",
+        "complicity",
+    ],
+    "identity_interior": ["trauma", "shame", "identity", "self_deception"],
+    "world_context": ["nature", "food", "domestic_life", "community", "technology"],
+    "epistemic_abstract": ["language", "silence", "meaning", "time"],
+}
+
+THEME_FEATURES: list[str] = sorted(
+    {feature for features in THEMES.values() for feature in features}
+)
+
+MOOD_FEATURES: list[str] = sorted(
+    [
+        "clinical",
+        "detached",
+        "devastating",
+        "tender",
+        "sensuous",
+        "wry",
+        "playful",
+        "incantatory",
+        "ominous",
+        "communal",
+        "restrained",
+        # Split "restrained" into:
+        # "meditative",
+        # "controlled",
+        # and maybe  "withheld
+        "defiant",
+    ]
+)
+
+POETIC_FORM_FEATURES: list[str] = sorted(
+    [
+        "lyric",
+        "narrative_lyric",
+        "dramatic_scene",
+        "epistolary_poem",
+        "dialogic_poem",
+        "list_poem",
+        "litany",
+        "sequence",
+        "collage",
+        "prose_poem",
+        "constraint_based",
+        "sonnet_adjacent",
+        "ghazal_adjacent",
+        "pantoum_adjacent",
+        "ars_poetica",
+        "elegy",
+    ]
+)
+
+TECHNIQUE_FEATURES: list[str] = sorted(
+    [
+        "anaphora",
+        "repetition",
+        "refrain",
+        "parallelism",
+        "catalogue",
+        "direct_address",
+        "apostrophe",
+        "rhetorical_questions",
+        "imperative_sequence",
+        "syntactic_fragmentation",
+        "parataxis",
+        "heavy_enjambment",
+        "end_stopped_lines",
+        "short_declarative_lines",
+        "long_syntactic_lines",
+        "caesural_breaks",
+        "indentation_as_structure",
+        "patterned_stanzaics",
+        "prose_syntax",
+        "extended_metaphor",
+        "conceit",
+        "internal_rhyme",
+        "slant_rhyme",
+    ]
+)
+
+TONE_VOICE_FEATURES: list[str] = sorted(
+    [
+        "restrained",
+        "austere",
+        "clinical",
+        "detached",
+        "intimate",
+        "meditative",
+        "declarative",
+        "incantatory",
+        "ceremonial",
+        "elliptical",
+        "associative",
+        "analytic",
+        "documentary",
+        "surreal",
+        "plainspoken",
+        "compressed",
+        "expansive",
+        "fractured",
+    ]
+)
+
+#
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
         env_file=".env",

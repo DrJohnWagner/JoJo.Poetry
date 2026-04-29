@@ -24,6 +24,13 @@ from server.repository import (
     _body_to_plaintext,
     get_repository,
 )
+from server.config import (
+    MOOD_FEATURES,
+    POETIC_FORM_FEATURES,
+    TECHNIQUE_FEATURES,
+    THEME_FEATURES,
+    TONE_VOICE_FEATURES,
+)
 from server.clustering.engine import run_clustering
 from server.clustering.types import (
     VALID_CATEGORIES,
@@ -271,6 +278,31 @@ def health(
     return HealthResponse(
         status="ok", poems_loaded=len(repo.list()), source=str(repo.path)
     )
+
+
+_FEATURE_GROUPS: dict[str, list[str]] = {
+    "themes": THEME_FEATURES,
+    "moods": MOOD_FEATURES,
+    "poetic_forms": POETIC_FORM_FEATURES,
+    "techniques": TECHNIQUE_FEATURES,
+    "tones_voices": TONE_VOICE_FEATURES,
+}
+
+
+@router.get("/api/features/{group}", response_model=List[str], tags=["meta"])
+def get_features(group: str) -> List[str]:
+    """Controlled vocabulary for a tag group.
+
+    ``group`` must be one of: ``themes``, ``moods``, ``poetic_forms``,
+    ``techniques``, ``tones_voices``.
+    """
+    features = _FEATURE_GROUPS.get(group)
+    if features is None:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Unknown group '{group}'. Allowed: {sorted(_FEATURE_GROUPS)}",
+        )
+    return features
 
 
 @router.get("/api/poems", response_model=PoemSummaryDataList, tags=["poems"])

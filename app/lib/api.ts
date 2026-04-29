@@ -102,6 +102,10 @@ export function fetchAwardedPoems(): Promise<PoemSummaryDataList> {
     return req<PoemSummaryDataList>("/api/poems/awards")
 }
 
+export function fetchFeatures(group: string): Promise<string[]> {
+    return req<string[]>(`/api/features/${encodeURIComponent(group)}`)
+}
+
 export function fetchClusters(categories: string[]): Promise<ClusterResponse> {
     return req<ClusterResponse>("/api/poems/cluster", {
         method: "POST",

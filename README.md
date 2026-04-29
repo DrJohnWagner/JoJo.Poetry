@@ -46,8 +46,8 @@ Two services, one flat JSON data source:
 .
 ├── server/
 │   ├── app.py                        # FastAPI factory, CORS, lifespan load + similarity init
-│   ├── api.py                        # All routes (read, search, POST/PATCH/DELETE, similarity, cluster)
-│   ├── config.py                     # Settings: POEMS_DATABASE, .env, paths
+│   ├── api.py                        # All routes (read, search, POST/PATCH/DELETE, similarity, cluster, features vocabulary)
+│   ├── config.py                     # Settings (POEMS_DATABASE, READ_ONLY) + controlled-vocabulary constants (THEME_FEATURES, MOOD_FEATURES, POETIC_FORM_FEATURES, TECHNIQUE_FEATURES, TONE_VOICE_FEATURES)
 │   ├── repository.py                 # In-memory, file-backed PoemRepository
 │   ├── clustering/
 │   │   ├── types.py                  # ClusterRequest / Cluster / ClusterResponse Pydantic models
@@ -116,11 +116,12 @@ Two services, one flat JSON data source:
 │   │       ├── PoemEditor.tsx        # Inline editor; receives full Poem loaded on demand
 │   │       ├── PoemDetail.tsx        # Reading view + Edit toggle
 │   │       ├── PoemCreateForm.tsx    # Dedicated POST form with defaults + guards
-│   │       ├── PoemMetadataEditor.tsx# Shared rating/date/url grid + all six TagInput fields
+│   │       ├── FeaturesEditor.tsx    # Multi-select for controlled-vocabulary groups (themes/moods/poetic_forms/techniques/tones_voices); fetches options from /api/features/{group}
+│   │       ├── PoemMetadataEditor.tsx# Shared rating/date/url grid; FeaturesEditor for the five controlled-vocab fields; FeatureInput for free-text fields (key_images, contest_fit, socials)
 │   │       ├── SimilarPoems.tsx      # Similar poems aside: all 5 axes (overall/theme/form/emotion/imagery) grouped
 │   │       └── PoemBody.tsx          # Toggle show/hide; showBody prop auto-fetches and expands on mount
 │   └── lib/
-│       ├── api.ts                    # Typed fetch wrappers (fetchPoems, fetchPoem, fetchRecentPoems, fetchAwardedPoems, fetchClusters)
+│       ├── api.ts                    # Typed fetch wrappers (fetchPoems, fetchPoem, fetchRecentPoems, fetchAwardedPoems, fetchClusters, fetchFeatures)
 │       ├── cluster.ts                # Cluster feature/group label helpers for cluster UI rendering
 │       ├── types.ts                  # PoemSummaryData / ClusterPoem / Poem type hierarchy; Award / SearchState / SimilarityBundle / ClusterResponse / …
 │       ├── editable.ts               # Canonical editable-field contract
@@ -729,6 +730,28 @@ and `closed` fields. Works in read-only mode.
 
 Response: `PoemSummaryDataList` — `{ items: PoemSummaryData[] }`.
 
+## Features vocabulary endpoint
+
+`GET /api/features/{group}`
+
+Returns the controlled vocabulary for a tag group as `string[]`. Used
+by `FeaturesEditor` to populate its multi-select options.
+
+| `group` | Config constant | Field on `Poem` |
+| ------- | --------------- | --------------- |
+| `themes` | `THEME_FEATURES` | `themes` |
+| `moods` | `MOOD_FEATURES` | `moods` |
+| `poetic_forms` | `POETIC_FORM_FEATURES` | `poetic_forms` |
+| `techniques` | `TECHNIQUE_FEATURES` | `techniques` |
+| `tones_voices` | `TONE_VOICE_FEATURES` | `tones_voices` |
+
+Unknown groups return `404` with a detail message listing the valid names.
+Group names are case-sensitive. Works in read-only mode.
+
+The vocabularies are defined in `server/config.py`. `THEME_FEATURES` is
+derived automatically (sorted, deduplicated) from the `THEMES` group-map;
+the others are explicit ordered lists.
+
 ## Ordering
 
 Authoritative ordering (applied by both list endpoints before returning):
@@ -842,6 +865,10 @@ Test files:
   excluded Poem fields, read-only mode, ranking), all five single-axis
   endpoints, and mutation → rebuild integration (POST/PATCH/DELETE each
   reflected in subsequent similarity queries).
+- `tests/server/test_features_api.py` — `GET /api/features/{group}`: 200 for all five groups,
+  `list[str]` shape, non-empty, exact match against config constants, themes sorted and
+  deduplicated, no empty strings; 404 for unknown group with detail naming allowed groups;
+  case-sensitivity (Themes/MOODS/Poetic_Forms all 404); trailing-slash behaviour.
 - `tests/server/test_clustering.py` — engine unit tests (matrix shape,
   L2 normalisation, auto-k range, lift ranking, majority label, poem
   ordering) and API tests (200 response, response shape including new

@@ -1,4 +1,5 @@
 import React from "react"
+import FeaturesEditor from "./FeaturesEditor"
 
 export const inputCls =
     "mt-1 w-full bg-transparent border-b border-rule focus:border-accent outline-none py-1"
@@ -32,7 +33,7 @@ export function Labelled({
     )
 }
 
-export function TagInput({
+export function FeatureInput({
     label,
     value,
     onChange,
@@ -44,7 +45,7 @@ export function TagInput({
     hint?: string
 }) {
     return (
-        <Labelled label={label} hint={hint ?? "Comma-separated."}>
+        <Labelled label={label} hint={hint ?? "Comma-separated features."}>
             <input
                 value={value}
                 onChange={(e) => onChange(e.target.value)}
@@ -119,42 +120,47 @@ export default function PoemMetadataEditor({
                 </Labelled>
             </div>
 
-            <TagInput
+            <FeaturesEditor
                 label="Themes"
+                group="themes"
                 value={values.themes}
                 onChange={(v) => set("themes", v)}
             />
-            <TagInput
+            <FeaturesEditor
                 label="Moods"
+                group="moods"
                 value={values.moods}
                 onChange={(v) => set("moods", v)}
             />
-            <TagInput
+            <FeaturesEditor
                 label="Poetic forms"
+                group="poetic_forms"
                 value={values.poetic_forms}
                 onChange={(v) => set("poetic_forms", v)}
             />
-            <TagInput
+            <FeaturesEditor
                 label="Techniques"
+                group="techniques"
                 value={values.techniques}
                 onChange={(v) => set("techniques", v)}
             />
-            <TagInput
-                label="Tones voices"
+            <FeaturesEditor
+                label="Tones / voices"
+                group="tones_voices"
                 value={values.tones_voices}
                 onChange={(v) => set("tones_voices", v)}
             />
-            <TagInput
+            <FeatureInput
                 label="Key images"
                 value={values.key_images}
                 onChange={(v) => set("key_images", v)}
             />
-            <TagInput
+            <FeatureInput
                 label="Contest fit"
                 value={values.contest_fit}
                 onChange={(v) => set("contest_fit", v)}
             />
-            <TagInput
+            <FeatureInput
                 label="Socials"
                 value={values.socials}
                 onChange={(v) => set("socials", v)}
