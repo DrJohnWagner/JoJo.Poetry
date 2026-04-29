@@ -11,6 +11,7 @@ import ClusterList from "./cluster/ClusterList"
 import PoemSummary from "./poem/PoemSummary"
 import HorizontalRule from "./HorizontalRule"
 import ErrorMessage from "./ErrorMessage"
+import LoadingMessage from "./LoadingMessage"
 import { type ClusterGroup } from "@/lib/cluster"
 
 export default function ClusteringUI({
@@ -149,11 +150,7 @@ export default function ClusteringUI({
                 />
             )}
 
-            {loading && selected.length > 0 && (
-                <p className="mt-10 font-sans text-sm text-muted">
-                    Clustering poems...
-                </p>
-            )}
+            <LoadingMessage show={loading && selected.length > 0} message="Clustering poems…" className="mt-10" />
 
             <ErrorMessage message={error} className="mt-8 font-sans text-sm" />
 
@@ -167,38 +164,37 @@ export default function ClusteringUI({
                             <div key={i}>
                                 <ClusterLabel cluster={cluster} />
                                 <ClusterFeatures features={cluster.features} />
-                                <div className="mt-4">
-                                    <ClusterList
-                                        poems={cluster.poems}
-                                        selected={selected}
-                                        editingId={editingId}
-                                        editingTitle={editingTitle}
-                                        loadedPoems={loadedPoems}
-                                        onEdit={(poem) =>
-                                            void startEditing(poem)
-                                        }
-                                        onDelete={(poem) =>
-                                            void handleDelete(
-                                                poem.id,
-                                                poem.title
-                                            )
-                                        }
-                                        onSaved={(updated) => {
-                                            updateLoaded(updated)
-                                            onPinnedChange(
-                                                updated.id,
-                                                updated.pinned
-                                            )
-                                            stopEditing()
-                                        }}
-                                        onCancel={stopEditing}
-                                        onDirtyChange={setDirty}
-                                        onTitleChange={setEditingTitle}
-                                        onPinChanged={(poem, pinned) =>
-                                            handlePinChange(poem.id, pinned)
-                                        }
-                                    />
-                                </div>
+                                <ClusterList
+                                    className="mt-4"
+                                    poems={cluster.poems}
+                                    selected={selected}
+                                    editingId={editingId}
+                                    editingTitle={editingTitle}
+                                    loadedPoems={loadedPoems}
+                                    onEdit={(poem) =>
+                                        void startEditing(poem)
+                                    }
+                                    onDelete={(poem) =>
+                                        void handleDelete(
+                                            poem.id,
+                                            poem.title
+                                        )
+                                    }
+                                    onSaved={(updated) => {
+                                        updateLoaded(updated)
+                                        onPinnedChange(
+                                            updated.id,
+                                            updated.pinned
+                                        )
+                                        stopEditing()
+                                    }}
+                                    onCancel={stopEditing}
+                                    onDirtyChange={setDirty}
+                                    onTitleChange={setEditingTitle}
+                                    onPinChanged={(poem, pinned) =>
+                                        handlePinChange(poem.id, pinned)
+                                    }
+                                />
                                 <HorizontalRule
                                     show={i < result.clusters.length - 1}
                                 />

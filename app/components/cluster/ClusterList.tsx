@@ -10,6 +10,7 @@ interface Props {
     editingId?: string | null
     editingTitle: string
     loadedPoems?: Record<string, Poem>
+    className?: string
     onEdit?: (poem: Poem) => void
     onCancel?: () => void
     onSaved?: (updated: Poem, previous: Poem) => void
@@ -25,6 +26,7 @@ export default function ClusterList({
     editingId = null,
     editingTitle,
     loadedPoems,
+    className = "",
     onEdit,
     onCancel,
     onSaved,
@@ -34,7 +36,7 @@ export default function ClusterList({
     onPinChanged,
 }: Props) {
     return (
-        <div className="space-y-5">
+        <div className={`space-y-5 ${className}`}>
             {poems.map((p) => (
                 <ClusterRow
                     key={p.id}

@@ -143,12 +143,10 @@ export default function PoemCreateForm() {
 
     return (
         <form onSubmit={submit} className="space-y-5">
-            <div>
-                <p className="text-label mb-6 text-muted">
-                    New poem · fields marked{" "}
-                    <span className="text-accent">⦁</span> are required.
-                </p>
-            </div>
+            <p className="text-label mb-6 text-muted">
+                New poem · fields marked{" "}
+                <span className="text-accent">⦁</span> are required.
+            </p>
 
             <Labelled label="Title" required>
                 <input

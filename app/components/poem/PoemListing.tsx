@@ -7,6 +7,7 @@ import SearchBar from "./PoemSearchBar"
 import SortBar, { DEFAULT_SORT, type SortState } from "./PoemSortBar"
 import PoemList from "./PoemList"
 import ErrorMessage from "../ErrorMessage"
+import LoadingMessage from "../LoadingMessage"
 
 const EMPTY: SearchState = {
     q: "",
@@ -175,9 +176,7 @@ export default function PoemListing({
             />
 
             <div className="mt-16 flex items-center gap-6">
-                {loading && (
-                    <span className="text-label text-muted">Loading…</span>
-                )}
+                <LoadingMessage show={loading} />
                 <ErrorMessage message={err} className="text-sm inline" />
             </div>
         </div>

@@ -3,6 +3,7 @@
 import { Fragment, useEffect, useState, type ReactNode } from "react"
 import { fetchPoem } from "@/lib/api"
 import ErrorMessage from "../ErrorMessage"
+import LoadingMessage from "../LoadingMessage"
 
 function renderInline(line: string, lineIndex: number): ReactNode[] {
     const nodes: ReactNode[] = []
@@ -108,15 +109,11 @@ export default function PoemBody({
             >
                 {open ? "Hide poem" : "Show poem"}
             </button>
-            {open && loading && (
-                <p className="text-label mt-3 text-muted">Loading…</p>
-            )}
-            {open && <ErrorMessage message={error} />}
+            <LoadingMessage show={open && loading} className="mt-3" />
+            <ErrorMessage message={error} show={open} />
             {open && body !== null && (
-                <div className="mt-4">
-                    <div className="text-body text-body-poem">
-                        {renderBody(body)}
-                    </div>
+                <div className="mt-4 text-body text-body-poem">
+                    {renderBody(body)}
                 </div>
             )}
         </div>

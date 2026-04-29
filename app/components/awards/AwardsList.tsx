@@ -32,6 +32,7 @@ function sortEntries(entries: AwardWithPoem[], sort: AwardSortState): AwardWithP
                 break
             case "medal":
                 cmp = medalRank(a.award.medal) - medalRank(b.award.medal)
+                if (cmp === 0) return b.closedMs - a.closedMs
                 break
             case "poem_title":
                 cmp = a.poem.title.localeCompare(b.poem.title)
