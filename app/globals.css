@@ -58,6 +58,9 @@
     .text-title-lg {
         @apply text-xl;
     }
+    .text-title-md {
+        @apply text-lg;
+    }
     .text-title-sm {
         @apply text-base;
     }
@@ -69,22 +72,22 @@
 
     /* Small all-caps sans label */
     .text-label {
-        @apply font-sans text-[0.76rem] uppercase tracking-wider2 text-muted;
+        @apply font-sans text-xs uppercase tracking-wider2 text-muted;
     }
 
     /* Small sans metadata — the primary secondary-text style */
     .text-meta {
-        @apply font-sans text-[0.78rem] text-ink/80;
+        @apply font-sans text-[0.8rem] text-ink/80;
     }
 
     /* Slightly larger sans text for award entry rows */
     .text-entry {
-        @apply font-sans text-[0.9rem] text-ink/80;
+        @apply font-sans text-[0.9rem] text-ink/90;
     }
 
     /* Italic serif prose project statement */
     .text-project {
-        @apply font-serif italic leading-normal text-ink/90;
+        @apply font-serif italic leading-normal text-base text-ink/90;
     }
 
     /* Cluster section headings */
@@ -111,6 +114,10 @@
     /* ------------------------------------------------------------------ */
     /* Buttons (layout bleed deferred — unchanged for now)                 */
     /* ------------------------------------------------------------------ */
+
+    .button-icon {
+        @apply text-muted transition-colors hover:text-ink;
+    }
 
     .button-primary {
         @apply text-label border-b border-muted pb-1 transition-colors hover:border-ink hover:text-ink;

@@ -1,5 +1,6 @@
 import { FaMedal } from "react-icons/fa"
 import type { Award } from "@/lib/types"
+import { medalColor } from "@/lib/format"
 
 const MAX_AWARD_TITLE_LENGTH = 28
 
@@ -9,15 +10,6 @@ function truncateAwardTitle(
 ): string {
     if (title.length <= length) return title
     return `${title.slice(0, length)}...`
-}
-
-function medalColor(medal: string): string {
-    if (medal === "Gold") return "#b8860b"
-    if (medal === "Silver") return "#888"
-    if (medal === "Bronze") return "#a0522d"
-    if (medal === "Honorable Mention") return "#4a7c59"
-    if (medal === "HM") return "#4a7c59"
-    return "currentColor"
 }
 
 export default function PoemAward({ award }: { award: Award }) {

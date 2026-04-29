@@ -94,7 +94,7 @@ export default function PoemDetail({ poem: initial }: { poem: Poem }) {
             <HorizontalRule />
 
             <section aria-label="Poem body" className="my-5">
-                <PoemBody poemId={poem.id} />
+                <PoemBody poemId={poem.id} showBody={true} />
             </section>
 
             <HorizontalRule />

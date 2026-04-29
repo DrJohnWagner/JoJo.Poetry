@@ -66,7 +66,7 @@ export default function AwardsList({ poems }: { poems: PoemSummaryData[] }) {
             <AwardsSortBar sort={sort} onChange={setSort} />
             {sorted.map(({ poem, award }, i) => (
                 <div key={`${poem.id}-${award.url}`}>
-                    <div className="grid grid-cols-[1fr_3fr_5fr] items-baseline gap-x-3 gap-y-1">
+                    <div className="grid grid-cols-[1fr_3fr_5fr] items-center gap-x-3 gap-y-1">
                         <AwardEntry poem={poem} award={award} />
                     </div>
                     <div className="my-5" />

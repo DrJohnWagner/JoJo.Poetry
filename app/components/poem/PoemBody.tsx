@@ -1,6 +1,6 @@
 "use client"
 
-import { Fragment, useState, type ReactNode } from "react"
+import { Fragment, useEffect, useState, type ReactNode } from "react"
 import { fetchPoem } from "@/lib/api"
 import ErrorMessage from "../ErrorMessage"
 
@@ -63,10 +63,16 @@ function renderBody(body: string): ReactNode[] {
     ))
 }
 
-export default function PoemBody({ poemId }: { poemId: string }) {
-    const [open, setOpen] = useState(false)
+export default function PoemBody({
+    poemId,
+    showBody = false,
+}: {
+    poemId: string
+    showBody?: boolean
+}) {
+    const [open, setOpen] = useState(showBody)
     const [body, setBody] = useState<string | null>(null)
-    const [loading, setLoading] = useState(false)
+    const [loading, setLoading] = useState(showBody)
     const [error, setError] = useState<string | null>(null)
 
     async function handleOpen() {
@@ -84,6 +90,16 @@ export default function PoemBody({ poemId }: { poemId: string }) {
         }
     }
 
+    useEffect(() => {
+        if (!showBody) return
+        fetchPoem(poemId)
+            .then((poem) => setBody(poem.body))
+            .catch((e: unknown) =>
+                setError(e instanceof Error ? e.message : "Failed to load poem")
+            )
+            .finally(() => setLoading(false))
+    }, [poemId, showBody])
+
     return (
         <div className="my-3">
             <button
@@ -98,7 +114,9 @@ export default function PoemBody({ poemId }: { poemId: string }) {
             {open && <ErrorMessage message={error} />}
             {open && body !== null && (
                 <div className="mt-4">
-                    <div className="text-body text-body-poem">{renderBody(body)}</div>
+                    <div className="text-body text-body-poem">
+                        {renderBody(body)}
+                    </div>
                 </div>
             )}
         </div>

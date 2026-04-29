@@ -39,11 +39,11 @@ export default function CopyButton({
             type="button"
             onClick={handleCopy}
             title="Copy poem as markdown"
-            className="text-muted hover:text-ink transition-colors"
+            className="button-icon"
         >
-            {state === "copied"  && <Check    className="text-[1rem]" />}
-            {state === "loading" && <Ellipsis className="text-[1rem]" />}
-            {state === "idle"    && <Copy     className="text-[1rem]" />}
+            {state === "copied"  && <Check    className="text-base" />}
+            {state === "loading" && <Ellipsis className="text-base" />}
+            {state === "idle"    && <Copy     className="text-base" />}
         </button>
     )
 }

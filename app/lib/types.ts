@@ -32,17 +32,17 @@ export interface ClusterPoem extends PoemSummaryData {
     tones_voices: string[]
 }
 
-export interface Poem extends PoemSummaryData {
+export interface Poem extends ClusterPoem {
     author?: Author
     url: string
     body: string
     notes: string[]
     socials: string[]
-    themes: string[]
-    moods: string[]
-    poetic_forms: string[]
-    techniques: string[]
-    tones_voices: string[]
+    // themes: string[]
+    // moods: string[]
+    // poetic_forms: string[]
+    // techniques: string[]
+    // tones_voices: string[]
     contest_fit: string[]
     key_images: string[]
 }

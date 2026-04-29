@@ -4,9 +4,9 @@ const PoemFeatures = ({ features }: { features?: string[] }) => {
     if (!features || features.length === 0) return null
 
     return (
-        <span className="text-meta">
+        <div className="text-meta mt-1">
             {toSortedLabels(features).join(" · ")}
-        </span>
+        </div>
     )
 }
 

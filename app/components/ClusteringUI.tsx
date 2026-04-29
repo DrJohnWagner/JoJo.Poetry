@@ -51,9 +51,8 @@ export default function ClusteringUI({
     function handlePinChange(id: string, pinned: boolean) {
         onPinnedChange(id, pinned)
         setLoadedPoems((prev) => {
-            const target = prev[id] ?? initial.find((p) => p.id === id)
-            if (!target) return prev
-            return { ...prev, [id]: { ...target, pinned } }
+            if (!prev[id]) return prev
+            return { ...prev, [id]: { ...prev[id], pinned } }
         })
     }
 

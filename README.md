@@ -118,13 +118,13 @@ Two services, one flat JSON data source:
 │   │       ├── PoemCreateForm.tsx    # Dedicated POST form with defaults + guards
 │   │       ├── PoemMetadataEditor.tsx# Shared rating/date/url grid + all six TagInput fields
 │   │       ├── SimilarPoems.tsx      # Similar poems aside: all 5 axes (overall/theme/form/emotion/imagery) grouped
-│   │       └── PoemBody.tsx          # Toggle show/hide; fetches body lazily by poemId on first open
+│   │       └── PoemBody.tsx          # Toggle show/hide; showBody prop auto-fetches and expands on mount
 │   └── lib/
 │       ├── api.ts                    # Typed fetch wrappers (fetchPoems, fetchPoem, fetchRecentPoems, fetchAwardedPoems, fetchClusters)
 │       ├── cluster.ts                # Cluster feature/group label helpers for cluster UI rendering
-│       ├── types.ts                  # PoemSummaryData / Poem / Award / ClusterPoem / SearchState / SimilarityBundle / ClusterResponse / …
+│       ├── types.ts                  # PoemSummaryData / ClusterPoem / Poem type hierarchy; Award / SearchState / SimilarityBundle / ClusterResponse / …
 │       ├── editable.ts               # Canonical editable-field contract
-│       └── format.ts                 # body ↔ plaintext, date formatting, cleanPoetryUrl, poemToMarkdown(id, full)
+│       └── format.ts                 # body ↔ plaintext, date formatting, cleanPoetryUrl, poemToMarkdown, medalColor
 ├── database/
 │   ├── Poems.json                    # Canonical collection
 │   ├── <Title>.json                  # Per-poem mirror files (reference only)

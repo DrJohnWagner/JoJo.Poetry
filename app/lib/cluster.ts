@@ -18,7 +18,7 @@ export const getGroups = (p: Poem | ClusterPoem) => {
     ]
 }
 
-export const getFeatures = (groups: Array<Array<string>>) => groups.flat()
+export const getFeatures = (groups: Array<string[]>) => groups.flat()
 
 export const getFeatureLabels = (
     p: Poem | ClusterPoem,
