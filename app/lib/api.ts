@@ -102,6 +102,12 @@ export function fetchAwardedPoems(): Promise<PoemSummaryDataList> {
     return req<PoemSummaryDataList>("/api/poems/awards")
 }
 
+export function fetchAuthor(): Promise<{ pen_name: string; full_name: string }> {
+    return req<{ pen_name: string; full_name: string }>("/api/author", {
+        cache: "force-cache",
+    })
+}
+
 export function fetchFeatures(group: string): Promise<string[]> {
     return req<string[]>(`/api/features/${encodeURIComponent(group)}`)
 }

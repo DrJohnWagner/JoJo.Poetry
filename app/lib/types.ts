@@ -22,10 +22,10 @@ export interface PoemSummaryData {
     date: string
     awards: Award[]
     pinned: boolean
+    themes: string[]
 }
 
 export interface ClusterPoem extends PoemSummaryData {
-    themes: string[]
     moods: string[]
     poetic_forms: string[]
     techniques: string[]
@@ -38,7 +38,6 @@ export interface Poem extends ClusterPoem {
     body: string
     notes: string[]
     socials: string[]
-    // themes: string[]
     // moods: string[]
     // poetic_forms: string[]
     // techniques: string[]

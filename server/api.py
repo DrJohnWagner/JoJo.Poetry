@@ -25,6 +25,7 @@ from server.repository import (
     get_repository,
 )
 from server.config import (
+    AUTHOR,
     MOOD_FEATURES,
     POETIC_FORM_FEATURES,
     TECHNIQUE_FEATURES,
@@ -278,6 +279,12 @@ def health(
     return HealthResponse(
         status="ok", poems_loaded=len(repo.list()), source=str(repo.path)
     )
+
+
+@router.get("/api/author", tags=["meta"])
+def get_author() -> dict[str, str]:
+    """Site author identity (pen name and full name)."""
+    return AUTHOR.model_dump()
 
 
 _FEATURE_GROUPS: dict[str, list[str]] = {

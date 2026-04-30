@@ -55,7 +55,6 @@ export default function PoemRow({
         <article>
             <PoemSummary
                 poem={poem}
-                features={[]}
                 pinned={poem.pinned}
                 onPinChange={onPinChanged}
             />

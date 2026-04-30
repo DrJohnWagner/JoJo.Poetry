@@ -1,6 +1,7 @@
 import type { Metadata } from "next"
 import { Crimson_Pro, Fraunces, Inter } from "next/font/google"
 import Link from "next/link"
+import { fetchAuthor } from "@/lib/api"
 import { AppConfigProvider } from "@/components/AppConfig"
 import "./globals.css"
 
@@ -20,17 +21,27 @@ const sans = Inter({
     display: "swap",
 })
 
-export const metadata: Metadata = {
-    title: "JoJo — Poems",
-    description: "Collected poems by JoJo.",
+export async function generateMetadata(): Promise<Metadata> {
+    const author = await fetchAuthor().catch(() => ({
+        pen_name: "JoJo",
+        full_name: "John Wagner",
+    }))
+    return {
+        title: `${author.pen_name} — Poems`,
+        description: `Collected poems by ${author.pen_name}.`,
+    }
 }
 
-export default function RootLayout({
+export default async function RootLayout({
     children,
 }: {
     children: React.ReactNode
 }) {
     const readOnly = process.env.READ_ONLY !== "false"
+    const author = await fetchAuthor().catch(() => ({
+        pen_name: "JoJo",
+        full_name: "John Wagner",
+    }))
     return (
         <html
             lang="en"
@@ -41,7 +52,8 @@ export default function RootLayout({
                     <div className="px-6 pb-24 pt-16">
                         <main>{children}</main>
                         <footer className="text-label mx-auto mt-12 max-w-prose border-t border-rule pt-8">
-                            © JoJo (John Wagner) · <Link href="/">Index</Link>
+                            © {author.pen_name} ({author.full_name}) ·{" "}
+                            <Link href="/">Index</Link>
                         </footer>
                     </div>
                 </AppConfigProvider>

@@ -32,7 +32,7 @@ export default function AwardEntry({
                 className="self-center justify-self-center"
                 style={{ color: medalColor(award.medal), fontSize: "1.7em" }}
             />
-            <Link href={`/poems/${poem.id}`} className="text-entry self-center">
+            <Link href={`/poems/${poem.id}`} className="text-entry">
                 {poem.title}
             </Link>
             {/* <h3 className="self-center">

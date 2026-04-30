@@ -31,7 +31,7 @@ export default function PoemSummary({
             />
             <PoemStatistics poem={poem} variant={variant} />
             <PoemProject project={poem.project} clamp />
-            <PoemFeatures features={features} />
+            <PoemFeatures features={features ?? poem.themes} className="mt-1" />
             {showAwards && poem.awards.length > 0 && (
                 <div className="mt-1 flex flex-row gap-1">
                     {[...poem.awards]

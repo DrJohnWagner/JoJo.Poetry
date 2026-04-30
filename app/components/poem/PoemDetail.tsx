@@ -22,7 +22,7 @@ function MetaRow({ group, features }: { group: string; features: string[] }) {
     if (!features || features.length === 0) return null
     return (
         <>
-            <dt className="text-label pt-0">
+            <dt className="text-label">
                 <PoemGroup group={group} />
             </dt>
             <dd className="text-meta">
@@ -99,10 +99,10 @@ export default function PoemDetail({ poem: initial }: { poem: Poem }) {
 
             <HorizontalRule />
 
-            <dl className="grid grid-cols-1 gap-x-4 gap-y-2 text-[0.95rem] md:grid-cols-[max-content_1fr]">
+            <dl className="grid grid-cols-1 items-start gap-x-4 gap-y-2 text-[0.95rem] md:grid-cols-[max-content_1fr]">
                 {poem.author && (
                     <>
-                        <dt className="text-label pt-1">Author</dt>
+                        <dt className="text-label">Author</dt>
                         <dd>
                             <PoemAuthor author={poem.author} />
                         </dd>
@@ -110,7 +110,7 @@ export default function PoemDetail({ poem: initial }: { poem: Poem }) {
                 )}
                 {poem.notes.length > 0 && (
                     <>
-                        <dt className="text-label pt-1">Notes</dt>
+                        <dt className="text-label">Notes</dt>
                         <dd>
                             <PoemNotes poem={poem} />
                         </dd>
@@ -125,7 +125,7 @@ export default function PoemDetail({ poem: initial }: { poem: Poem }) {
                 <MetaRow group="Contest fit" features={contest_fit} />
                 {socials.length > 0 && (
                     <>
-                        <dt className="text-label pt-1">Socials</dt>
+                        <dt className="text-label">Socials</dt>
                         <dd className="space-y-1">
                             {socials.map((s) => (
                                 <PoemSocial key={s} url={s} />
@@ -136,7 +136,7 @@ export default function PoemDetail({ poem: initial }: { poem: Poem }) {
 
                 {awards.length > 0 && (
                     <>
-                        <dt className="text-label pt-1">
+                        <dt className="text-label">
                             <PoemGroup group="Awards" />
                         </dt>
                         <dd className="space-y-1">
@@ -145,7 +145,7 @@ export default function PoemDetail({ poem: initial }: { poem: Poem }) {
                     </>
                 )}
 
-                <dt className="text-label pt-1">Link</dt>
+                <dt className="text-label">Link</dt>
                 <dd>
                     <a
                         href={cleanPoetryUrl(poem.url)}

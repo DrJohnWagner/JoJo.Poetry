@@ -4,7 +4,7 @@ import { useState } from "react"
 import type { Award, PoemSummaryData } from "@/lib/types"
 import AwardEntry from "./AwardEntry"
 import AwardsSortBar, { DEFAULT_AWARD_SORT, type AwardSortState } from "./AwardsSortBar"
-import HorizontalRule from "@/components/HorizontalRule"
+// import HorizontalRule from "@/components/HorizontalRule"
 
 interface AwardWithPoem {
     poem: PoemSummaryData
@@ -36,9 +36,13 @@ function sortEntries(entries: AwardWithPoem[], sort: AwardSortState): AwardWithP
                 break
             case "poem_title":
                 cmp = a.poem.title.localeCompare(b.poem.title)
+                if (cmp === 0)
+                    cmp = medalRank(b.award.medal) - medalRank(a.award.medal)
+                if (cmp === 0) return b.closedMs - a.closedMs
                 break
             case "contest_title":
                 cmp = (a.award.title ?? "").localeCompare(b.award.title ?? "")
+                if (cmp === 0) return b.closedMs - a.closedMs
                 break
         }
         return sort.dir === "asc" ? cmp : -cmp

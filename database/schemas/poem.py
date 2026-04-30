@@ -45,6 +45,7 @@ class PoemSummaryData(BaseModel):
     date: datetime
     awards: List[Award]
     pinned: bool = False
+    themes: List[str] = Field(default_factory=list)
 
 
 class Poem(PoemSummaryData):
@@ -62,7 +63,6 @@ class Poem(PoemSummaryData):
     title: str = Field(min_length=1)
     url: HttpUrl
     body: str = Field(min_length=1)
-    themes: List[str]
     moods: List[str]
     poetic_forms: List[str]
     techniques: List[str]
