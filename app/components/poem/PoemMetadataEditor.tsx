@@ -3,6 +3,7 @@ import FeaturesEditor from "./FeaturesEditor"
 
 export const inputCls =
     "mt-1 w-full bg-transparent border-b border-rule focus:border-accent outline-none py-1"
+export const inputMonoCls = inputCls + " font-mono text-sm"
 export const textareaCls =
     "mt-1 w-full bg-transparent border border-rule focus:border-accent outline-none p-3 font-serif leading-normal resize-y"
 
@@ -49,7 +50,7 @@ export function FeatureInput({
             <input
                 value={value}
                 onChange={(e) => onChange(e.target.value)}
-                className="mt-1 w-full bg-transparent border-b border-rule focus:border-accent outline-none py-1 font-sans text-sm"
+                className={inputCls + " font-sans text-sm"}
             />
         </Labelled>
     )
@@ -102,7 +103,7 @@ export default function PoemMetadataEditor({
                         value={values.date}
                         onChange={(e) => set("date", e.target.value)}
                         placeholder="YYYY-MM-DDTHH:MM:SSZ"
-                        className={inputCls + " font-mono text-sm"}
+                        className={inputMonoCls}
                     />
                 </Labelled>
                 <Labelled
@@ -115,7 +116,7 @@ export default function PoemMetadataEditor({
                         value={values.url}
                         onChange={(e) => set("url", e.target.value)}
                         required={urlRequired}
-                        className={inputCls + " font-mono text-sm"}
+                        className={inputMonoCls}
                     />
                 </Labelled>
             </div>

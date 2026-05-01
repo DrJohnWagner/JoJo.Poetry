@@ -30,6 +30,13 @@ const MONTHS = [
     "December",
 ]
 
+const STRING_FIELDS: Array<{ key: keyof SearchState; label: string }> = [
+    { key: "title", label: "Title" },
+    { key: "body", label: "Body" },
+    { key: "project", label: "Project" },
+    { key: "notes", label: "Notes" },
+]
+
 export default function SearchBar({
     value,
     onChange,
@@ -74,30 +81,20 @@ export default function SearchBar({
         (value.notes?.trim() ? 1 : 0)
 
     const activeFilters = useMemo(() => {
-        const filters: Array<{
-            key: string
-            label: string
-            clear: () => void
-        }> = []
+        const filters: Array<{ key: string; label: string; clear: () => void }> = []
+
         if (value.q) {
             filters.push({
                 key: "q",
                 label: `Search: ${value.q}`,
-                clear: () => {
-                    setDraft("")
-                    onChange({ ...value, q: "" })
-                },
+                clear: () => { setDraft(""); onChange({ ...value, q: "" }) },
             })
         }
         for (const theme of value.themes) {
             filters.push({
                 key: `theme:${theme}`,
                 label: `Theme: ${theme}`,
-                clear: () =>
-                    onChange({
-                        ...value,
-                        themes: value.themes.filter((t) => t !== theme),
-                    }),
+                clear: () => onChange({ ...value, themes: value.themes.filter((t) => t !== theme) }),
             })
         }
         if (value.year !== null) {
@@ -118,41 +115,20 @@ export default function SearchBar({
             filters.push({
                 key: `medal:${medal}`,
                 label: `Medal: ${medal}`,
-                clear: () =>
-                    onChange({
-                        ...value,
-                        medals: value.medals.filter((item) => item !== medal),
-                    }),
+                clear: () => onChange({ ...value, medals: value.medals.filter((m) => m !== medal) }),
             })
         }
-        if (value.title?.trim()) {
-            filters.push({
-                key: "title",
-                label: `Title: ${value.title.trim()}`,
-                clear: () => onChange({ ...value, title: "" }),
-            })
+        for (const { key, label } of STRING_FIELDS) {
+            const v = (value[key] as string).trim()
+            if (v) {
+                filters.push({
+                    key,
+                    label: `${label}: ${v}`,
+                    clear: () => onChange({ ...value, [key]: "" }),
+                })
+            }
         }
-        if (value.body?.trim()) {
-            filters.push({
-                key: "body",
-                label: `Body: ${value.body.trim()}`,
-                clear: () => onChange({ ...value, body: "" }),
-            })
-        }
-        if (value.project?.trim()) {
-            filters.push({
-                key: "project",
-                label: `Project: ${value.project.trim()}`,
-                clear: () => onChange({ ...value, project: "" }),
-            })
-        }
-        if (value.notes?.trim()) {
-            filters.push({
-                key: "notes",
-                label: `Notes: ${value.notes.trim()}`,
-                clear: () => onChange({ ...value, notes: "" }),
-            })
-        }
+
         return filters
     }, [onChange, value])
 

@@ -6,11 +6,14 @@ type Item = { label: string; href: string | null }
 
 function parse(s: string): Item {
     if (s.startsWith("/?")) {
-        const eq = s.indexOf("=")
-        const raw = eq === -1 ? "" : decodeURIComponent(s.slice(eq + 1))
+        const raw = new URLSearchParams(s.slice(2)).values().next().value ?? ""
         return { label: toLabel(raw), href: s }
     }
     return { label: toLabel(s), href: null }
+}
+
+function dedupeByLabel(items: Item[]): Item[] {
+    return [...new Map(items.map((item) => [item.label, item])).values()]
 }
 
 const PoemFeatures = ({
@@ -22,11 +25,9 @@ const PoemFeatures = ({
 }) => {
     if (!features || features.length === 0) return null
 
-    const items = [
-        ...new Map(
-            features.map(parse).map((item) => [item.label, item])
-        ).values(),
-    ].sort((a, b) => a.label.localeCompare(b.label))
+    const items = dedupeByLabel(features.map(parse)).sort((a, b) =>
+        a.label.localeCompare(b.label)
+    )
 
     return (
         <div className={`text-meta ${className}`}>
