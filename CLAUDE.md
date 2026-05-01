@@ -83,6 +83,16 @@ restructured.
 
 ---
 
+## PoemSummaryData field additions — known gotcha
+
+`NeighbourResult` (in `server/similarity/service.py`) extends `PoemSummaryData`
+but is constructed field-by-field. Whenever a new field is added to
+`PoemSummaryData`, grep for every `NeighbourResult(` constructor call and add
+the field there too — it will not error at runtime (Pydantic uses the field
+default), it will just silently return empty/zero data to the frontend.
+
+---
+
 ## Key schema types
 
 ```
