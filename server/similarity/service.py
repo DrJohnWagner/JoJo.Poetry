@@ -50,6 +50,8 @@ class PoemSimilarityService:
                     words=full.words,
                     date=full.date,
                     awards=full.awards,
+                    pinned=full.pinned,
+                    themes=full.themes,
                     score=sort_key(fused_sim),
                     breakdown=fused_sim,
                 )
