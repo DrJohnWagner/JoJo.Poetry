@@ -39,7 +39,6 @@ class ClusterRequest(BaseModel):
 class PoemSummary(PoemSummaryData):
     model_config = ConfigDict(extra="forbid")
 
-    pinned: bool
     themes: List[str]
     moods: List[str]
     poetic_forms: List[str]

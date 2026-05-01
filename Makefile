@@ -15,6 +15,7 @@ GCLOUD_DOCKERFILE ?= Dockerfile-gcloud
 VENV_DIR ?= .venv
 PYTEST_PATH ?= tests/server
 UVICORN_APP ?= server.app:app
+UVICORN_RELOAD_DIRS ?= --reload-dir server --reload-dir database
 SERVER_HOST ?= 0.0.0.0
 SERVER_PORT ?= 8000
 
@@ -66,7 +67,7 @@ install: setup ## Alias for setup
 
 .PHONY: dev-server
 dev-server: ## Run backend in reload mode (uvicorn)
-	$(UV) run uvicorn $(UVICORN_APP) --reload --host $(SERVER_HOST) --port $(SERVER_PORT)
+	$(UV) run uvicorn $(UVICORN_APP) --reload $(UVICORN_RELOAD_DIRS) --host $(SERVER_HOST) --port $(SERVER_PORT)
 
 .PHONY: dev-web
 dev-web: ## Run Next.js development server
@@ -74,14 +75,14 @@ dev-web: ## Run Next.js development server
 
 .PHONY: dev
 dev: ## Run backend first, wait for it, then run frontend
-	@$(UV) run uvicorn $(UVICORN_APP) --reload --host $(SERVER_HOST) --port $(SERVER_PORT) & \
+	@$(UV) run uvicorn $(UVICORN_APP) --reload $(UVICORN_RELOAD_DIRS) --host $(SERVER_HOST) --port $(SERVER_PORT) & \
 	until curl -sf http://localhost:$(SERVER_PORT)/api/author >/dev/null 2>&1; do sleep 0.5; done; \
 	$(NPM) run dev
 
 
 .PHONY: dev-server-ro
 dev-server-ro: ## Run backend in reload mode (uvicorn)
-	READ_ONLY=true $(UV) run uvicorn $(UVICORN_APP) --reload --host $(SERVER_HOST) --port $(SERVER_PORT)
+	READ_ONLY=true $(UV) run uvicorn $(UVICORN_APP) --reload $(UVICORN_RELOAD_DIRS) --host $(SERVER_HOST) --port $(SERVER_PORT)
 
 .PHONY: dev-web-ro
 dev-web-ro: ## Run Next.js development server
@@ -89,7 +90,7 @@ dev-web-ro: ## Run Next.js development server
 
 .PHONY: dev-server-rw
 dev-server-rw: ## Run backend in reload mode (uvicorn)
-	READ_ONLY=false $(UV) run uvicorn $(UVICORN_APP) --reload --host $(SERVER_HOST) --port $(SERVER_PORT)
+	READ_ONLY=false $(UV) run uvicorn $(UVICORN_APP) --reload $(UVICORN_RELOAD_DIRS) --host $(SERVER_HOST) --port $(SERVER_PORT)
 
 .PHONY: dev-web-rw
 dev-web-rw: ## Run Next.js development server
@@ -97,13 +98,13 @@ dev-web-rw: ## Run Next.js development server
 
 .PHONY: dev-ro
 dev-ro: ## Run backend first, wait for it, then run frontend (read-only)
-	@READ_ONLY=true $(UV) run uvicorn $(UVICORN_APP) --reload --host $(SERVER_HOST) --port $(SERVER_PORT) & \
+	@READ_ONLY=true $(UV) run uvicorn $(UVICORN_APP) --reload $(UVICORN_RELOAD_DIRS) --host $(SERVER_HOST) --port $(SERVER_PORT) & \
 	until curl -sf http://localhost:$(SERVER_PORT)/api/author >/dev/null 2>&1; do sleep 0.5; done; \
 	READ_ONLY=true $(NPM) run dev
 
 .PHONY: dev-rw
 dev-rw: ## Run backend first, wait for it, then run frontend (read-write)
-	@READ_ONLY=false $(UV) run uvicorn $(UVICORN_APP) --reload --host $(SERVER_HOST) --port $(SERVER_PORT) & \
+	@READ_ONLY=false $(UV) run uvicorn $(UVICORN_APP) --reload $(UVICORN_RELOAD_DIRS) --host $(SERVER_HOST) --port $(SERVER_PORT) & \
 	until curl -sf http://localhost:$(SERVER_PORT)/api/author >/dev/null 2>&1; do sleep 0.5; done; \
 	READ_ONLY=false $(NPM) run dev
 

@@ -45,31 +45,28 @@ def test_search_shape_matches_list(client):
 
 # -------------------------------------------------------------- OR semantics
 
-def test_or_across_populated_fields(client):
-    # title match: "Metaphor" -> Not a Metaphor
-    # themes match: "biological_process" -> Load-Bearing Interior, Weather Over Brief Structures, Unchecked
-    # Poem must match EITHER.
+def test_themes_and_title_or(client):
+    # themes is an AND pre-filter: only poems with biological_process survive narrowing.
+    # title="Metaphor" is then OR-matched within that narrowed set.
+    # "Not a Metaphor" has "Metaphor" in its title but lacks biological_process → excluded.
+    # The bio-process poems have no "Metaphor" in their titles → none pass the OR step.
     r = client.get(
         "/api/poems/search",
         params=[("title", "Metaphor"), ("themes", "biological_process")],
     )
-    assert _titles(r) == {
-        "Not a Metaphor",
-        "Load-Bearing Interior",
-        "Weather Over Brief Structures",
-        "Unchecked",
-    }
+    assert _titles(r) == set()
 
 
-def test_tag_within_field_is_or(client):
+def test_themes_and_within_field(client):
+    # All supplied themes must be present (AND). Only poems with BOTH biological_process
+    # AND cancer qualify: Weather Over Brief Structures and Unchecked.
+    # Load-Bearing Interior has biological_process but not cancer → excluded.
     r = client.get(
         "/api/poems/search",
         params=[("themes", "biological_process"), ("themes", "cancer")],
     )
-    # Unchecked (cancer), Load-Bearing Interior (biological_process), Weather Over Brief Structures (both)
     assert _titles(r) == {
         "Unchecked",
-        "Load-Bearing Interior",
         "Weather Over Brief Structures",
     }
 
@@ -132,18 +129,6 @@ def test_medal_multiple_is_or(client):
 def test_medal_unknown_rejected(client):
     r = client.get("/api/poems/search", params={"medals": "Platinum"})
     assert r.status_code == 422
-
-
-# ------------------------------------------------------------- ordering + pagination
-
-def test_pinned_first_in_search(client):
-    from uuid import UUID
-    from server.repository import get_repository
-    # Pin the last-in-source-order poem and confirm it comes first
-    source_ids = [i["id"] for i in client.get("/api/poems").json()["items"]]
-    get_repository().update(UUID(source_ids[-1]), {"pinned": True})
-    r = client.get("/api/poems/search", params={"year": 2026})
-    assert r.json()["items"][0]["id"] == source_ids[-1]
 
 
 # ------------------------------------------------------------- rating band

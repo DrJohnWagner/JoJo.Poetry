@@ -21,8 +21,9 @@ export interface PoemSummaryData {
     words: number
     date: string
     awards: Award[]
-    pinned: boolean
     themes: string[]
+    // Client-only: not in the API response; merged from localStorage by fetchPoems.
+    pinned: boolean
 }
 
 export interface ClusterPoem extends PoemSummaryData {

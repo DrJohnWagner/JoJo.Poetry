@@ -3,7 +3,7 @@
 Mirrors database/schemas/poem.schema.json. Runtime validation:
   - requires `id` as a UUID v4 and treats it as unique at the collection level
     (uniqueness is enforced by the repository layer, not the model)
-  - applies defaults for optional fields (`pinned`, `notes`)
+  - applies defaults for optional fields (`notes`)
     when absent from input
   - accepts the existing dataset unchanged
 """
@@ -44,7 +44,6 @@ class PoemSummaryData(BaseModel):
     words: int = Field(ge=0)
     date: datetime
     awards: List[Award]
-    pinned: bool = False
     themes: List[str] = Field(default_factory=list)
 
 
@@ -54,7 +53,7 @@ class Poem(PoemSummaryData):
     Strictness: `extra="forbid"` on the top-level model rejects unknown fields
     so that schema drift is surfaced rather than silently stored. Optional
     fields with defaults keep the model tolerant of older records that
-    predate `pinned` / `notes`.
+    predate `notes`.
     """
 
     model_config = ConfigDict(extra="forbid", str_strip_whitespace=False)

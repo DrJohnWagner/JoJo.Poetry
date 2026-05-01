@@ -11,6 +11,13 @@ it — just do it.
 
 ---
 
+## Git workflow
+
+Commit after significant work. Do **not** merge branches or delete branches
+unless explicitly instructed — leave that to John.
+
+---
+
 ## Repo purpose
 
 Full-stack poetry portfolio app. FastAPI backend + Next.js frontend. The owner

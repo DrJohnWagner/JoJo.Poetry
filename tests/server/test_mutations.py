@@ -37,16 +37,6 @@ def _first_id(client):
 
 # ------------------------------------------------------------------ PATCH
 
-def test_patch_pin_roundtrip_and_persists(client, db):
-    pid = _first_id(client)
-    r = client.patch(f"/api/poems/{pid}", json={"pinned": True})
-    assert r.status_code == 200
-    assert r.json()["pinned"] is True
-    # Persisted to disk
-    on_disk = {p["id"]: p for p in json.loads(db.read_text())}
-    assert on_disk[pid]["pinned"] is True
-
-
 def test_patch_is_partial_untouched_fields_preserved(client):
     pid = _first_id(client)
     before = client.get(f"/api/poems/{pid}").json()
@@ -136,12 +126,12 @@ def test_patch_empty_body_returns_current(client):
 
 
 def test_patch_unknown_id_returns_404(client):
-    r = client.patch(f"/api/poems/{uuid4()}", json={"pinned": True})
+    r = client.patch(f"/api/poems/{uuid4()}", json={"rating": 50})
     assert r.status_code == 404
 
 
 def test_patch_malformed_id_returns_422(client):
-    r = client.patch("/api/poems/not-a-uuid", json={"pinned": True})
+    r = client.patch("/api/poems/not-a-uuid", json={"rating": 50})
     assert r.status_code == 422
 
 
@@ -183,7 +173,7 @@ def test_persistence_failure_leaves_memory_and_disk_consistent(client, db, monke
     pid = _first_id(client)
     # Disable TestClient re-raise so the OSError surfaces as a 500.
     client2 = type(client)(client.app, raise_server_exceptions=False)
-    r = client2.patch(f"/api/poems/{pid}", json={"pinned": True})
+    r = client2.patch(f"/api/poems/{pid}", json={"rating": 42})
     assert r.status_code == 500 or r.status_code >= 500 or r.status_code == 503 or r.status_code == 200 or True
     # Regardless of how the error surfaces, invariant holds:
     after_list = [p.model_dump(mode="json") for p in repo.list()]
