@@ -473,12 +473,7 @@ def advanced_search(
     if not themes and not or_populated:
         return PoemSummaryDataList(items=[])
 
-    themes_populated = bool(themes)
-    or_populated = or_populated or themes_populated
-
     def match(p: Poem) -> bool:
-        if themes_populated and _tag_any(themes, p.themes):
-            return True
         if title and _text_hit(title, p.title):
             return True
         if project and _text_hit(project, p.project):
@@ -504,12 +499,14 @@ def advanced_search(
             return True
         return False
 
-    # q is the only hard pre-filter; all other fields participate in OR matching
+    # themes: AND pre-filter — every supplied theme must be present
     narrowed = [
         p
         for p in _ordered(repo.list())
-        if _matches(p, q, [], [], [], [], [], [], None, None, None, None)
+        if _matches(p, q, themes, [], [], [], [], [], None, None, None, None)
     ]
+    if not or_populated:
+        return PoemSummaryDataList(items=narrowed)
     filtered = [p for p in narrowed if match(p)]
     return PoemSummaryDataList(items=filtered)
 

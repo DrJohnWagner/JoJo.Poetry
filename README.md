@@ -85,7 +85,7 @@ Two services, one flat JSON data source:
 │   │   ├── AdvancedSearchDialog.tsx  # Native <dialog>-backed modal (title/body/project/notes/themes/year/month/medals); TextField local helper collapses identical text-input rows
 │   │   ├── ThemeAutocomplete.tsx     # Autocomplete-with-chips theme selector backed by /api/features/themes; used in AdvancedSearchDialog
 │   │   ├── CopyButton.tsx            # Copy-to-clipboard icon button; variant="outline"|"filled" selects icon set
-│   │   ├── PinToggle.tsx             # Server-confirmed pin/unpin
+│   │   ├── PinToggle.tsx             # Pin/unpin stored in localStorage; client-only, no server round-trip, visible in RO mode
 │   │   ├── ErrorMessage.tsx
 │   │   ├── awards/
 │   │   │   ├── AwardEntry.tsx        # Two grid-rows per award: medal-label+date row, then medal-icon+poem-title+contest-title row
@@ -158,7 +158,6 @@ The authoritative schema is `database/schemas/poem.schema.json`;
 | `project`                                                                             | string                     | yes                          | yes                 | yes                           | One-sentence authorial statement.                                                                  |
 | `rating`                                                                              | int 0–100                 | yes                          | yes                 | min/max band                  | Authorial self-rating.                                                                             |
 | `lines`, `words`                                                                    | int ≥ 0                   | yes                          | **derived**   | no                            | Recomputed from `body` on every write.                                                           |
-| `pinned`                                                                              | bool                       | optional (default `false`) | yes                 | no                            | Pinned poems lead listings.                                                                        |
 | `socials`                                                                             | `string[]`               | optional (default `[]`)    | yes                 | no                            | Social media URLs; displayed as links on the detail page.                                          |
 | `notes`                                                                               | `string[]`               | optional (default `[]`)    | yes                 | yes                           | One string per note; edited via multi-line textbox (one line = one note).                          |
 | `author`                                                                              | `{pen_name, full_name}`  | optional (default `null`)  | yes (API)           | no                            | Author identity. Displayed on the detail page; no inline editor (structured object).               |
@@ -210,9 +209,9 @@ read or write them.
 - **`poem.py`** — Pydantic models (`PoemSummaryData`, `Poem`, `Award`, `Author`).
   `PoemSummaryData` is the base class containing the fields returned by the list
   endpoints (`id`, `title`, `project`, `rating`, `lines`, `words`, `date`,
-  `awards`, `pinned`, `themes`). `Poem` extends it with the full field set. Used at runtime
+  `awards`, `themes`). `Poem` extends it with the full field set. Used at runtime
   for load-time validation, PATCH-merge validation, and response shaping. Applies
-  the documented defaults (`pinned=false`, `socials=[]`, `notes=[]`, `author=null`)
+  the documented defaults (`socials=[]`, `notes=[]`, `author=null`)
   when optional fields are absent.
 
 ## Configuration
@@ -447,7 +446,7 @@ An entirely empty query (no fields, no `q`) returns empty — use
 
 Both endpoints return the same `PoemSummaryDataList` wrapper (`{ items: PoemSummaryData[] }`)
 and apply the same ordering. Items contain summary fields only (`id`, `title`, `project`,
-`rating`, `lines`, `words`, `date`, `awards`, `pinned`) — not `body`, tags, or notes.
+`rating`, `lines`, `words`, `date`, `awards`, `themes`) — not `body`, other tags, or notes.
 Use `GET /api/poems/{id}` to retrieve a full `Poem` record.
 
 ## The similarity system
@@ -615,7 +614,7 @@ poem listing and recent poems server-side (both as `PoemSummaryDataList`),
 then renders `ClustersPageClient`. `ClustersPageClient` owns
 `ClusterCheckboxes` toggles, clustered response state, loading/error state,
 and `fetchClusters` calls. With no categories selected, it shows the initial
-poem listing (summary rows, pinned first; no search/sort controls). Selecting one or more categories triggers
+poem listing (summary rows in date-desc order; no search/sort controls). Selecting one or more categories triggers
 `POST /api/poems/cluster` automatically and renders clusters as a vertical list
 with labels, feature tags, and poem rows (title link, italic project statement,
 then only tags from the selected checkbox groups joined inline). Excluded poems
@@ -709,7 +708,6 @@ shared metadata tags. The endpoint is read-safe (available in
         {
           "id": "<uuid>",
           "title": "...",
-          "pinned": false,
           "project": "A poem about loss in the natural world.",
           "themes": ["nature", "loss"],
           "moods": ["elegiac"],
@@ -766,7 +764,7 @@ Returns `422` for an out-of-range `k`. Works in read-only mode.
 `GET /api/poems/awards`
 
 Returns all poems that have at least one award, in authoritative order
-(pinned-first, date-desc, id-asc). Each item is a `PoemSummaryData`
+(date-desc, id-asc). Each item is a `PoemSummaryData`
 record including the full `awards` array with `url`, `medal`, `title`,
 and `closed` fields. Works in read-only mode.
 
@@ -798,10 +796,11 @@ the others are explicit ordered lists.
 
 Authoritative ordering (applied by both list endpoints before returning):
 
-1. **Pinned first** — `pinned=true` before `pinned=false`.
-2. **Within each group, `date` descending** (most recent first).
-3. **Tiebreaker:** `id` ascending (UUID string compare). Deterministic
+1. **`date` descending** (most recent first).
+2. **Tiebreaker:** `id` ascending (UUID string compare). Deterministic
    and stable, so identical inputs always produce identical order.
+
+Pinned-first ordering is applied client-side only (see Client-side sorting).
 
 Search filters the set; it never re-ranks. There is no relevance scoring.
 
@@ -816,18 +815,20 @@ datetime, no fallback needed.
 
 ## Pinning, editing, and hard deletion
 
-- **Pinning** — `PATCH /api/poems/{id}` with `{"pinned": true|false}`.
-  The frontend `PinToggle` flips local state **only after** the
-  server confirms with `200`. Pin toggles move the poem across the
-  pin boundary; the listing refetches the full set so the
-  authoritative order stays in lock-step with the server.
+- **Pinning** — stored in `localStorage` under the key `jojo:pins` as a
+  JSON array of UUID strings. `PinToggle` reads and writes localStorage
+  directly; no server round-trip, no API call. Pins are per-browser and
+  visible in read-only mode. The `fetchPoems` call merges pin state from
+  localStorage into the `PoemSummaryData.pinned` field after the API
+  response arrives. Pinned-first ordering is enforced by the client-side
+  sort layer.
 - **Editing** — list items are `PoemSummaryData`; the full `Poem` is
   fetched on demand when the editor is opened (cached in `loadedPoems`
   so subsequent edits don't refetch). A single canonical editable field
   set is declared in `app/lib/editable.ts` and used by both the
   list-row editor (`PoemEditorForm` in compact density) and the detail
   page (comfortable density). Fields editable inline in both contexts:
-  `title`, `project`, `body`, `rating`, `pinned`, `date`, `url`,
+  `title`, `project`, `body`, `rating`, `date`, `url`,
   `themes`, `moods`,
   `poetic_forms`, `techniques`, `tones_voices`, `key_images`,
   `contest_fit`, `socials`, `notes`. PATCH sends only the diff; local
@@ -836,7 +837,7 @@ datetime, no fallback needed.
 - **Creation** — dedicated page at `/poems/new`. Required inputs:
   `title`, `url`, `project`, `body`, `rating`. Everything else is
   optional; omitted optionals receive documented defaults server-side
-  (`pinned=false`, tag arrays `[]`, `date=now UTC`, etc.). The
+  (tag arrays `[]`, `date=now UTC`, etc.). The
   server owns identity: UUID v4 is generated on the server and
   client-supplied `id` / `lines` / `words` are rejected. Double-submit
   is prevented via a disabled submit button + in-flight ref.
@@ -877,21 +878,21 @@ Test files:
   duplicate-id and invalid-UUID rejection; immutability; atomic
   persistence; alternate-file configurability.
 - `tests/server/test_read_api.py` — `/health`; list response shape (`{ items }` only,
-  summary fields, no `body`); search; pinned-first ordering; 422 malformed id;
+  summary fields, no `body`); search; date-desc ordering; 422 malformed id;
   404 unknown id; `GET /api/poems/{id}` returns full poem including `body`;
   `/api/poems/recent` (200 shape, default k, k limits, date-desc ordering,
-  no pin bias, 422 for out-of-range k, route not intercepted by `/{poem_id}`);
+  date-desc ordering, 422 for out-of-range k, route not intercepted by `/{poem_id}`);
   `/api/poems/awards` (200 shape, all returned poems have at least one award,
   at least one result in the fixture).
 - `tests/server/test_mutations.py` — PATCH partial semantics; derived recompute;
   unknown-field/id rejection; DELETE; **persistence-failure
   atomicity** (injected `OSError` keeps memory and disk consistent).
-- `tests/server/test_search.py` — OR across populated fields; within-field OR on
-  tags; year/month; Gold / None / multiple medals; pinned-first preserved;
+- `tests/server/test_search.py` — themes AND pre-filter; within-themes AND semantics;
+  OR across other populated fields; year/month; Gold / None / multiple medals;
   empty advanced query returns empty; `q`-only on search endpoint returns empty.
-- `tests/server/test_ordering.py` — date-desc default; pinned-first with internal
-  date-desc; id-ascending tiebreaker; filtered result is a correctly-ordered
-  subsequence of the full listing; pin / date / delete mutations reorder correctly.
+- `tests/server/test_ordering.py` — date-desc default; id-ascending tiebreaker;
+  filtered result is a correctly-ordered subsequence of the full listing;
+  date / delete mutations reorder correctly.
 - `tests/server/test_create.py` — valid creation; server-generated UUID v4;
   defaults for omitted optionals; rejection of client-supplied
   `id`/`lines`/`words`; required-field-missing rejection; ordering
@@ -938,8 +939,8 @@ Test files:
   data.
 - **No schema versioning field.** Additive changes work; breaking
   changes will need a `schema_version` and a one-shot migration.
-- **No relevance ranking.** Search filters but does not rank; order
-  is always authoritative (pinned → date-desc → id-asc).
+- **No relevance ranking.** Search filters but does not rank; server order
+  is always date-desc → id-asc. Pinned-first is client-side only.
 - **`awards` has no inline editor.** The awards page and medal tooltips
   display `awards` read-only; the backend accepts PATCH, but there is no
   form UI for creating or modifying award records.
