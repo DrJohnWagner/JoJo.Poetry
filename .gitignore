@@ -47,6 +47,9 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 
+# ---- Production data (not committed) ----
+database/Poems-JoJo.json
+
 # ---- OS / editor ----
 .DS_Store
 .idea/

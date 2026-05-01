@@ -3,12 +3,11 @@ import { hasAdvanced } from "./types"
 
 const SERVER_BASE =
     process.env.API_BASE_URL_SERVER?.replace(/\/$/, "") ||
-    process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/$/, "") ||
     "http://localhost:8000"
 
 const CLIENT_BASE =
     process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/$/, "") ||
-    "http://localhost:8000"
+    ""
 
 const BASE = typeof window === "undefined" ? SERVER_BASE : CLIENT_BASE
 

@@ -66,8 +66,10 @@ dev-web: ## Run Next.js development server
 	$(NPM) run dev
 
 .PHONY: dev
-dev: ## Run backend + frontend together (parallel)
-	$(MAKE) -j2 dev-server dev-web
+dev: ## Run backend first, wait for it, then run frontend
+	@$(UV) run uvicorn $(UVICORN_APP) --reload --host $(SERVER_HOST) --port $(SERVER_PORT) & \
+	until curl -sf http://localhost:$(SERVER_PORT)/api/author >/dev/null 2>&1; do sleep 0.5; done; \
+	$(NPM) run dev
 
 
 .PHONY: dev-server-ro
@@ -87,12 +89,16 @@ dev-web-rw: ## Run Next.js development server
 	READ_ONLY=false $(NPM) run dev
 
 .PHONY: dev-ro
-dev-ro: ## Run backend + frontend together (parallel)
-	READ_ONLY=true $(MAKE) -j2 dev-server-ro dev-web-ro
+dev-ro: ## Run backend first, wait for it, then run frontend (read-only)
+	@READ_ONLY=true $(UV) run uvicorn $(UVICORN_APP) --reload --host $(SERVER_HOST) --port $(SERVER_PORT) & \
+	until curl -sf http://localhost:$(SERVER_PORT)/api/author >/dev/null 2>&1; do sleep 0.5; done; \
+	READ_ONLY=true $(NPM) run dev
 
 .PHONY: dev-rw
-dev-rw: ## Run backend + frontend together (parallel)
-	READ_ONLY=false $(MAKE) -j2 dev-server-rw dev-web-rw
+dev-rw: ## Run backend first, wait for it, then run frontend (read-write)
+	@READ_ONLY=false $(UV) run uvicorn $(UVICORN_APP) --reload --host $(SERVER_HOST) --port $(SERVER_PORT) & \
+	until curl -sf http://localhost:$(SERVER_PORT)/api/author >/dev/null 2>&1; do sleep 0.5; done; \
+	READ_ONLY=false $(NPM) run dev
 
 .PHONY: start-web-ro
 start-web-ro: ## Run Next.js production server
