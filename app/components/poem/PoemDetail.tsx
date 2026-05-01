@@ -15,6 +15,14 @@ import HorizontalRule from "../HorizontalRule"
 import { cleanPoetryUrl } from "@/lib/format"
 import PoemAwards from "./PoemAwards"
 import PoemSummary from "./PoemSummary"
+import dynamic from "next/dynamic"
+import LoadingMessage from "../LoadingMessage"
+import ErrorMessage from "../ErrorMessage"
+
+const InstagramEmbed = dynamic(
+    () => import("react-social-media-embed").then((m) => m.InstagramEmbed),
+    { ssr: false }
+)
 
 function MetaRow({ group, features }: { group: string; features: string[] }) {
     if (!features || features.length === 0) return null
@@ -33,9 +41,11 @@ function MetaRow({ group, features }: { group: string; features: string[] }) {
 export default function PoemDetail({ poem: initial }: { poem: Poem }) {
     const { readOnly } = useAppConfig()
     const [poem, setPoem] = useState<Poem>(initial)
+    const [open, setOpen] = useState(false)
+    const [caption, setCaption] = useState(false)
     const [editing, setEditing] = useState(false)
     const [liveTitle, setLiveTitle] = useState(initial.title)
-    const { id, title } = poem
+    // const { id, title } = poem
 
     if (editing) {
         return (
@@ -72,6 +82,7 @@ export default function PoemDetail({ poem: initial }: { poem: Poem }) {
         socials,
         awards,
     } = poem
+    const instagram = poem.socials.filter((s) => s.includes("instagram.com"))
 
     return (
         <div>
@@ -112,7 +123,12 @@ export default function PoemDetail({ poem: initial }: { poem: Poem }) {
                         </dd>
                     </>
                 )}
-                <MetaRow group="Themes" features={themes.map((t) => `/?themes=${encodeURIComponent(t)}`)} />
+                <MetaRow
+                    group="Themes"
+                    features={themes.map(
+                        (t) => `/?themes=${encodeURIComponent(t)}`
+                    )}
+                />
                 <MetaRow group="Moods" features={moods} />
                 <MetaRow group="Poetic forms" features={poetic_forms} />
                 <MetaRow group="Techniques" features={techniques} />
@@ -161,6 +177,56 @@ export default function PoemDetail({ poem: initial }: { poem: Poem }) {
                         deleteId={poem.id}
                     />
                 </footer>
+            )}
+            {instagram.length > 0 && (
+                <div className="text-label mt-5 hover:text-ink">
+                    <div className="my-5 flex gap-x-5">
+                        <button
+                            onClick={() => setOpen(!open)}
+                            className="text-label hover:text-ink"
+                        >
+                            {open ? "Hide social media" : "Show social media"}
+                        </button>
+                        {open && (
+                            <button
+                                onClick={() => setCaption(!caption)}
+                                className="text-label hover:text-ink"
+                            >
+                                {caption ? "Hide captions" : "Show captions"}
+                            </button>
+                        )}
+                    </div>
+                    {open &&
+                        instagram.map((url) => (
+                            <div
+                                key={url}
+                                style={{
+                                    display: "flex",
+                                    justifyContent: "center",
+                                }}
+                            >
+                                {caption && (
+                                    <InstagramEmbed
+                                        url={url}
+                                        width={500}
+                                        captioned
+                                        // placeholderProps={{
+                                        //     url: url,
+                                        //     style: {
+                                        //         width: 500,
+                                        //         height: 716,
+                                        //         // backgroundColor: "#f0f0f0", // Example: adding a custom background
+                                        //     },
+                                        //     linkText: "Loading post...",
+                                        // }}
+                                    />
+                                )}
+                                {!caption && (
+                                    <InstagramEmbed url={url} width={500} />
+                                )}
+                            </div>
+                        ))}
+                </div>
             )}
         </div>
     )
