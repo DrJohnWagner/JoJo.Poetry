@@ -16,8 +16,6 @@ import { cleanPoetryUrl } from "@/lib/format"
 import PoemAwards from "./PoemAwards"
 import PoemSummary from "./PoemSummary"
 import dynamic from "next/dynamic"
-import LoadingMessage from "../LoadingMessage"
-import ErrorMessage from "../ErrorMessage"
 
 const InstagramEmbed = dynamic(
     () => import("react-social-media-embed").then((m) => m.InstagramEmbed),
@@ -45,6 +43,10 @@ export default function PoemDetail({ poem: initial }: { poem: Poem }) {
     const [caption, setCaption] = useState(false)
     const [editing, setEditing] = useState(false)
     const [liveTitle, setLiveTitle] = useState(initial.title)
+    const SMALL = 350
+    const LARGE = 500
+    const [width, setWidth] = useState(SMALL)
+
     // const { id, title } = poem
 
     if (editing) {
@@ -170,14 +172,7 @@ export default function PoemDetail({ poem: initial }: { poem: Poem }) {
             </dl>
 
             <HorizontalRule />
-            {!readOnly && (
-                <footer>
-                    <PoemButtons
-                        onEdit={() => setEditing(true)}
-                        deleteId={poem.id}
-                    />
-                </footer>
-            )}
+
             {instagram.length > 0 && (
                 <div className="text-label mt-5 hover:text-ink">
                     <div className="my-5 flex gap-x-5">
@@ -185,8 +180,18 @@ export default function PoemDetail({ poem: initial }: { poem: Poem }) {
                             onClick={() => setOpen(!open)}
                             className="text-label hover:text-ink"
                         >
-                            {open ? "Hide social media" : "Show social media"}
+                            {open ? "Hide socials" : "Show socials"}
                         </button>
+                        {open && (
+                            <button
+                                onClick={() =>
+                                    setWidth(width === LARGE ? SMALL : LARGE)
+                                }
+                                className="text-label hover:text-ink"
+                            >
+                                {width === LARGE ? "Small" : "Large"}
+                            </button>
+                        )}
                         {open && (
                             <button
                                 onClick={() => setCaption(!caption)}
@@ -208,25 +213,27 @@ export default function PoemDetail({ poem: initial }: { poem: Poem }) {
                                 {caption && (
                                     <InstagramEmbed
                                         url={url}
-                                        width={500}
+                                        width={width}
                                         captioned
-                                        // placeholderProps={{
-                                        //     url: url,
-                                        //     style: {
-                                        //         width: 500,
-                                        //         height: 716,
-                                        //         // backgroundColor: "#f0f0f0", // Example: adding a custom background
-                                        //     },
-                                        //     linkText: "Loading post...",
-                                        // }}
                                     />
                                 )}
                                 {!caption && (
-                                    <InstagramEmbed url={url} width={500} />
+                                    <InstagramEmbed url={url} width={width} />
                                 )}
                             </div>
                         ))}
                 </div>
+            )}
+
+            {instagram.length > 0 && !readOnly && <HorizontalRule />}
+
+            {!readOnly && (
+                <footer>
+                    <PoemButtons
+                        onEdit={() => setEditing(true)}
+                        deleteId={poem.id}
+                    />
+                </footer>
             )}
         </div>
     )
