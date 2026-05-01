@@ -146,3 +146,12 @@ export function formatDate(iso: string): string {
         year: "numeric",
     })
 }
+
+export function medalColor(medal: string): string {
+    if (medal === "Gold") return "#b8860b"
+    if (medal === "Silver") return "#888"
+    if (medal === "Bronze") return "#a0522d"
+    if (medal === "Honorable Mention") return "#4a7c59"
+    if (medal === "HM") return "#4a7c59"
+    return "currentColor"
+}

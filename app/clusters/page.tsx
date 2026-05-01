@@ -5,7 +5,7 @@ export const dynamic = "force-dynamic"
 
 export default async function ClustersPage() {
     const [initial, recent] = await Promise.all([
-        fetchPoems({ q: "", year: null, month: null, medals: [], title: "", body: "", project: "", notes: "" }),
+        fetchPoems({ q: "", themes: [], year: null, month: null, medals: [], title: "", body: "", project: "", notes: "" }),
         fetchRecentPoems(12),
     ])
 

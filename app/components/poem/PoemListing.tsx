@@ -1,15 +1,18 @@
 "use client"
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import { useSearchParams } from "next/navigation"
 import { deletePoem, fetchPoem, fetchPoems } from "@/lib/api"
 import type { Poem, PoemSummaryData, SearchState } from "@/lib/types"
 import SearchBar from "./PoemSearchBar"
 import SortBar, { DEFAULT_SORT, type SortState } from "./PoemSortBar"
 import PoemList from "./PoemList"
 import ErrorMessage from "../ErrorMessage"
+import LoadingMessage from "../LoadingMessage"
 
 const EMPTY: SearchState = {
     q: "",
+    themes: [],
     year: null,
     month: null,
     medals: [],
@@ -24,6 +27,7 @@ export default function PoemListing({
 }: {
     initial: PoemSummaryData[]
 }) {
+    const searchParams = useSearchParams()
     const [search, setSearch] = useState<SearchState>(EMPTY)
     const [items, setItems] = useState<PoemSummaryData[]>(initial)
     const [loading, setLoading] = useState(false)
@@ -33,18 +37,8 @@ export default function PoemListing({
     const [dirty, setDirty] = useState(false)
     const [loadedPoems, setLoadedPoems] = useState<Record<string, Poem>>({})
 
-    const editingIdRef = useRef<string | null>(null)
-    useEffect(() => {
-        editingIdRef.current = editingId
-    }, [editingId])
-
-    const dirtyRef = useRef(false)
-    useEffect(() => {
-        dirtyRef.current = dirty
-    }, [dirty])
-
     function confirmDiscard(reason: string): boolean {
-        if (!dirtyRef.current) return true
+        if (!dirty) return true
         return window.confirm(`Discard unsaved changes? (${reason})`)
     }
 
@@ -52,6 +46,37 @@ export default function PoemListing({
     useEffect(() => {
         searchRef.current = search
     }, [search])
+
+    // Theme links (e.g. /?themes=loss) do a soft Next.js navigation — the component
+    // doesn't remount, so a mount-only effect won't fire. useSearchParams() reacts
+    // to same-page URL changes, which is what we need.
+    //
+    // After extracting themes we clean the URL with replaceState so it reverts to /.
+    // That triggers another searchParams update (empty). To suppress it without a
+    // one-shot skip flag (which React StrictMode's double-invocation consumes early),
+    // we pre-set lastProcessedParams to "" — what searchParams.toString() will return
+    // after the clean — so the router's feedback arrives already marked as processed.
+    const lastProcessedParams = useRef("")
+    useEffect(() => {
+        const raw = searchParams.toString()
+        if (raw === lastProcessedParams.current) return
+        lastProcessedParams.current = raw
+        if (searchParams.has("reset")) {
+            setSearch(EMPTY)
+            lastProcessedParams.current = ""
+            window.history.replaceState(null, "", "/")
+            return
+        }
+        const themes = searchParams.getAll("themes")
+        setSearch((prev) => {
+            if (themes.join(",") === prev.themes.join(",")) return prev
+            return { ...prev, themes }
+        })
+        if (themes.length > 0) {
+            lastProcessedParams.current = ""
+            window.history.replaceState(null, "", "/")
+        }
+    }, [searchParams])
 
     const refetchFromTop = useCallback(() => {
         const snapshot = searchRef.current
@@ -76,24 +101,6 @@ export default function PoemListing({
         }
         refetchFromTop()
     }, [search, refetchFromTop])
-
-    const applyUpdated = useCallback(
-        (updated: Poem, previous: PoemSummaryData) => {
-            const orderChanged =
-                updated.pinned !== previous.pinned ||
-                updated.date !== previous.date
-            setEditingId(null)
-            if (orderChanged) {
-                refetchFromTop()
-                return
-            }
-            setItems((prev) =>
-                prev.map((p) => (p.id === updated.id ? updated : p))
-            )
-            setLoadedPoems((prev) => ({ ...prev, [updated.id]: updated }))
-        },
-        [refetchFromTop]
-    )
 
     async function handleEdit(poem: PoemSummaryData) {
         if (editingId && editingId !== poem.id) {
@@ -162,7 +169,18 @@ export default function PoemListing({
                 }}
                 onSaved={(updated, previous) => {
                     setDirty(false)
-                    applyUpdated(updated, previous)
+                    const orderChanged =
+                        updated.pinned !== previous.pinned ||
+                        updated.date !== previous.date
+                    setEditingId(null)
+                    if (orderChanged) {
+                        refetchFromTop()
+                        return
+                    }
+                    setItems((prev) =>
+                        prev.map((p) => (p.id === updated.id ? updated : p))
+                    )
+                    setLoadedPoems((prev) => ({ ...prev, [updated.id]: updated }))
                 }}
                 onDirtyChange={setDirty}
                 onDelete={(p) => {
@@ -175,9 +193,7 @@ export default function PoemListing({
             />
 
             <div className="mt-16 flex items-center gap-6">
-                {loading && (
-                    <span className="label-text text-muted">Loading…</span>
-                )}
+                <LoadingMessage show={loading} />
                 <ErrorMessage message={err} className="text-sm inline" />
             </div>
         </div>

@@ -21,10 +21,10 @@ export default function PoemTitle({
     const hasPinToggle = onPinChange !== undefined && pinned !== undefined
     const HeadingTag = hasPinToggle ? "h2" : "h4"
     const headingSizeClass = hasPinToggle
-        ? "poem-title-text-lg"
-        : "poem-title-text-sm"
+        ? "text-title-lg"
+        : "text-title-sm"
     const titleContent = link ? (
-        <Link href={`/poems/${id}`} className="poem-title-link">
+        <Link href={`/poems/${id}`} className="text-title-link">
             {title}
         </Link>
     ) : (
@@ -34,7 +34,7 @@ export default function PoemTitle({
     return (
         <div className="flex items-baseline justify-between gap-6">
             <div className="flex flex-1 items-baseline gap-3">
-                <HeadingTag className={`poem-title-text ${headingSizeClass}`}>
+                <HeadingTag className={`text-title ${headingSizeClass}`}>
                     {titleContent}
                 </HeadingTag>
                 {hasPinToggle && (

@@ -4,7 +4,7 @@ import { useState } from "react"
 import type { Award, PoemSummaryData } from "@/lib/types"
 import AwardEntry from "./AwardEntry"
 import AwardsSortBar, { DEFAULT_AWARD_SORT, type AwardSortState } from "./AwardsSortBar"
-import HorizontalRule from "@/components/HorizontalRule"
+// import HorizontalRule from "@/components/HorizontalRule"
 
 interface AwardWithPoem {
     poem: PoemSummaryData
@@ -32,12 +32,17 @@ function sortEntries(entries: AwardWithPoem[], sort: AwardSortState): AwardWithP
                 break
             case "medal":
                 cmp = medalRank(a.award.medal) - medalRank(b.award.medal)
+                if (cmp === 0) return b.closedMs - a.closedMs
                 break
             case "poem_title":
                 cmp = a.poem.title.localeCompare(b.poem.title)
+                if (cmp === 0)
+                    cmp = medalRank(b.award.medal) - medalRank(a.award.medal)
+                if (cmp === 0) return b.closedMs - a.closedMs
                 break
             case "contest_title":
                 cmp = (a.award.title ?? "").localeCompare(b.award.title ?? "")
+                if (cmp === 0) return b.closedMs - a.closedMs
                 break
         }
         return sort.dir === "asc" ? cmp : -cmp
@@ -62,11 +67,11 @@ export default function AwardsList({ poems }: { poems: PoemSummaryData[] }) {
 
     return (
         <section aria-label="Awards">
-            {/* <h2 className="label-text mb-4">Awards</h2> */}
+            {/* <h2 className="text-label mb-4">Awards</h2> */}
             <AwardsSortBar sort={sort} onChange={setSort} />
             {sorted.map(({ poem, award }, i) => (
                 <div key={`${poem.id}-${award.url}`}>
-                    <div className="grid grid-cols-[1fr_3fr_5fr] items-baseline gap-x-3 gap-y-1">
+                    <div className="grid grid-cols-[1fr_3fr_5fr] items-center gap-x-3 gap-y-1">
                         <AwardEntry poem={poem} award={award} />
                     </div>
                     <div className="my-5" />

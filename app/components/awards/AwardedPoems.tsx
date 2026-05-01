@@ -19,7 +19,7 @@ export default function AwardedPoems({ poems }: { poems: PoemSummaryData[] }) {
 
     return (
         <section aria-label="Award-winning poems" className="bg-paper/50">
-            <h2 className="label-text text-center">Award-Winning Poems</h2>
+            <h2 className="text-label text-center">Award-Winning Poems</h2>
             <div className="mt-3 space-y-4">
                 {sorted.map((p) => (
                     <PoemSummary

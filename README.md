@@ -46,8 +46,8 @@ Two services, one flat JSON data source:
 .
 ├── server/
 │   ├── app.py                        # FastAPI factory, CORS, lifespan load + similarity init
-│   ├── api.py                        # All routes (read, search, POST/PATCH/DELETE, similarity, cluster)
-│   ├── config.py                     # Settings: POEMS_DATABASE, .env, paths
+│   ├── api.py                        # All routes (read, search, POST/PATCH/DELETE, similarity, cluster, features vocabulary)
+│   ├── config.py                     # Settings (POEMS_DATABASE, READ_ONLY) + controlled-vocabulary constants (THEME_FEATURES, MOOD_FEATURES, POETIC_FORM_FEATURES, TECHNIQUE_FEATURES, TONE_VOICE_FEATURES)
 │   ├── repository.py                 # In-memory, file-backed PoemRepository
 │   ├── clustering/
 │   │   ├── types.py                  # ClusterRequest / Cluster / ClusterResponse Pydantic models
@@ -75,14 +75,15 @@ Two services, one flat JSON data source:
 │   │   ├── Page.tsx                  # Two-column flex wrapper (full-width, centred)
 │   │   ├── LColumn.tsx               # Left column shell: fixed lg flex-basis (62%) + inner max-w-prose
 │   │   ├── RColumn.tsx               # Right aside shell: hidden <lg, fixed lg flex-basis (38%), 106px top padding
-│   │   ├── Header.tsx                # Site header (title + "Clusters" + "Awards" links + optional "New poem" link)
+│   │   ├── Header.tsx                # Site header; Home link uses /?reset to clear all search state; Clusters/Awards links; optional New poem link in RW mode
 │   │   ├── AwardsPageClient.tsx      # Layout shell for the awards page (no client state; composes AwardsList + AwardedPoems)
 │   │   ├── ClustersPageClient.tsx    # Client owner of cluster checkbox state, fetchClusters calls, and aside switching logic
 │   │   ├── ClusteringUI.tsx          # Presentational clustered/list renderer (receives selected/loading/error/result props)
 │   │   ├── TopClusteredPoems.tsx     # Aside panel: one top-ranked poem (first in server-sorted list) per cluster
 │   │   ├── RecentPoems.tsx           # Recent poems aside: k most recent by date, rendered via PoemSummary (abridged)
 │   │   ├── HorizontalRule.tsx        # Shared rule divider; margin prop (Tailwind spacing scale integer, default 5) applied via inline style
-│   │   ├── AdvancedSearchDialog.tsx  # Native <dialog>-backed modal (title/body/project/notes/year/month/medals/tags)
+│   │   ├── AdvancedSearchDialog.tsx  # Native <dialog>-backed modal (title/body/project/notes/themes/year/month/medals); TextField local helper collapses identical text-input rows
+│   │   ├── ThemeAutocomplete.tsx     # Autocomplete-with-chips theme selector backed by /api/features/themes; used in AdvancedSearchDialog
 │   │   ├── CopyButton.tsx            # Copy-to-clipboard icon button; variant="outline"|"filled" selects icon set
 │   │   ├── PinToggle.tsx             # Server-confirmed pin/unpin
 │   │   ├── ErrorMessage.tsx
@@ -97,7 +98,7 @@ Two services, one flat JSON data source:
 │   │   │   ├── ClusterLabel.tsx      # Per-cluster heading and poem count
 │   │   │   └── ClusterFeatures.tsx   # Per-cluster feature chips/labels
 │   │   └── poem/
-│   │       ├── PoemListing.tsx       # Client: fetch, search/sort controls, row edit/delete (full poem fetched on edit)
+│   │       ├── PoemListing.tsx       # Client: fetch, search/sort controls, row edit/delete; useSearchParams drives theme navigation (same-page URL changes → chips → refetch); /?reset clears all state
 │   │       ├── PoemList.tsx          # Shared list renderer (<ol> of PoemRow); accepts PoemSummaryData[], loadedPoems map
 │   │       ├── PoemRow.tsx           # Single poem row: PoemSummary + PoemBody toggle + edit/delete buttons
 │   │       ├── PoemSummary.tsx       # Shared list item: title + stats + project + features; showAwards prop adds medal tooltip row
@@ -109,30 +110,30 @@ Two services, one flat JSON data source:
 │   │       ├── PoemProject.tsx       # Italic project statement, null-safe, optional two-line clamp
 │   │       ├── PoemAuthor.tsx        # pen_name + (full_name) span
 │   │       ├── PoemAwards.tsx        # List of awards; each row: medal icon · medal label · optional truncated award link
-│   │       ├── PoemFeatures.tsx      # Sorted, deduplicated tag values joined by " · "
+│   │       ├── PoemFeatures.tsx      # Sorted, deduplicated tag values joined by " · "; strings starting with /?  rendered as Next.js Links (enables theme navigation)
 │   │       ├── PoemGroup.tsx         # Metadata group label span (eyebrow style)
 │   │       ├── PoemNotes.tsx         # Unordered list of per-poem notes
 │   │       ├── PoemSocial.tsx        # Social URL rendered as hostname link
 │   │       ├── PoemEditor.tsx        # Inline editor; receives full Poem loaded on demand
 │   │       ├── PoemDetail.tsx        # Reading view + Edit toggle
 │   │       ├── PoemCreateForm.tsx    # Dedicated POST form with defaults + guards
-│   │       ├── PoemMetadataEditor.tsx# Shared rating/date/url grid + all six TagInput fields
+│   │       ├── FeaturesEditor.tsx    # Multi-select for controlled-vocabulary groups (themes/moods/poetic_forms/techniques/tones_voices); fetches options from /api/features/{group}
+│   │       ├── PoemMetadataEditor.tsx# Shared rating/date/url grid; FeaturesEditor for the five controlled-vocab fields; FeatureInput for free-text fields (key_images, contest_fit, socials)
 │   │       ├── SimilarPoems.tsx      # Similar poems aside: all 5 axes (overall/theme/form/emotion/imagery) grouped
-│   │       └── PoemBody.tsx          # Toggle show/hide; fetches body lazily by poemId on first open
+│   │       └── PoemBody.tsx          # Toggle show/hide; showBody prop auto-fetches and expands on mount
 │   └── lib/
-│       ├── api.ts                    # Typed fetch wrappers (fetchPoems, fetchPoem, fetchRecentPoems, fetchAwardedPoems, fetchClusters)
+│       ├── api.ts                    # Typed fetch wrappers (fetchPoems, fetchPoem, fetchRecentPoems, fetchAwardedPoems, fetchClusters, fetchFeatures)
 │       ├── cluster.ts                # Cluster feature/group label helpers for cluster UI rendering
-│       ├── types.ts                  # PoemSummaryData / Poem / Award / ClusterPoem / SearchState / SimilarityBundle / ClusterResponse / …
+│       ├── types.ts                  # PoemSummaryData / ClusterPoem / Poem type hierarchy; Award / SearchState / SimilarityBundle / ClusterResponse / …
 │       ├── editable.ts               # Canonical editable-field contract
-│       └── format.ts                 # body ↔ plaintext, date formatting, cleanPoetryUrl, poemToMarkdown(id, full)
+│       └── format.ts                 # body ↔ plaintext, date formatting, cleanPoetryUrl, poemToMarkdown, medalColor
 ├── database/
 │   ├── Poems.json                    # Canonical collection
 │   ├── <Title>.json                  # Per-poem mirror files (reference only)
 │   └── schemas/
 │       ├── poem.schema.json          # JSON Schema (Draft 2020-12)
-│       ├── poem.py                   # Pydantic Poem / Award / Author
-│       ├── similarity.py             # Re-exports similarity response types for API use
-│       └── poem.py                   # Pydantic PoemSummaryData / Poem / Award / Author
+│       ├── poem.py                   # Pydantic PoemSummaryData / Poem / Award / Author
+│       └── similarity.py             # Re-exports similarity response types for API use
 ├── Dockerfile                        # Combined multi-stage image (Node 22 + Python 3.11, Debian bookworm-slim, no CMD)
 └── docker-compose.yml                # Orchestrates backend + frontend
 ```
@@ -206,7 +207,7 @@ read or write them.
 - **`poem.py`** — Pydantic models (`PoemSummaryData`, `Poem`, `Award`, `Author`).
   `PoemSummaryData` is the base class containing the fields returned by the list
   endpoints (`id`, `title`, `project`, `rating`, `lines`, `words`, `date`,
-  `awards`, `pinned`). `Poem` extends it with the full field set. Used at runtime
+  `awards`, `pinned`, `themes`). `Poem` extends it with the full field set. Used at runtime
   for load-time validation, PATCH-merge validation, and response shaping. Applies
   the documented defaults (`pinned=false`, `socials=[]`, `notes=[]`, `author=null`)
   when optional fields are absent.
@@ -351,6 +352,26 @@ The listing page applies a second, client-side sort layer on top of the server's
 
 One button is always active (Date descending by default). Clicking the active button toggles direction; clicking an inactive button selects it at its default direction. The sort is re-applied automatically whenever the search state changes and a fresh set of items is fetched.
 
+## CSS typography system
+
+All typographic styles are defined in `app/globals.css` under `@layer components` as a flat `text-*` namespace. Layout is always inline Tailwind; `globals.css` is for typography only.
+
+| Class | Role | Key properties |
+| ----- | ---- | -------------- |
+| `text-display` | Site-level h1 | `font-display`, `text-3xl`, `leading-none`, `tracking-tight` |
+| `text-title` | Poem/section titles | `font-display`, `leading-snug`, `tracking-tight` |
+| `text-title-lg` / `text-title-sm` | Size modifiers, applied alongside `text-title` | `text-xl` / `text-base` |
+| `text-title-link` | Link variant of a title | `text-ink`, `no-underline`, `hover:text-accent` |
+| `text-label` | Small all-caps sans label | `font-sans`, `0.76 rem`, `uppercase`, `tracking-wider2`, `text-muted` |
+| `text-meta` | Small sans secondary text | `font-sans`, `0.78 rem`, `text-ink/80` |
+| `text-entry` | Slightly larger sans for data rows | `font-sans`, `0.9 rem`, `text-ink/80` |
+| `text-project` | Italic serif project statement | `font-serif`, `italic`, `leading-normal`, `text-ink/90` |
+| `text-cluster-heading` | Cluster section headings | `font-serif`, `semibold`, `uppercase`, `leading-tight` |
+| `text-body` | Poem body prose | `font-serif`, `text-lg`, `leading-tight` |
+| `text-body-poem` | Rendering layer on top of `text-body` | `whitespace-pre-wrap`, no hyphens, oldstyle numerals; link styles |
+
+Button classes (`button-primary`, `button-sort`, `button-text*`) are also in `globals.css` but carry layout (border, padding, transition) in addition to typography. They are kept as a distinct group pending a separate refactor.
+
 ## The search system
 
 Two endpoints, intentionally distinct.
@@ -364,24 +385,31 @@ endpoint's tag and numeric filters (`themes=…`, `min_rating=…`, etc.).
 
 ### Advanced field search — `GET /api/poems/search`
 
-Field-specific matching with **OR across populated fields**. A poem
-matches if it satisfies **any** populated field. Empty advanced query
-returns empty (use the simple listing to browse everything).
+Field-specific matching. If `q` is supplied it is applied first as the
+same free-text pre-filter used by `GET /api/poems`. The remaining
+filters combine as follows:
 
-If `q` is also supplied, it is applied first as the same free-text
-match used by `GET /api/poems`, so advanced search can further narrow
-an already filtered collection.
+- **`themes`** — AND pre-filter: every supplied theme must be present on
+  the poem. Applied before OR matching. If themes are the only populated
+  field, all theme-matching poems are returned directly.
+- **`title`, `body`, `project`, `notes`** — OR across fields;
+  case-insensitive substring.
+- **Other tag fields** (`moods`, `poetic_forms`, `techniques`,
+  `tones_voices`, `key_images`, `contest_fit`) — OR across fields;
+  case-insensitive exact-entry equality.
+- **`year` + `month`** — AND with each other (both must match when both
+  are supplied); count together as one OR condition against other fields.
+- **Rating band** (`min_rating` + `max_rating`) — AND with each other;
+  one OR condition against other fields.
+- **`medals`** — OR within field. `None` matches poems with an empty
+  `awards` array.
 
-Populated fields: `title`, `body`, `project`, `notes`
-(all case-insensitive substring); tag arrays
-(OR within field, case-insensitive exact-entry equality); `year`,
-`month` (integer equality on `date`); rating band (`min_rating` +
-`max_rating` together = one populated field); `medals`.
+If no fields other than `themes` are populated, OR matching is skipped.
+An entirely empty query (no fields, no `q`) returns empty — use
+`GET /api/poems` to browse everything.
 
 `medals` values: `Gold`, `Silver`, `Bronze`, `Honorable Mention`,
-`None`. `None` matches poems whose `awards` array is empty; selecting
-multiple medals is OR (e.g. `medals=Gold&medals=None`). Unknown medals
-→ 422.
+`None`. Unknown medals → 422.
 
 Both endpoints return the same `PoemSummaryDataList` wrapper (`{ items: PoemSummaryData[] }`)
 and apply the same ordering. Items contain summary fields only (`id`, `title`, `project`,
@@ -710,6 +738,28 @@ and `closed` fields. Works in read-only mode.
 
 Response: `PoemSummaryDataList` — `{ items: PoemSummaryData[] }`.
 
+## Features vocabulary endpoint
+
+`GET /api/features/{group}`
+
+Returns the controlled vocabulary for a tag group as `string[]`. Used
+by `FeaturesEditor` to populate its multi-select options.
+
+| `group` | Config constant | Field on `Poem` |
+| ------- | --------------- | --------------- |
+| `themes` | `THEME_FEATURES` | `themes` |
+| `moods` | `MOOD_FEATURES` | `moods` |
+| `poetic_forms` | `POETIC_FORM_FEATURES` | `poetic_forms` |
+| `techniques` | `TECHNIQUE_FEATURES` | `techniques` |
+| `tones_voices` | `TONE_VOICE_FEATURES` | `tones_voices` |
+
+Unknown groups return `404` with a detail message listing the valid names.
+Group names are case-sensitive. Works in read-only mode.
+
+The vocabularies are defined in `server/config.py`. `THEME_FEATURES` is
+derived automatically (sorted, deduplicated) from the `THEMES` group-map;
+the others are explicit ordered lists.
+
 ## Ordering
 
 Authoritative ordering (applied by both list endpoints before returning):
@@ -823,6 +873,10 @@ Test files:
   excluded Poem fields, read-only mode, ranking), all five single-axis
   endpoints, and mutation → rebuild integration (POST/PATCH/DELETE each
   reflected in subsequent similarity queries).
+- `tests/server/test_features_api.py` — `GET /api/features/{group}`: 200 for all five groups,
+  `list[str]` shape, non-empty, exact match against config constants, themes sorted and
+  deduplicated, no empty strings; 404 for unknown group with detail naming allowed groups;
+  case-sensitivity (Themes/MOODS/Poetic_Forms all 404); trailing-slash behaviour.
 - `tests/server/test_clustering.py` — engine unit tests (matrix shape,
   L2 normalisation, auto-k range, lift ranking, majority label, poem
   ordering) and API tests (200 response, response shape including new

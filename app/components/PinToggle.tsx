@@ -45,7 +45,7 @@ export default function PinToggle({
             disabled={pending}
             aria-pressed={pinned}
             title={pinned ? "Unpin" : "Pin to top"}
-            className={`button-text button-text-standard${
+            className={`button-text button-text-standard ${
                 pending ? "button-text-disabled" : ""
             } ${
                 pinned

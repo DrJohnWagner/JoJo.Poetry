@@ -12,7 +12,7 @@ export default function PoemNotesEditor({
 }) {
     return (
         <label className="block">
-            <span className="label-text">Author's Notes</span>
+            <span className="text-label">Author's Notes</span>
             <textarea
                 value={value}
                 onChange={(e) => onChange(e.target.value)}

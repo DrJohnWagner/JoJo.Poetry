@@ -1,8 +1,9 @@
 "use client"
 
-import { Fragment, useState, type ReactNode } from "react"
+import { Fragment, useEffect, useState, type ReactNode } from "react"
 import { fetchPoem } from "@/lib/api"
 import ErrorMessage from "../ErrorMessage"
+import LoadingMessage from "../LoadingMessage"
 
 function renderInline(line: string, lineIndex: number): ReactNode[] {
     const nodes: ReactNode[] = []
@@ -63,10 +64,16 @@ function renderBody(body: string): ReactNode[] {
     ))
 }
 
-export default function PoemBody({ poemId }: { poemId: string }) {
-    const [open, setOpen] = useState(false)
+export default function PoemBody({
+    poemId,
+    showBody = false,
+}: {
+    poemId: string
+    showBody?: boolean
+}) {
+    const [open, setOpen] = useState(showBody)
     const [body, setBody] = useState<string | null>(null)
-    const [loading, setLoading] = useState(false)
+    const [loading, setLoading] = useState(showBody)
     const [error, setError] = useState<string | null>(null)
 
     async function handleOpen() {
@@ -84,21 +91,29 @@ export default function PoemBody({ poemId }: { poemId: string }) {
         }
     }
 
+    useEffect(() => {
+        if (!showBody) return
+        fetchPoem(poemId)
+            .then((poem) => setBody(poem.body))
+            .catch((e: unknown) =>
+                setError(e instanceof Error ? e.message : "Failed to load poem")
+            )
+            .finally(() => setLoading(false))
+    }, [poemId, showBody])
+
     return (
         <div className="my-3">
             <button
                 onClick={() => (open ? setOpen(false) : void handleOpen())}
-                className="label-text hover:text-ink"
+                className="text-label hover:text-ink"
             >
                 {open ? "Hide poem" : "Show poem"}
             </button>
-            {open && loading && (
-                <p className="label-text mt-3 text-muted">Loading…</p>
-            )}
-            {open && <ErrorMessage message={error} />}
+            <LoadingMessage show={open && loading} className="mt-3" />
+            <ErrorMessage message={error} show={open} />
             {open && body !== null && (
-                <div className="mt-4">
-                    <div className="poem-body">{renderBody(body)}</div>
+                <div className="mt-4 text-body text-body-poem">
+                    {renderBody(body)}
                 </div>
             )}
         </div>

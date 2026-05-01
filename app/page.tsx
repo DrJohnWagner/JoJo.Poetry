@@ -1,3 +1,4 @@
+import { Suspense } from "react"
 import Page from "@/components/Page"
 import LColumn from "@/components/LColumn"
 import RColumn from "@/components/RColumn"
@@ -10,7 +11,7 @@ export const dynamic = "force-dynamic"
 
 export default async function Home() {
     const [initial, recent] = await Promise.all([
-        fetchPoems({ q: "", year: null, month: null, medals: [], title: "", body: "", project: "", notes: "" }),
+        fetchPoems({ q: "", themes: [], year: null, month: null, medals: [], title: "", body: "", project: "", notes: "" }),
         fetchRecentPoems(12),
     ])
 
@@ -18,7 +19,9 @@ export default async function Home() {
         <Page>
             <LColumn>
                 <Header />
-                <PoemListing initial={initial.items} />
+                <Suspense>
+                    <PoemListing initial={initial.items} />
+                </Suspense>
             </LColumn>
             <RColumn>
                 <RecentPoems recent={recent} />

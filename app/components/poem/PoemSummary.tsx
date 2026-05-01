@@ -12,6 +12,7 @@ export default function PoemSummary({
     variant = "complete",
     pinned,
     onPinChange,
+    clampProject = true,
     showAwards = false,
 }: {
     poem: PoemSummaryData
@@ -19,6 +20,7 @@ export default function PoemSummary({
     variant?: Variant
     pinned?: boolean
     onPinChange?: (pinned: boolean) => void
+    clampProject?: boolean
     showAwards?: boolean
 }) {
     return (
@@ -30,8 +32,16 @@ export default function PoemSummary({
                 onPinChange={onPinChange}
             />
             <PoemStatistics poem={poem} variant={variant} />
-            <PoemProject project={poem.project} clamp />
-            <PoemFeatures features={features} />
+            <PoemProject project={poem.project} clamp={clampProject} />
+            <PoemFeatures
+                features={
+                    features ??
+                    poem.themes.map(
+                        (t) => `/?themes=${encodeURIComponent(t)}`
+                    )
+                }
+                className="mt-2"
+            />
             {showAwards && poem.awards.length > 0 && (
                 <div className="mt-1 flex flex-row gap-1">
                     {[...poem.awards]

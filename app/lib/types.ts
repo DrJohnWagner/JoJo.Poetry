@@ -22,27 +22,26 @@ export interface PoemSummaryData {
     date: string
     awards: Award[]
     pinned: boolean
+    themes: string[]
 }
 
 export interface ClusterPoem extends PoemSummaryData {
-    themes: string[]
     moods: string[]
     poetic_forms: string[]
     techniques: string[]
     tones_voices: string[]
 }
 
-export interface Poem extends PoemSummaryData {
+export interface Poem extends ClusterPoem {
     author?: Author
     url: string
     body: string
     notes: string[]
     socials: string[]
-    themes: string[]
-    moods: string[]
-    poetic_forms: string[]
-    techniques: string[]
-    tones_voices: string[]
+    // moods: string[]
+    // poetic_forms: string[]
+    // techniques: string[]
+    // tones_voices: string[]
     contest_fit: string[]
     key_images: string[]
 }
@@ -54,6 +53,7 @@ export interface PoemSummaryDataList {
 /** Filters that drive BOTH the simple and the advanced search calls. */
 export interface SearchState {
     q: string
+    themes: string[]
     year: number | null
     month: number | null
     medals: string[] // Gold | Silver | Bronze | Honorable Mention | None
@@ -73,6 +73,7 @@ export const MEDALS = [
 
 export function hasAdvanced(s: SearchState): boolean {
     return (
+        s.themes.length > 0 ||
         s.year !== null ||
         s.month !== null ||
         s.medals.length > 0 ||

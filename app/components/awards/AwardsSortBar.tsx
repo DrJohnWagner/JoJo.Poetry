@@ -27,7 +27,7 @@ export default function AwardsSortBar({
 }) {
     return (
         <div className="mb-6">
-            <p className="label-text mb-3 text-muted">Sort</p>
+            <p className="text-label mb-3">Sort</p>
             <div className="flex flex-wrap gap-x-5 gap-y-1">
                 {FIELDS.map(({ field, label, defaultDir }) => {
                     const active = sort.field === field

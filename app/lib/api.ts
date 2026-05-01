@@ -40,12 +40,14 @@ async function req<T>(path: string, init?: RequestInit): Promise<T> {
 function buildListQuery(s: SearchState): string {
     const p = new URLSearchParams()
     if (s.q.trim()) p.set("q", s.q.trim())
+    for (const t of s.themes) p.append("themes", t)
     return p.toString()
 }
 
 function buildAdvancedQuery(s: SearchState): string {
     const p = new URLSearchParams()
     if (s.q.trim()) p.set("q", s.q.trim())
+    for (const t of s.themes) p.append("themes", t)
     if (s.year !== null) p.set("year", String(s.year))
     if (s.month !== null) p.set("month", String(s.month))
     for (const a of s.medals) p.append("medals", a)
@@ -100,6 +102,16 @@ export function fetchSimilarPoems(id: string): Promise<SimilarityBundle> {
 
 export function fetchAwardedPoems(): Promise<PoemSummaryDataList> {
     return req<PoemSummaryDataList>("/api/poems/awards")
+}
+
+export function fetchAuthor(): Promise<{ pen_name: string; full_name: string }> {
+    return req<{ pen_name: string; full_name: string }>("/api/author", {
+        cache: "force-cache",
+    })
+}
+
+export function fetchFeatures(group: string): Promise<string[]> {
+    return req<string[]>(`/api/features/${encodeURIComponent(group)}`)
 }
 
 export function fetchClusters(categories: string[]): Promise<ClusterResponse> {

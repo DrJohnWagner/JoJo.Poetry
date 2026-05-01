@@ -13,7 +13,7 @@ export default function PoemStatistics({
     const awardCount = poem.awards.length
     const complete = variant === "complete"
     return (
-        <div className="poem-statistics-text mt-1 flex flex-wrap gap-x-1 gap-y-1">
+        <div className="text-label mt-1 flex flex-wrap gap-x-1 gap-y-1">
             {complete && (
                 <>
                     <span>{formatDate(poem.date)}</span>
