@@ -18,7 +18,7 @@ export default function PoemTitle({
     pinned?: boolean
     onPinChange?: (pinned: boolean) => void
 }) {
-    const hasPinToggle = onPinChange !== undefined && pinned !== undefined
+    const hasPinToggle = onPinChange !== undefined
     const HeadingTag = hasPinToggle ? "h2" : "h4"
     const headingSizeClass = hasPinToggle
         ? "text-title-lg"

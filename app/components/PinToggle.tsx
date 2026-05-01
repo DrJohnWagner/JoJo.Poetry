@@ -1,18 +1,22 @@
 "use client"
 
-import { useState } from "react"
-import { setPin } from "@/lib/pins"
+import { useEffect, useState } from "react"
+import { isPinned, setPin } from "@/lib/pins"
 
 export default function PinToggle({
     id,
-    initialPinned,
+    initialPinned = false,
     onChange,
 }: {
     id: string
-    initialPinned: boolean
+    initialPinned?: boolean
     onChange?: (next: boolean) => void
 }) {
     const [pinned, setPinned] = useState(initialPinned)
+
+    useEffect(() => {
+        setPinned(isPinned(id))
+    }, [id])
 
     function toggle() {
         const next = !pinned
