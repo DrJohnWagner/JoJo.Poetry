@@ -112,7 +112,7 @@ export default function PoemDetail({ poem: initial }: { poem: Poem }) {
                         </dd>
                     </>
                 )}
-                <MetaRow group="Themes" features={themes} />
+                <MetaRow group="Themes" features={themes.map((t) => `/?themes=${encodeURIComponent(t)}`)} />
                 <MetaRow group="Moods" features={moods} />
                 <MetaRow group="Poetic forms" features={poetic_forms} />
                 <MetaRow group="Techniques" features={techniques} />

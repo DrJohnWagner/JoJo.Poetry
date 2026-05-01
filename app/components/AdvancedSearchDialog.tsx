@@ -20,6 +20,34 @@ const MONTHS = [
     "December",
 ]
 
+const inputCls =
+    "mt-1 w-full border-b border-rule bg-transparent py-1 font-serif outline-none focus:border-accent"
+
+function TextField({
+    label,
+    value,
+    onChange,
+    placeholder = "Substring match…",
+}: {
+    label: string
+    value: string
+    onChange: (v: string) => void
+    placeholder?: string
+}) {
+    return (
+        <label className="col-span-2 block">
+            <span className="text-label">{label}</span>
+            <input
+                type="text"
+                value={value}
+                onChange={(e) => onChange(e.target.value)}
+                placeholder={placeholder}
+                className={inputCls}
+            />
+        </label>
+    )
+}
+
 /** Accessible modal built on the native <dialog> element. */
 export default function AdvancedSearchDialog({
     open,
@@ -91,54 +119,26 @@ export default function AdvancedSearchDialog({
                 </header>
 
                 <div className="grid grid-cols-2 gap-x-6 gap-y-5">
-                    <label className="col-span-2 block">
-                        <span className="text-label">Title</span>
-                        <input
-                            type="text"
-                            value={value.title}
-                            onChange={(e) =>
-                                onChange({ ...value, title: e.target.value })
-                            }
-                            placeholder="Substring match…"
-                            className="mt-1 w-full border-b border-rule bg-transparent py-1 font-serif outline-none focus:border-accent"
-                        />
-                    </label>
-                    <label className="col-span-2 block">
-                        <span className="text-label">Body</span>
-                        <input
-                            type="text"
-                            value={value.body}
-                            onChange={(e) =>
-                                onChange({ ...value, body: e.target.value })
-                            }
-                            placeholder="Substring match…"
-                            className="mt-1 w-full border-b border-rule bg-transparent py-1 font-serif outline-none focus:border-accent"
-                        />
-                    </label>
-                    <label className="col-span-2 block">
-                        <span className="text-label">Project</span>
-                        <input
-                            type="text"
-                            value={value.project}
-                            onChange={(e) =>
-                                onChange({ ...value, project: e.target.value })
-                            }
-                            placeholder="Substring match…"
-                            className="mt-1 w-full border-b border-rule bg-transparent py-1 font-serif outline-none focus:border-accent"
-                        />
-                    </label>
-                    <label className="col-span-2 block">
-                        <span className="text-label">Author&#39;s Notes</span>
-                        <input
-                            type="text"
-                            value={value.notes}
-                            onChange={(e) =>
-                                onChange({ ...value, notes: e.target.value })
-                            }
-                            placeholder="Substring match…"
-                            className="mt-1 w-full border-b border-rule bg-transparent py-1 font-serif outline-none focus:border-accent"
-                        />
-                    </label>
+                    <TextField
+                        label="Title"
+                        value={value.title}
+                        onChange={(v) => onChange({ ...value, title: v })}
+                    />
+                    <TextField
+                        label="Body"
+                        value={value.body}
+                        onChange={(v) => onChange({ ...value, body: v })}
+                    />
+                    <TextField
+                        label="Project"
+                        value={value.project}
+                        onChange={(v) => onChange({ ...value, project: v })}
+                    />
+                    <TextField
+                        label="Author's Notes"
+                        value={value.notes}
+                        onChange={(v) => onChange({ ...value, notes: v })}
+                    />
 
                     <fieldset className="col-span-2">
                         <legend className="text-label">Themes</legend>
@@ -147,7 +147,9 @@ export default function AdvancedSearchDialog({
                         </p>
                         <ThemeAutocomplete
                             value={value.themes}
-                            onChange={(themes) => onChange({ ...value, themes })}
+                            onChange={(themes) =>
+                                onChange({ ...value, themes })
+                            }
                         />
                     </fieldset>
 
@@ -167,7 +169,7 @@ export default function AdvancedSearchDialog({
                                             : Number(e.target.value),
                                 })
                             }
-                            className="mt-1 w-full border-b border-rule bg-transparent py-1 font-serif outline-none focus:border-accent"
+                            className={inputCls}
                         />
                     </label>
                     <label className="block">
@@ -183,7 +185,7 @@ export default function AdvancedSearchDialog({
                                             : Number(e.target.value),
                                 })
                             }
-                            className="mt-1 w-full border-b border-rule bg-transparent py-1 font-serif outline-none focus:border-accent"
+                            className={inputCls}
                         >
                             <option value="">Any</option>
                             {MONTHS.slice(1).map((m, i) => (
@@ -217,19 +219,6 @@ export default function AdvancedSearchDialog({
                         </div>
                     </fieldset>
                 </div>
-
-                {/* <footer className="text-label mt-8 flex items-center justify-end gap-6">
-                    <button
-                        type="button"
-                        onClick={onClear}
-                        className="text-muted hover:text-ink"
-                    >
-                        clear
-                    </button>
-                    <button type="submit" className="text-accent">
-                        apply
-                    </button>
-                </footer> */}
             </form>
         </dialog>
     )

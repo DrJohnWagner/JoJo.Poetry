@@ -61,6 +61,12 @@ export default function PoemListing({
         const raw = searchParams.toString()
         if (raw === lastProcessedParams.current) return
         lastProcessedParams.current = raw
+        if (searchParams.has("reset")) {
+            setSearch(EMPTY)
+            lastProcessedParams.current = ""
+            window.history.replaceState(null, "", "/")
+            return
+        }
         const themes = searchParams.getAll("themes")
         setSearch((prev) => {
             if (themes.join(",") === prev.themes.join(",")) return prev

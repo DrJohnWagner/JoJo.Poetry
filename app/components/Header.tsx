@@ -17,7 +17,7 @@ export default function Header() {
                 <p className="text-label mt-2">Collected poems</p>
             </Link>
             <div className="flex items-end gap-5">
-                <Link href="/" className="button-primary hover:no-underline">
+                <Link href="/?reset" className="button-primary hover:no-underline">
                     Home
                 </Link>
                 <Link

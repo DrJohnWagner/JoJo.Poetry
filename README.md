@@ -75,14 +75,15 @@ Two services, one flat JSON data source:
 │   │   ├── Page.tsx                  # Two-column flex wrapper (full-width, centred)
 │   │   ├── LColumn.tsx               # Left column shell: fixed lg flex-basis (62%) + inner max-w-prose
 │   │   ├── RColumn.tsx               # Right aside shell: hidden <lg, fixed lg flex-basis (38%), 106px top padding
-│   │   ├── Header.tsx                # Site header (title + "Clusters" + "Awards" links + optional "New poem" link)
+│   │   ├── Header.tsx                # Site header; Home link uses /?reset to clear all search state; Clusters/Awards links; optional New poem link in RW mode
 │   │   ├── AwardsPageClient.tsx      # Layout shell for the awards page (no client state; composes AwardsList + AwardedPoems)
 │   │   ├── ClustersPageClient.tsx    # Client owner of cluster checkbox state, fetchClusters calls, and aside switching logic
 │   │   ├── ClusteringUI.tsx          # Presentational clustered/list renderer (receives selected/loading/error/result props)
 │   │   ├── TopClusteredPoems.tsx     # Aside panel: one top-ranked poem (first in server-sorted list) per cluster
 │   │   ├── RecentPoems.tsx           # Recent poems aside: k most recent by date, rendered via PoemSummary (abridged)
 │   │   ├── HorizontalRule.tsx        # Shared rule divider; margin prop (Tailwind spacing scale integer, default 5) applied via inline style
-│   │   ├── AdvancedSearchDialog.tsx  # Native <dialog>-backed modal (title/body/project/notes/year/month/medals/tags)
+│   │   ├── AdvancedSearchDialog.tsx  # Native <dialog>-backed modal (title/body/project/notes/themes/year/month/medals); TextField local helper collapses identical text-input rows
+│   │   ├── ThemeAutocomplete.tsx     # Autocomplete-with-chips theme selector backed by /api/features/themes; used in AdvancedSearchDialog
 │   │   ├── CopyButton.tsx            # Copy-to-clipboard icon button; variant="outline"|"filled" selects icon set
 │   │   ├── PinToggle.tsx             # Server-confirmed pin/unpin
 │   │   ├── ErrorMessage.tsx
@@ -97,7 +98,7 @@ Two services, one flat JSON data source:
 │   │   │   ├── ClusterLabel.tsx      # Per-cluster heading and poem count
 │   │   │   └── ClusterFeatures.tsx   # Per-cluster feature chips/labels
 │   │   └── poem/
-│   │       ├── PoemListing.tsx       # Client: fetch, search/sort controls, row edit/delete (full poem fetched on edit)
+│   │       ├── PoemListing.tsx       # Client: fetch, search/sort controls, row edit/delete; useSearchParams drives theme navigation (same-page URL changes → chips → refetch); /?reset clears all state
 │   │       ├── PoemList.tsx          # Shared list renderer (<ol> of PoemRow); accepts PoemSummaryData[], loadedPoems map
 │   │       ├── PoemRow.tsx           # Single poem row: PoemSummary + PoemBody toggle + edit/delete buttons
 │   │       ├── PoemSummary.tsx       # Shared list item: title + stats + project + features; showAwards prop adds medal tooltip row
@@ -109,7 +110,7 @@ Two services, one flat JSON data source:
 │   │       ├── PoemProject.tsx       # Italic project statement, null-safe, optional two-line clamp
 │   │       ├── PoemAuthor.tsx        # pen_name + (full_name) span
 │   │       ├── PoemAwards.tsx        # List of awards; each row: medal icon · medal label · optional truncated award link
-│   │       ├── PoemFeatures.tsx      # Sorted, deduplicated tag values joined by " · "
+│   │       ├── PoemFeatures.tsx      # Sorted, deduplicated tag values joined by " · "; strings starting with /?  rendered as Next.js Links (enables theme navigation)
 │   │       ├── PoemGroup.tsx         # Metadata group label span (eyebrow style)
 │   │       ├── PoemNotes.tsx         # Unordered list of per-poem notes
 │   │       ├── PoemSocial.tsx        # Social URL rendered as hostname link
@@ -206,7 +207,7 @@ read or write them.
 - **`poem.py`** — Pydantic models (`PoemSummaryData`, `Poem`, `Award`, `Author`).
   `PoemSummaryData` is the base class containing the fields returned by the list
   endpoints (`id`, `title`, `project`, `rating`, `lines`, `words`, `date`,
-  `awards`, `pinned`). `Poem` extends it with the full field set. Used at runtime
+  `awards`, `pinned`, `themes`). `Poem` extends it with the full field set. Used at runtime
   for load-time validation, PATCH-merge validation, and response shaping. Applies
   the documented defaults (`pinned=false`, `socials=[]`, `notes=[]`, `author=null`)
   when optional fields are absent.
@@ -384,24 +385,31 @@ endpoint's tag and numeric filters (`themes=…`, `min_rating=…`, etc.).
 
 ### Advanced field search — `GET /api/poems/search`
 
-Field-specific matching with **OR across populated fields**. A poem
-matches if it satisfies **any** populated field. Empty advanced query
-returns empty (use the simple listing to browse everything).
+Field-specific matching. If `q` is supplied it is applied first as the
+same free-text pre-filter used by `GET /api/poems`. The remaining
+filters combine as follows:
 
-If `q` is also supplied, it is applied first as the same free-text
-match used by `GET /api/poems`, so advanced search can further narrow
-an already filtered collection.
+- **`themes`** — AND pre-filter: every supplied theme must be present on
+  the poem. Applied before OR matching. If themes are the only populated
+  field, all theme-matching poems are returned directly.
+- **`title`, `body`, `project`, `notes`** — OR across fields;
+  case-insensitive substring.
+- **Other tag fields** (`moods`, `poetic_forms`, `techniques`,
+  `tones_voices`, `key_images`, `contest_fit`) — OR across fields;
+  case-insensitive exact-entry equality.
+- **`year` + `month`** — AND with each other (both must match when both
+  are supplied); count together as one OR condition against other fields.
+- **Rating band** (`min_rating` + `max_rating`) — AND with each other;
+  one OR condition against other fields.
+- **`medals`** — OR within field. `None` matches poems with an empty
+  `awards` array.
 
-Populated fields: `title`, `body`, `project`, `notes`
-(all case-insensitive substring); tag arrays
-(OR within field, case-insensitive exact-entry equality); `year`,
-`month` (integer equality on `date`); rating band (`min_rating` +
-`max_rating` together = one populated field); `medals`.
+If no fields other than `themes` are populated, OR matching is skipped.
+An entirely empty query (no fields, no `q`) returns empty — use
+`GET /api/poems` to browse everything.
 
 `medals` values: `Gold`, `Silver`, `Bronze`, `Honorable Mention`,
-`None`. `None` matches poems whose `awards` array is empty; selecting
-multiple medals is OR (e.g. `medals=Gold&medals=None`). Unknown medals
-→ 422.
+`None`. Unknown medals → 422.
 
 Both endpoints return the same `PoemSummaryDataList` wrapper (`{ items: PoemSummaryData[] }`)
 and apply the same ordering. Items contain summary fields only (`id`, `title`, `project`,
