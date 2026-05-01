@@ -1,7 +1,6 @@
 import { toLabel } from "@/lib/format"
 import type { ClusterGroup } from "@/lib/cluster"
 
-// Missing: "poetic_forms",
 export const CLUSTER_GROUPS = [
     "themes",
     "moods",

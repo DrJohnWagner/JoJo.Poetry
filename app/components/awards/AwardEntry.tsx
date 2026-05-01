@@ -35,11 +35,6 @@ export default function AwardEntry({
             <Link href={`/poems/${poem.id}`} className="text-entry">
                 {poem.title}
             </Link>
-            {/* <h3 className="self-center">
-                <Link href={`/poems/${poem.id}`} className="text-entry">
-                    {poem.title}
-                </Link>
-            </h3> */}
             {award.title ? (
                 <a
                     href={award.url}
@@ -49,9 +44,7 @@ export default function AwardEntry({
                 >
                     {award.title} ↗
                 </a>
-            ) : (
-                <span />
-            )}
+            ) : null}
         </>
     )
 }

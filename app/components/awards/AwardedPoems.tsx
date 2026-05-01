@@ -1,12 +1,6 @@
 import type { PoemSummaryData } from "@/lib/types"
 import PoemSummary from "@/components/poem/PoemSummary"
-
-const MEDAL_SCORE: Record<string, number> = {
-    "Gold": 4,
-    "Silver": 3,
-    "Bronze": 2,
-    "Honorable Mention": 1,
-}
+import { MEDAL_SCORE } from "@/lib/format"
 
 function awardScore(poem: PoemSummaryData): number {
     return poem.awards.reduce((sum, a) => sum + (MEDAL_SCORE[a.medal] ?? 0), 0)
