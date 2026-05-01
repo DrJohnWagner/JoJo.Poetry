@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { useSearchParams } from "next/navigation"
 import { deletePoem, fetchPoem, fetchPoems } from "@/lib/api"
+import { getPins } from "@/lib/pins"
 import type { Poem, PoemSummaryData, SearchState } from "@/lib/types"
 import SearchBar from "./PoemSearchBar"
 import SortBar, { DEFAULT_SORT, type SortState } from "./PoemSortBar"
@@ -36,6 +37,11 @@ export default function PoemListing({
     const [editingId, setEditingId] = useState<string | null>(null)
     const [dirty, setDirty] = useState(false)
     const [loadedPoems, setLoadedPoems] = useState<Record<string, Poem>>({})
+    const [localPins, setLocalPins] = useState<Set<string>>(new Set())
+
+    useEffect(() => {
+        setLocalPins(getPins())
+    }, [])
 
     function confirmDiscard(reason: string): boolean {
         if (!dirty) return true
@@ -134,7 +140,9 @@ export default function PoemListing({
     const sortedItems = useMemo(() => {
         const { field, dir } = sort
         return [...items].sort((a, b) => {
-            if (a.pinned !== b.pinned) return a.pinned ? -1 : 1
+            const aPinned = localPins.has(a.id)
+            const bPinned = localPins.has(b.id)
+            if (aPinned !== bPinned) return aPinned ? -1 : 1
             let cmp: number
             if (field === "title") {
                 cmp = a.title.localeCompare(b.title)
@@ -147,7 +155,7 @@ export default function PoemListing({
             }
             return dir === "asc" ? cmp : -cmp
         })
-    }, [items, sort])
+    }, [items, sort, localPins])
 
     return (
         <div>
@@ -187,11 +195,11 @@ export default function PoemListing({
                     void handleDelete(p.id)
                 }}
                 onPinChanged={(p, pinned) => {
-                    setItems((prev) =>
-                        prev.map((item) =>
-                            item.id === p.id ? { ...item, pinned } : item
-                        )
-                    )
+                    setLocalPins((prev) => {
+                        const next = new Set(prev)
+                        if (pinned) next.add(p.id); else next.delete(p.id)
+                        return next
+                    })
                 }}
             />
 

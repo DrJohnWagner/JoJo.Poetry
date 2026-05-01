@@ -113,7 +113,8 @@ Two services, one flat JSON data source:
 │   │       ├── PoemFeatures.tsx      # Sorted, deduplicated tag values joined by " · "; strings starting with /?  rendered as Next.js Links (enables theme navigation)
 │   │       ├── PoemGroup.tsx         # Metadata group label span (eyebrow style)
 │   │       ├── PoemNotes.tsx         # Unordered list of per-poem notes
-│   │       ├── PoemSocial.tsx        # Social URL rendered as hostname link
+│   │       ├── PoemSocial.tsx        # Social URL rendered as hostname link (non-Instagram)
+│   │       ├── InstagramEmbed        # Dynamically imported (ssr: false) from react-social-media-embed; toggled via Show/Hide socials; width and captioned toggles
 │   │       ├── PoemEditor.tsx        # Inline editor; receives full Poem loaded on demand
 │   │       ├── PoemDetail.tsx        # Reading view + Edit toggle
 │   │       ├── PoemCreateForm.tsx    # Dedicated POST form with defaults + guards
@@ -158,7 +159,7 @@ The authoritative schema is `database/schemas/poem.schema.json`;
 | `project`                                                                             | string                     | yes                          | yes                 | yes                           | One-sentence authorial statement.                                                                  |
 | `rating`                                                                              | int 0–100                 | yes                          | yes                 | min/max band                  | Authorial self-rating.                                                                             |
 | `lines`, `words`                                                                    | int ≥ 0                   | yes                          | **derived**   | no                            | Recomputed from `body` on every write.                                                           |
-| `socials`                                                                             | `string[]`               | optional (default `[]`)    | yes                 | no                            | Social media URLs; displayed as links on the detail page.                                          |
+| `socials`                                                                             | `string[]`               | optional (default `[]`)    | yes                 | no                            | Social media URLs. All entries rendered as hostname links; Instagram URLs additionally rendered as embedded posts via `react-social-media-embed` (toggled, width-adjustable, caption-toggleable). |
 | `notes`                                                                               | `string[]`               | optional (default `[]`)    | yes                 | yes                           | One string per note; edited via multi-line textbox (one line = one note).                          |
 | `author`                                                                              | `{pen_name, full_name}`  | optional (default `null`)  | yes (API)           | no                            | Author identity. Displayed on the detail page; no inline editor (structured object).               |
 

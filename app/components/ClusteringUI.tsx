@@ -1,7 +1,8 @@
 "use client"
 
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { deletePoem, fetchPoem } from "@/lib/api"
+import { getPins } from "@/lib/pins"
 import type { ClusterResponse, Poem, PoemSummaryData } from "@/lib/types"
 import PoemList from "./poem/PoemList"
 import ClusterFeatures from "./cluster/ClusterFeatures"
@@ -35,6 +36,11 @@ export default function ClusteringUI({
     const [rowError, setRowError] = useState<string | null>(null)
     const [loadedPoems, setLoadedPoems] = useState<Record<string, Poem>>({})
     const [deletedIds, setDeletedIds] = useState<Set<string>>(new Set())
+    const [localPins, setLocalPins] = useState<Set<string>>(new Set())
+
+    useEffect(() => {
+        setLocalPins(getPins())
+    }, [])
 
     const totalPoems = result
         ? result.clusters.reduce((sum, c) => sum + c.size, 0)
@@ -51,9 +57,10 @@ export default function ClusteringUI({
 
     function handlePinChange(id: string, pinned: boolean) {
         onPinnedChange(id, pinned)
-        setLoadedPoems((prev) => {
-            if (!prev[id]) return prev
-            return { ...prev, [id]: { ...prev[id], pinned } }
+        setLocalPins((prev) => {
+            const next = new Set(prev)
+            if (pinned) next.add(id); else next.delete(id)
+            return next
         })
     }
 
@@ -106,11 +113,13 @@ export default function ClusteringUI({
                     .filter((p) => !deletedIds.has(p.id))
                     .map((p) => loadedPoems[p.id] ?? p)
                     .sort((a, b) => {
-                        if (a.pinned !== b.pinned) return a.pinned ? -1 : 1
+                        const aPinned = localPins.has(String(a.id))
+                        const bPinned = localPins.has(String(b.id))
+                        if (aPinned !== bPinned) return aPinned ? -1 : 1
                         return a.title.localeCompare(b.title)
                     }),
             })) ?? [],
-        [result, deletedIds, loadedPoems]
+        [result, deletedIds, loadedPoems, localPins]
     )
 
     const displayPoems = useMemo(
@@ -119,14 +128,16 @@ export default function ClusteringUI({
                 .filter((p) => !deletedIds.has(p.id))
                 .map((p) => loadedPoems[p.id] ?? p)
                 .sort((a, b) => {
-                    if (a.pinned !== b.pinned) return a.pinned ? -1 : 1
+                    const aPinned = localPins.has(String(a.id))
+                    const bPinned = localPins.has(String(b.id))
+                    if (aPinned !== bPinned) return aPinned ? -1 : 1
                     return (
                         new Date(b.date).getTime() -
                             new Date(a.date).getTime() ||
                         a.id.localeCompare(b.id)
                     )
                 }),
-        [initial, deletedIds, loadedPoems]
+        [initial, deletedIds, loadedPoems, localPins]
     )
 
     return (
