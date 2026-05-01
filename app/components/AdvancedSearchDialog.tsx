@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react"
 import { MEDALS, type SearchState } from "@/lib/types"
+import ThemeAutocomplete from "./ThemeAutocomplete"
 
 const MONTHS = [
     "",
@@ -69,14 +70,24 @@ export default function AdvancedSearchDialog({
             >
                 <header className="mb-6 flex items-baseline justify-between">
                     <h2 className="font-display text-xl">Advanced search</h2>
-                    <button
-                        type="button"
-                        onClick={onClose}
-                        aria-label="Close"
-                        className="text-label hover:text-accent"
-                    >
-                        close
-                    </button>
+                    <div className="flex gap-4">
+                        <button
+                            type="button"
+                            onClick={onClear}
+                            aria-label="Clear"
+                            className="text-label hover:text-accent"
+                        >
+                            Clear
+                        </button>
+                        <button
+                            type="button"
+                            onClick={onClose}
+                            aria-label="Close"
+                            className="text-label hover:text-accent"
+                        >
+                            Close
+                        </button>
+                    </div>
                 </header>
 
                 <div className="grid grid-cols-2 gap-x-6 gap-y-5">
@@ -128,6 +139,18 @@ export default function AdvancedSearchDialog({
                             className="mt-1 w-full border-b border-rule bg-transparent py-1 font-serif outline-none focus:border-accent"
                         />
                     </label>
+
+                    <fieldset className="col-span-2">
+                        <legend className="text-label">Themes</legend>
+                        <p className="mb-2 mt-1 text-[0.96rem] text-muted">
+                            All selected must be present (AND).
+                        </p>
+                        <ThemeAutocomplete
+                            value={value.themes}
+                            onChange={(themes) => onChange({ ...value, themes })}
+                        />
+                    </fieldset>
+
                     <label className="block">
                         <span className="text-label">Year</span>
                         <input
@@ -195,7 +218,7 @@ export default function AdvancedSearchDialog({
                     </fieldset>
                 </div>
 
-                <footer className="text-label mt-8 flex items-center justify-end gap-6">
+                {/* <footer className="text-label mt-8 flex items-center justify-end gap-6">
                     <button
                         type="button"
                         onClick={onClear}
@@ -206,7 +229,7 @@ export default function AdvancedSearchDialog({
                     <button type="submit" className="text-accent">
                         apply
                     </button>
-                </footer>
+                </footer> */}
             </form>
         </dialog>
     )

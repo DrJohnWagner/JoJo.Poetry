@@ -4,9 +4,6 @@ import { useState } from "react"
 import type { Poem } from "@/lib/types"
 import { useAppConfig } from "../AppConfig"
 import PoemBody from "./PoemBody"
-import PoemStatistics from "./PoemStatistics"
-import PoemProject from "./PoemProject"
-import PoemTitle from "./PoemTitle"
 import PoemAuthor from "./PoemAuthor"
 import PoemNotes from "./PoemNotes"
 import PoemSocial from "./PoemSocial"
@@ -17,6 +14,7 @@ import PoemEditor from "./PoemEditor"
 import HorizontalRule from "../HorizontalRule"
 import { cleanPoetryUrl } from "@/lib/format"
 import PoemAwards from "./PoemAwards"
+import PoemSummary from "./PoemSummary"
 
 function MetaRow({ group, features }: { group: string; features: string[] }) {
     if (!features || features.length === 0) return null
@@ -78,17 +76,15 @@ export default function PoemDetail({ poem: initial }: { poem: Poem }) {
     return (
         <div>
             <header className="mb-5">
-                <PoemTitle
-                    id={id}
-                    title={title}
-                    link={false}
+                <PoemSummary
+                    poem={poem}
                     pinned={poem.pinned}
                     onPinChange={(p) =>
                         setPoem((prev) => ({ ...prev, pinned: p }))
                     }
+                    clampProject={false}
+                    features={[]}
                 />
-                <PoemStatistics poem={poem} />
-                <PoemProject project={poem.project} />
             </header>
 
             <HorizontalRule />
@@ -146,7 +142,7 @@ export default function PoemDetail({ poem: initial }: { poem: Poem }) {
                 )}
 
                 <dt className="text-label">Link</dt>
-                <dd>
+                <dd className="text-meta">
                     <a
                         href={cleanPoetryUrl(poem.url)}
                         target="_blank"

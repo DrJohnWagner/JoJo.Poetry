@@ -409,7 +409,7 @@ def advanced_search(
         None, description="Case-insensitive substring of project statement."
     ),
     themes: List[str] = Query(
-        default_factory=list, description="Any of these themes (OR within field)."
+        default_factory=list, description="Require ALL supplied themes (AND). Pre-filter before OR matching."
     ),
     moods: List[str] = Query(default_factory=list),
     poetic_forms: List[str] = Query(default_factory=list),
@@ -435,22 +435,23 @@ def advanced_search(
 ) -> PoemSummaryDataList:
     """Advanced field-specific search with optional free-text narrowing.
 
-    If ``q`` is supplied it is applied first using the same semantics as
-    ``GET /api/poems``. The advanced portion uses **OR semantics across
-    populated fields**: a poem matches if it satisfies at least one
-    populated field. If no field is populated the result is empty.
+    If ``q`` is supplied it is applied first as a full-text pre-filter.
 
     Matching rules:
 
+    - **themes**: AND — every supplied theme must be present. Applied as
+      a pre-filter before OR matching. If no other fields are populated,
+      only theme-matching poems are returned.
     - **Text fields** (``title``, ``body``, ``project``, ``notes``):
-      case-insensitive substring on a plain-text projection.
-    - **Tag fields** (``themes``, ``moods``,
-      ``poetic_forms``, ``techniques``, ``tones_voices``,
-      ``key_images``, ``contest_fit``): OR within
-      the field; case-insensitive exact match on list entries.
-    - **Numeric / date filters** (``year``, ``month``, ``min_rating``,
-      ``max_rating``): each treated as one populated field.
-      ``min_rating`` + ``max_rating`` together count as one field.
+      OR across fields; case-insensitive substring match.
+    - **Other tag fields** (``moods``, ``poetic_forms``, ``techniques``,
+      ``tones_voices``, ``key_images``, ``contest_fit``): OR across
+      fields; case-insensitive exact match on list entries.
+    - **Date** (``year``, ``month``): AND with each other — both must
+      match when both are supplied. Counts as one OR condition against
+      other fields.
+    - **Rating** (``min_rating``, ``max_rating``): AND with each other;
+      one OR condition against other fields.
     - **Awards**: OR across supplied values; ``"None"`` matches poems
       with an empty ``awards`` array.
     """
@@ -463,7 +464,6 @@ def advanced_search(
 
     text_queries = {"title": title, "project": project, "body": body, "notes": notes}
     tag_queries = {
-        "themes": themes,
         "moods": moods,
         "poetic_forms": poetic_forms,
         "techniques": techniques,
@@ -471,16 +471,16 @@ def advanced_search(
         "key_images": key_images,
         "contest_fit": contest_fit,
     }
+    date_populated = year is not None or month is not None
     rating_populated = min_rating is not None or max_rating is not None
-    any_populated = (
+    or_populated = (
         any(v for v in text_queries.values())
         or any(v for v in tag_queries.values())
-        or year is not None
-        or month is not None
+        or date_populated
         or rating_populated
         or bool(medals)
     )
-    if not any_populated:
+    if not themes and not or_populated:
         return PoemSummaryDataList(items=[])
 
     def match(p: Poem) -> bool:
@@ -495,10 +495,11 @@ def advanced_search(
         for field, needles in tag_queries.items():
             if _tag_any(needles, getattr(p, field)):
                 return True
-        if year is not None and p.date.year == year:
-            return True
-        if month is not None and p.date.month == month:
-            return True
+        if date_populated:
+            year_ok = year is None or p.date.year == year
+            month_ok = month is None or p.date.month == month
+            if year_ok and month_ok:
+                return True
         if rating_populated:
             lo = min_rating if min_rating is not None else 0
             hi = max_rating if max_rating is not None else 100
@@ -508,11 +509,14 @@ def advanced_search(
             return True
         return False
 
+    # themes are AND: every supplied theme must be present on the poem
     narrowed = [
         p
         for p in _ordered(repo.list())
-        if _matches(p, q, [], [], [], [], [], [], None, None, None, None, None)
+        if _matches(p, q, themes, [], [], [], [], [], None, None, None, None, None)
     ]
+    if not or_populated:
+        return PoemSummaryDataList(items=narrowed)
     filtered = [p for p in narrowed if match(p)]
     return PoemSummaryDataList(items=filtered)
 

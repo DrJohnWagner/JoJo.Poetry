@@ -53,6 +53,7 @@ export interface PoemSummaryDataList {
 /** Filters that drive BOTH the simple and the advanced search calls. */
 export interface SearchState {
     q: string
+    themes: string[]
     year: number | null
     month: number | null
     medals: string[] // Gold | Silver | Bronze | Honorable Mention | None
@@ -72,6 +73,7 @@ export const MEDALS = [
 
 export function hasAdvanced(s: SearchState): boolean {
     return (
+        s.themes.length > 0 ||
         s.year !== null ||
         s.month !== null ||
         s.medals.length > 0 ||

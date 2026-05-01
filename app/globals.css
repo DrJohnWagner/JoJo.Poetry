@@ -6,8 +6,8 @@
     :root {
         --button-text-font-family:
             ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
-        --button-text-font-size-standard: 0.76rem;
-        --button-text-font-size-compact: 0.72rem;
+        --button-text-font-size-standard: 0.82rem;
+        --button-text-font-size-compact: 0.76rem;
         --button-text-font-weight: 400;
         --button-text-letter-spacing: 0.08em;
         --button-text-line-height: 1;
@@ -77,7 +77,7 @@
 
     /* Small sans metadata — the primary secondary-text style */
     .text-meta {
-        @apply font-sans text-[0.8rem] text-ink/80;
+        @apply font-sans text-xs text-ink/80;
     }
 
     /* Slightly larger sans text for award entry rows */
@@ -87,7 +87,7 @@
 
     /* Italic serif prose project statement */
     .text-project {
-        @apply font-serif italic leading-normal text-base text-ink/90;
+        @apply font-serif italic leading-tight text-lg text-ink/90;
     }
 
     /* Cluster section headings */

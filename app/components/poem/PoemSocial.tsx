@@ -6,7 +6,7 @@ export default function PoemSocial({ url }: { url: string }) {
         label = url + " ↗"
     }
     return (
-        <div>
+        <div className="text-meta">
             <a href={url} target="_blank" rel="noreferrer">
                 {label}
             </a>

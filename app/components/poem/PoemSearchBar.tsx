@@ -5,6 +5,7 @@ import { hasAdvanced, type SearchState } from "@/lib/types"
 import AdvancedSearchDialog from "../AdvancedSearchDialog"
 
 const EMPTY_ADVANCED = {
+    themes: [] as string[],
     year: null,
     month: null,
     medals: [] as string[],
@@ -63,6 +64,7 @@ export default function SearchBar({
     }
 
     const advancedCount =
+        value.themes.length +
         (value.year !== null ? 1 : 0) +
         (value.month !== null ? 1 : 0) +
         value.medals.length +
@@ -85,6 +87,17 @@ export default function SearchBar({
                     setDraft("")
                     onChange({ ...value, q: "" })
                 },
+            })
+        }
+        for (const theme of value.themes) {
+            filters.push({
+                key: `theme:${theme}`,
+                label: `Theme: ${theme}`,
+                clear: () =>
+                    onChange({
+                        ...value,
+                        themes: value.themes.filter((t) => t !== theme),
+                    }),
             })
         }
         if (value.year !== null) {

@@ -40,12 +40,14 @@ async function req<T>(path: string, init?: RequestInit): Promise<T> {
 function buildListQuery(s: SearchState): string {
     const p = new URLSearchParams()
     if (s.q.trim()) p.set("q", s.q.trim())
+    for (const t of s.themes) p.append("themes", t)
     return p.toString()
 }
 
 function buildAdvancedQuery(s: SearchState): string {
     const p = new URLSearchParams()
     if (s.q.trim()) p.set("q", s.q.trim())
+    for (const t of s.themes) p.append("themes", t)
     if (s.year !== null) p.set("year", String(s.year))
     if (s.month !== null) p.set("month", String(s.month))
     for (const a of s.medals) p.append("medals", a)

@@ -15,9 +15,9 @@ function truncateAwardTitle(
 export default function PoemAward({ award }: { award: Award }) {
     const medal = award.medal === "Honorable Mention" ? "HM" : award.medal
     return (
-        <>
+        <div className="contents text-meta">
             <FaMedal style={{ color: medalColor(award.medal) }} />
-            <span className="text-meta">{medal}</span>
+            <span>{medal}</span>
             {award.title ? (
                 <a href={award.url} target="_blank" rel="noreferrer">
                     {truncateAwardTitle(
@@ -29,6 +29,6 @@ export default function PoemAward({ award }: { award: Award }) {
             ) : (
                 <span />
             )}
-        </>
+        </div>
     )
 }

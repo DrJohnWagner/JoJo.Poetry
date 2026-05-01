@@ -28,6 +28,11 @@ const config: Config = {
                     "sans-serif",
                 ],
             },
+            fontSize: {
+                xs: "0.825rem",
+                // sm: "0.875rem",
+                // base: "1rem",
+            },
             maxWidth: {
                 prose: "38rem", // ~608px — comfortable measure for poetry
             },
