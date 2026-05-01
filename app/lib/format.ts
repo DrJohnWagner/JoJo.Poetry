@@ -1,4 +1,3 @@
-// import { constants } from "buffer"
 import { fetchPoem } from "./api"
 import type { Poem } from "./types"
 
@@ -145,6 +144,13 @@ export function formatDate(iso: string): string {
         month: "long",
         year: "numeric",
     })
+}
+
+export const MEDAL_SCORE: Record<string, number> = {
+    Gold: 4,
+    Silver: 3,
+    Bronze: 2,
+    "Honorable Mention": 1,
 }
 
 export function medalColor(medal: string): string {
