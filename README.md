@@ -134,8 +134,11 @@ Two services, one flat JSON data source:
 │       ├── poem.schema.json          # JSON Schema (Draft 2020-12)
 │       ├── poem.py                   # Pydantic PoemSummaryData / Poem / Award / Author
 │       └── similarity.py             # Re-exports similarity response types for API use
-├── Dockerfile                        # Combined multi-stage image (Node 22 + Python 3.11, Debian bookworm-slim, no CMD)
-└── docker-compose.yml                # Orchestrates backend + frontend
+├── Dockerfile                        # Combined multi-stage base image (Node 22 + Python 3.13, Debian bookworm-slim, no CMD)
+├── Dockerfile.backend                # Backend-only image used by docker-compose
+├── Dockerfile.frontend               # Frontend-only image used by docker-compose
+├── Dockerfile-gcloud                 # Single-container Cloud Run image (FastAPI + Next.js, CMD with startup health poll)
+└── docker-compose.yml                # Orchestrates backend + frontend (local/self-hosted)
 ```
 
 ## Poem data model
@@ -230,10 +233,10 @@ directly to `create_app`.
 
 ### Frontend
 
-| Variable                     | Default                   | Purpose                                                                                                                              |
-| ---------------------------- | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| `NEXT_PUBLIC_API_BASE_URL` | `http://localhost:8000` | Origin the browser calls. Inlined at build time.                                                                                     |
-| `READ_ONLY`                | `true`                  | When `true`, hides all editing controls (pin, edit, delete, new poem). Read at server-component render time; not inlined at build. |
+| Variable                     | Default | Purpose                                                                                                                              |
+| ---------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| `NEXT_PUBLIC_API_BASE_URL` | `""` (empty — same-origin relative paths) | Origin prefix the browser prepends to every `/api/…` path. Inlined at build time. Empty string is correct for Cloud Run (Next.js rewrites `/api/:path*` to the internal FastAPI). Set to `http://localhost:8000` only if running the frontend against a separately-exposed backend. |
+| `READ_ONLY`                | `true`  | When `true`, hides all editing controls (pin, edit, delete, new poem). Read at server-component render time; not inlined at build. |
 
 Both services default to read-only. Pass `READ_ONLY=false` to enable
 editing (see Local development and Docker sections below).
@@ -311,6 +314,37 @@ make docker-shell-web       # shell into running web container
 ```
 
 The combined `Dockerfile` is a three-stage Debian bookworm-slim build (no `CMD`) that can be used as a base or composed into custom orchestrations. The `docker-compose.yml` builds on top of it.
+
+## Google Cloud Run
+
+`Dockerfile-gcloud` is a self-contained single-container image: Next.js standalone server on `$PORT` (8080) and FastAPI on `127.0.0.1:8000`, both in the same container. Only port 8080 is exposed. Browser requests to `/api/…` are proxied by Next.js rewrites to the internal FastAPI — the browser never reaches port 8000 directly.
+
+**Production data:** `database/Poems-JoJo.json` (gitignored) is copied over `database/Poems.json` during the Docker build. Refresh it before deploying:
+
+```bash
+cp /path/to/production/Poems.json database/Poems-JoJo.json
+```
+
+**First-time setup** (creates the Artifact Registry repo, enables Cloud Run/build APIs):
+
+```bash
+make gcloud-login    # browser auth + configure Docker credential helper
+make gcloud-deploy   # enable services, create repo, build, push, deploy
+```
+
+**Routine updates:**
+
+```bash
+make gcloud-update   # --no-cache build, verify Python/sklearn, push (timestamped + latest tags), deploy
+```
+
+**Logs and traffic:**
+
+```bash
+make gcloud-logs     # traffic table + last 100 log lines (10-minute window)
+```
+
+The deployed service runs `READ_ONLY=true`. The startup CMD polls `/api/author` before handing off to Next.js, so the first Cloud Run health check never races a cold FastAPI start.
 
 Details:
 
