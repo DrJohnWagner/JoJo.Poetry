@@ -70,7 +70,6 @@ def test_loads_and_validates_canonical_file(poems_file):
     for p in poems:
         assert p.id.version == 4
         # optional-field defaults applied
-        assert p.pinned is False
         assert isinstance(p.notes, list)
 
 

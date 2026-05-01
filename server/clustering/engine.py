@@ -185,7 +185,6 @@ def _poem_summaries(poems: List[Poem]) -> List[PoemSummary]:
             words=poem.words,
             date=poem.date,
             awards=poem.awards,
-            pinned=poem.pinned,
             project=poem.project,
             themes=poem.themes,
             moods=poem.moods,

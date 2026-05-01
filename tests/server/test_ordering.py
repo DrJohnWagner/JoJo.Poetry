@@ -42,31 +42,7 @@ def test_default_order_is_date_desc(client):
     items = client.get("/api/poems").json()["items"]
     dates = [datetime.fromisoformat(i["date"].replace("Z", "+00:00")) for i in items]
     assert dates == sorted(dates, reverse=True)
-    # None are pinned by default, so the whole list is date-desc.
-    assert all(i["pinned"] is False for i in items)
 
-
-def test_pinned_appears_before_unpinned_and_date_order_is_preserved(client):
-    # Pin the two *oldest* poems and confirm they float to the top in date-desc order.
-    from server.repository import get_repository
-    repo = get_repository()
-    dated = sorted(repo.list(), key=lambda p: p.date)  # oldest first
-    oldest, second_oldest = dated[0], dated[1]
-    repo.update(oldest.id, {"pinned": True})
-    repo.update(second_oldest.id, {"pinned": True})
-
-    items = client.get("/api/poems").json()["items"]
-    # First two are pinned
-    assert items[0]["pinned"] is True and items[1]["pinned"] is True
-    # Pinned group is ordered date-desc: second_oldest (newer of the two) comes first.
-    assert items[0]["id"] == str(second_oldest.id)
-    assert items[1]["id"] == str(oldest.id)
-    # Unpinned group follows, also date-desc.
-    unpinned_dates = [
-        datetime.fromisoformat(i["date"].replace("Z", "+00:00"))
-        for i in items[2:]
-    ]
-    assert unpinned_dates == sorted(unpinned_dates, reverse=True)
 
 
 def test_tiebreaker_is_id_ascending(client, db):
@@ -105,13 +81,6 @@ def test_filter_returns_subset_in_order(client):
 
 
 # --------------------------------------------------------- ordering after mutations
-
-def test_pin_moves_poem_to_top_after_patch(client):
-    all_ids = _ids(client.get("/api/poems"))
-    target = all_ids[-1]  # last in authoritative order
-    client.patch(f"/api/poems/{target}", json={"pinned": True})
-    assert _ids(client.get("/api/poems"))[0] == target
-
 
 def test_edit_to_date_reorders(client):
     all_ids = _ids(client.get("/api/poems"))

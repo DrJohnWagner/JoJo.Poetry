@@ -1,5 +1,6 @@
 import type { ClusterResponse, Poem, PoemSummaryData, PoemSummaryDataList, SearchState, SimilarityBundle } from './types'
 import { hasAdvanced } from "./types"
+import { getPins } from "./pins"
 
 const SERVER_BASE =
     process.env.API_BASE_URL_SERVER?.replace(/\/$/, "") ||
@@ -57,14 +58,20 @@ function buildAdvancedQuery(s: SearchState): string {
     return p.toString()
 }
 
-export function fetchPoems(s: SearchState): Promise<PoemSummaryDataList> {
+function mergePins(list: PoemSummaryDataList): PoemSummaryDataList {
+    if (typeof window === "undefined") return list
+    const pins = getPins()
+    return { items: list.items.map((p) => ({ ...p, pinned: pins.has(p.id) })) }
+}
+
+export async function fetchPoems(s: SearchState): Promise<PoemSummaryDataList> {
     if (hasAdvanced(s)) {
-        return req<PoemSummaryDataList>(
-            `/api/poems/search?${buildAdvancedQuery(s)}`
-        )
+        const result = await req<PoemSummaryDataList>(`/api/poems/search?${buildAdvancedQuery(s)}`)
+        return mergePins(result)
     }
     const qs = buildListQuery(s)
-    return req<PoemSummaryDataList>(`/api/poems${qs ? `?${qs}` : ""}`)
+    const result = await req<PoemSummaryDataList>(`/api/poems${qs ? `?${qs}` : ""}`)
+    return mergePins(result)
 }
 
 export function fetchPoem(id: string): Promise<Poem> {

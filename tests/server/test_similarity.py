@@ -89,7 +89,6 @@ def _make_poem(**overrides):
         "rating": 50,
         "lines": 2,
         "words": 4,
-        "pinned": False,
         "notes": [],
         "socials": [],
     }

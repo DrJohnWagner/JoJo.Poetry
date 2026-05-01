@@ -58,7 +58,6 @@ def test_create_minimal_payload_succeeds(client, db):
     assert UUID(poem["id"]).version == 4
 
     # Defaults applied
-    assert poem["pinned"] is False
     assert poem["notes"] == []
     assert poem["themes"] == []
     assert poem["awards"] == []
@@ -133,12 +132,6 @@ def test_caller_supplied_date_is_kept(client):
     assert r.json()["date"].startswith("2030-06-15")
 
 
-def test_caller_supplied_pinned_is_kept(client):
-    r = client.post("/api/poems", json={**_minimal(), "pinned": True})
-    assert r.status_code == 201
-    assert r.json()["pinned"] is True
-
-
 def test_socials_defaults_to_empty_list(client):
     r = client.post("/api/poems", json=_minimal())
     assert r.status_code == 201
@@ -175,13 +168,6 @@ def test_new_poem_appears_in_listings_and_search(client):
     # Appears in simple search via q over title
     by_q = client.get("/api/poems?q=Tomorrow").json()["items"]
     assert any(p["id"] == pid for p in by_q)
-
-
-def test_pinned_new_poem_leads_over_unpinned(client):
-    payload = {**_minimal(), "pinned": True, "title": "Pinned Newcomer"}
-    pid = client.post("/api/poems", json=payload).json()["id"]
-    first = client.get("/api/poems?limit=1").json()["items"][0]
-    assert first["id"] == pid
 
 
 # ---------------------------------------------------------- atomicity

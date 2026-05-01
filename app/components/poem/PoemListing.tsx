@@ -170,7 +170,6 @@ export default function PoemListing({
                 onSaved={(updated, previous) => {
                     setDirty(false)
                     const orderChanged =
-                        updated.pinned !== previous.pinned ||
                         updated.date !== previous.date
                     setEditingId(null)
                     if (orderChanged) {
@@ -188,7 +187,11 @@ export default function PoemListing({
                     void handleDelete(p.id)
                 }}
                 onPinChanged={(p, pinned) => {
-                    if (pinned !== p.pinned) refetchFromTop()
+                    setItems((prev) =>
+                        prev.map((item) =>
+                            item.id === p.id ? { ...item, pinned } : item
+                        )
+                    )
                 }}
             />
 

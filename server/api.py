@@ -102,7 +102,6 @@ class PoemCreate(BaseModel):
       ``poetic_forms`` / ``techniques`` / ``tones_voices`` /
       ``key_images`` / ``contest_fit`` — default
       to ``[]``.
-    - ``pinned`` — defaults to ``False``.
     - ``notes`` — defaults to ``[]``.
 
     Forbidden on input (the server supplies them):
@@ -130,7 +129,6 @@ class PoemCreate(BaseModel):
     tones_voices: List[str] = Field(default_factory=list)
     key_images: List[str] = Field(default_factory=list)
     contest_fit: List[str] = Field(default_factory=list)
-    pinned: bool = False
     socials: List[str] = Field(default_factory=list)
     notes: List[str] = Field(default_factory=list)
     author: Optional[Author] = None
@@ -165,7 +163,6 @@ class PoemPatch(BaseModel):
     project: Optional[str] = None
     contest_fit: Optional[List[str]] = None
     rating: Optional[int] = Field(None, ge=0, le=100)
-    pinned: Optional[bool] = None
     socials: Optional[List[str]] = None
     notes: Optional[List[str]] = None
     author: Optional[Author] = None
@@ -174,10 +171,10 @@ class PoemPatch(BaseModel):
 # -------------------------------------------------------------------- helpers
 
 def _ordered(poems: List[Poem]) -> List[Poem]:
-    """Authoritative ordering: pinned first, date descending, id ascending."""
+    """Authoritative ordering: date descending, id ascending."""
     return sorted(
         poems,
-        key=lambda p: (0 if p.pinned else 1, -p.date.timestamp(), str(p.id)),
+        key=lambda p: (-p.date.timestamp(), str(p.id)),
     )
 
 
@@ -192,7 +189,6 @@ def _matches(
     contest_fit: List[str],
     min_rating: Optional[int],
     max_rating: Optional[int],
-    pinned: Optional[bool],
     date_from: Optional[datetime],
     date_to: Optional[datetime],
 ) -> bool:
@@ -235,8 +231,6 @@ def _matches(
     if min_rating is not None and p.rating < min_rating:
         return False
     if max_rating is not None and p.rating > max_rating:
-        return False
-    if pinned is not None and p.pinned is not pinned:
         return False
     if date_from is not None and p.date < date_from:
         return False
@@ -346,9 +340,6 @@ def list_poems(
     ),
     min_rating: Optional[int] = Query(None, ge=0, le=100),
     max_rating: Optional[int] = Query(None, ge=0, le=100),
-    pinned: Optional[bool] = Query(
-        None, description="Filter to only pinned (true) or only unpinned (false)."
-    ),
     date_from: Optional[datetime] = Query(
         None, description="Inclusive lower bound on poem date (ISO 8601)."
     ),
@@ -358,8 +349,8 @@ def list_poems(
 ) -> PoemSummaryDataList:
     """Filtered list of poem summaries in authoritative order.
 
-    **Ordering.** Pinned poems first, then ``date`` descending, with
-    ``id`` ascending as a deterministic tiebreaker.
+    **Ordering.** ``date`` descending, with ``id`` ascending as a
+    deterministic tiebreaker.
 
     **Search semantics.** ``q`` is a case-insensitive substring match
     over title, a plain-text projection of the body (``<br/>`` stripped),
@@ -383,7 +374,6 @@ def list_poems(
             contest_fit,
             min_rating,
             max_rating,
-            pinned,
             date_from,
             date_to,
         )
@@ -483,7 +473,12 @@ def advanced_search(
     if not themes and not or_populated:
         return PoemSummaryDataList(items=[])
 
+    themes_populated = bool(themes)
+    or_populated = or_populated or themes_populated
+
     def match(p: Poem) -> bool:
+        if themes_populated and _tag_any(themes, p.themes):
+            return True
         if title and _text_hit(title, p.title):
             return True
         if project and _text_hit(project, p.project):
@@ -509,14 +504,12 @@ def advanced_search(
             return True
         return False
 
-    # themes are AND: every supplied theme must be present on the poem
+    # q is the only hard pre-filter; all other fields participate in OR matching
     narrowed = [
         p
         for p in _ordered(repo.list())
-        if _matches(p, q, themes, [], [], [], [], [], None, None, None, None, None)
+        if _matches(p, q, [], [], [], [], [], [], None, None, None, None)
     ]
-    if not or_populated:
-        return PoemSummaryDataList(items=narrowed)
     filtered = [p for p in narrowed if match(p)]
     return PoemSummaryDataList(items=filtered)
 
@@ -630,7 +623,7 @@ def patch_poem(
     """Partial update. Returns the full updated record.
 
     No-op PATCH (empty body) returns the current record unchanged.
-    Pin/unpin toggles use this endpoint with ``{"pinned": true|false}``.
+    No-op PATCH (empty body) returns the current record unchanged.
     """
     updates = patch.model_dump(exclude_unset=True, mode="json")
     if not updates:

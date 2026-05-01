@@ -134,18 +134,6 @@ def test_medal_unknown_rejected(client):
     assert r.status_code == 422
 
 
-# ------------------------------------------------------------- ordering + pagination
-
-def test_pinned_first_in_search(client):
-    from uuid import UUID
-    from server.repository import get_repository
-    # Pin the last-in-source-order poem and confirm it comes first
-    source_ids = [i["id"] for i in client.get("/api/poems").json()["items"]]
-    get_repository().update(UUID(source_ids[-1]), {"pinned": True})
-    r = client.get("/api/poems/search", params={"year": 2026})
-    assert r.json()["items"][0]["id"] == source_ids[-1]
-
-
 # ------------------------------------------------------------- rating band
 
 def test_rating_band_is_single_field(client):
