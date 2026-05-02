@@ -254,7 +254,7 @@ gcloud-update: ## Build, push, and deploy a new revision (timestamped tag)
 	$(eval TAG := $(shell date +%Y%m%d-%H%M%S))
 	$(GCLOUD) config set project $(GCLOUD_PROJECT)
 	$(GCLOUD) auth configure-docker $(GCLOUD_REGION)-docker.pkg.dev --quiet
-	docker build --no-cache -f $(GCLOUD_DOCKERFILE) \
+	docker build -f $(GCLOUD_DOCKERFILE) \
 	    -t $(GCLOUD_IMAGE):$(TAG) \
 	    -t $(GCLOUD_IMAGE):latest \
 	    .
