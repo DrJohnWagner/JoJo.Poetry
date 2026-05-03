@@ -1,5 +1,9 @@
 export type UUID = string
 
+export interface InstagramData {
+    poem_id: UUID
+}
+
 export interface Author {
     pen_name: string
     full_name: string

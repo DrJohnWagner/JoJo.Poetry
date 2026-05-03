@@ -1,4 +1,4 @@
-import type { ClusterResponse, Poem, PoemSummaryData, PoemSummaryDataList, SearchState, SimilarityBundle } from './types'
+import type { ClusterResponse, InstagramData, Poem, PoemSummaryData, PoemSummaryDataList, SearchState, SimilarityBundle } from './types'
 import { hasAdvanced } from "./types"
 import { getPins } from "./pins"
 
@@ -124,6 +124,34 @@ export function fetchClusters(categories: string[]): Promise<ClusterResponse> {
     return req<ClusterResponse>("/api/poems/cluster", {
         method: "POST",
         body: JSON.stringify({ categories }),
+    })
+}
+
+export function instagramGenerate(poem_id: string): Promise<InstagramData> {
+    return req<InstagramData>("/api/instagram/generate", {
+        method: "POST",
+        body: JSON.stringify({ poem_id }),
+    })
+}
+
+export function instagramRegenerate(poem_id: string): Promise<InstagramData> {
+    return req<InstagramData>("/api/instagram/regenerate", {
+        method: "POST",
+        body: JSON.stringify({ poem_id }),
+    })
+}
+
+export function instagramRender(poem_id: string): Promise<InstagramData> {
+    return req<InstagramData>("/api/instagram/render", {
+        method: "POST",
+        body: JSON.stringify({ poem_id }),
+    })
+}
+
+export function instagramPost(poem_id: string): Promise<InstagramData> {
+    return req<InstagramData>("/api/instagram/post", {
+        method: "POST",
+        body: JSON.stringify({ poem_id }),
     })
 }
 

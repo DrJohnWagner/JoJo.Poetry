@@ -3,6 +3,8 @@
 import Link from "next/link"
 import PinToggle from "../PinToggle"
 import CopyButton from "../CopyButton"
+import InstagramButton from "../instagram/InstagramButton"
+import { useAppConfig } from "../AppConfig"
 import { poemToMarkdown } from "@/lib/format"
 
 export default function PoemTitle({
@@ -18,6 +20,7 @@ export default function PoemTitle({
     pinned?: boolean
     onPinChange?: (pinned: boolean) => void
 }) {
+    const { readOnly } = useAppConfig()
     const hasPinToggle = onPinChange !== undefined
     const HeadingTag = hasPinToggle ? "h2" : "h4"
     const headingSizeClass = hasPinToggle
@@ -48,6 +51,9 @@ export default function PoemTitle({
                         getText={() => poemToMarkdown(id, true)}
                         variant="filled"
                     />
+                )}
+                {hasPinToggle && !readOnly && (
+                    <InstagramButton poemId={id} />
                 )}
             </div>
             {hasPinToggle && (
