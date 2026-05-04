@@ -59,6 +59,9 @@ def create_app(settings: Optional[Settings] = None) -> FastAPI:
     from server.api import router as read_router
     app.include_router(read_router)
 
+    from server.clustering.router import router as clustering_router
+    app.include_router(clustering_router)
+
     from server.instagram.router import router as instagram_router
     app.include_router(instagram_router)
 

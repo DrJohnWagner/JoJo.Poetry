@@ -50,6 +50,7 @@ Two services, one flat JSON data source:
 │   ├── config.py                     # Settings (POEMS_DATABASE, READ_ONLY) + controlled-vocabulary constants (THEME_FEATURES, MOOD_FEATURES, POETIC_FORM_FEATURES, TECHNIQUE_FEATURES, TONE_VOICE_FEATURES)
 │   ├── repository.py                 # In-memory, file-backed PoemRepository
 │   ├── clustering/
+│   │   ├── router.py                 # FastAPI router: POST /api/poems/cluster
 │   │   ├── types.py                  # ClusterRequest / Cluster / ClusterResponse Pydantic models
 │   │   └── engine.py                 # Feature matrix, auto-k, Ward clustering, lift labels
 │   ├── similarity/

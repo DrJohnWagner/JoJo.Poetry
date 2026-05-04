@@ -32,12 +32,6 @@ from server.config import (
     THEME_FEATURES,
     TONE_VOICE_FEATURES,
 )
-from server.clustering.engine import run_clustering
-from server.clustering.types import (
-    VALID_CATEGORIES,
-    ClusterRequest,
-    ClusterResponse,
-)
 from server.similarity.service import rebuild_similarity_service
 from server.similarity.types import NeighbourListResult
 
@@ -531,32 +525,6 @@ def poems_with_awards(
     poems = _ordered(repo.list())
     awarded = [p for p in poems if p.awards and len(p.awards) > 0]
     return PoemSummaryDataList(items=awarded)
-
-
-@router.post("/api/poems/cluster", response_model=ClusterResponse, tags=["poems"])
-def cluster_poems(
-    payload: ClusterRequest,
-    repo: PoemRepository = Depends(get_repository),
-    _: None = Depends(check_for_external_changes),
-) -> ClusterResponse:
-    """Cluster the corpus by one or more metadata categories.
-
-    Categories must be drawn from: ``themes``, ``moods``,
-    ``poetic_forms``, ``techniques``, ``tones_voices``,
-    ``images`` (maps to ``key_images``), ``contest_fit``.
-
-    If ``k`` is omitted the number of clusters is chosen automatically via
-    silhouette-score sweep. Poems in clusters smaller than
-    ``min_cluster_size`` are returned in ``excluded`` with reason
-    ``"cluster too small"``.
-    """
-    bad = [c for c in payload.categories if c not in VALID_CATEGORIES]
-    if bad:
-        raise HTTPException(
-            status_code=422,
-            detail=f"Unknown categories: {bad}. Allowed: {sorted(VALID_CATEGORIES)}",
-        )
-    return run_clustering(repo.list(), payload)
 
 
 @router.get("/api/poems/{poem_id}", response_model=Poem, tags=["poems"])
