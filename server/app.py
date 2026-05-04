@@ -59,6 +59,9 @@ def create_app(settings: Optional[Settings] = None) -> FastAPI:
     from server.api import router as read_router
     app.include_router(read_router)
 
+    from server.similarity.router import router as similarity_router
+    app.include_router(similarity_router)
+
     from server.clustering.router import router as clustering_router
     app.include_router(clustering_router)
 

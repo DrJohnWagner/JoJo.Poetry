@@ -54,6 +54,7 @@ Two services, one flat JSON data source:
 │   │   ├── types.py                  # ClusterRequest / Cluster / ClusterResponse Pydantic models
 │   │   └── engine.py                 # Feature matrix, auto-k, Ward clustering, lift labels
 │   ├── similarity/
+│   │   ├── router.py                 # FastAPI router: GET /api/poems/{id}/similar and five single-axis endpoints; SimilarityBundle response model
 │   │   ├── types.py                  # NormalisedPoemFeatures, score breakdowns, NeighbourResult
 │   │   ├── normalise.py              # Poem → NormalisedPoemFeatures (lowercase, dedup, synonyms)
 │   │   ├── structured.py             # Jaccard similarity over tag sets; StructuredScoreBreakdown
