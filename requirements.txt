@@ -4,4 +4,6 @@ pydantic-settings==2.7.1
 uvicorn[standard]==0.34.0
 scikit-learn>=1.6,<1.8
 numpy
+pillow
+openai
 scipy

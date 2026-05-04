@@ -1,7 +1,5 @@
-export type Placement =
-    | "top-left" | "top" | "top-right"
-    | "left"     | "centre" | "right"
-    | "bottom-left" | "bottom" | "bottom-right"
+export type { Placement } from "@/lib/types"
+import type { Placement } from "@/lib/types"
 
 const GRID: { label: string; value: Placement; symbol: string }[] = [
     { label: "Top Left",     value: "top-left",     symbol: "↖" },

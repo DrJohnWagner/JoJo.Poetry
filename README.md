@@ -45,7 +45,7 @@ Two services, one flat JSON data source:
 ```
 .
 ├── server/
-│   ├── app.py                        # FastAPI factory, CORS, lifespan load + similarity init
+│   ├── app.py                        # FastAPI factory, CORS, lifespan load + similarity init; load_dotenv() for OPENAI_API_KEY
 │   ├── api.py                        # All routes (read, search, POST/PATCH/DELETE, similarity, cluster, features vocabulary)
 │   ├── config.py                     # Settings (POEMS_DATABASE, READ_ONLY) + controlled-vocabulary constants (THEME_FEATURES, MOOD_FEATURES, POETIC_FORM_FEATURES, TECHNIQUE_FEATURES, TONE_VOICE_FEATURES)
 │   ├── repository.py                 # In-memory, file-backed PoemRepository
@@ -59,6 +59,13 @@ Two services, one flat JSON data source:
 │   │   ├── semantic.py               # SemanticSimilarityIndex: TF-IDF on project/form/image text
 │   │   ├── fusion.py                 # Weighted blend of structured + semantic; axis weights
 │   │   └── service.py                # PoemSimilarityService; module-level init/rebuild helpers
+│   ├── instagram/
+│   │   ├── router.py                 # FastAPI router: generate, update, regenerate, filters, fonts, image-serving endpoints; in-memory image store
+│   │   ├── instagram.py              # OpenAI pipeline: excerpt + prompt selection (Responses API) → image generation (images API) → text overlay (Pillow); TESTING flag uses gpt-5-mini + test.png
+│   │   ├── filters.py                # Pillow-based filter library: none, aden, clarendon, crema, gingham, juno, lark, ludwig, moon, perpetua, reyes, slumber
+│   │   ├── parsing.py                # LLM JSON output extraction utilities
+│   │   ├── prompts.py                # GENERATE_PROMPT and GENERATE_IMAGE string templates
+│   │   └── fonts/                    # TTF font files served by /api/instagram/fonts
 │   └── Dockerfile                    # Python 3.11-slim image
 ├── requirements.txt                  # Production Python deps
 ├── requirements-dev.txt              # Adds pytest, httpx, jsonschema
@@ -71,6 +78,16 @@ Two services, one flat JSON data source:
 │   ├── poems/new/page.tsx            # Dedicated create page
 │   ├── layout.tsx, globals.css
 │   ├── components/
+│   │   ├── instagram/
+│   │   │   ├── InstagramButton.tsx   # Icon button (Instagram icon) that mounts InstagramDialog
+│   │   │   ├── InstagramDialog.tsx   # Native <dialog> owner: loads fonts + filters in parallel, runs generate on mount, owns all state (excerpt, prompt, placement, textStyle, filter, dirty flags)
+│   │   │   ├── ImagePreview.tsx      # Displays the generated image; shows CSS spinner while loading
+│   │   │   ├── ImagePromptInput.tsx  # Textarea for the image prompt; UPDATE button (enabled when dirtyPrompt && prompt not empty); CLEAR button (enabled when prompt not empty)
+│   │   │   ├── ExcerptEditor.tsx     # Textarea for the poem excerpt; UPDATE button (enabled when dirtyExcerpt)
+│   │   │   ├── FilterSelector.tsx    # Loads filter list from /api/instagram/filters; 2-col (sm) / 3-col (md+) button grid; title-cases filter names
+│   │   │   ├── TextPlacementGrid.tsx # 3×3 button grid for 9 text placement positions; re-exports Placement type
+│   │   │   ├── TextStyleControls.tsx # Colour picker (white/black/custom) + font dropdown (MRU optgroup / All Fonts optgroup) + font-size stepper
+│   │   │   └── InstagramActions.tsx  # REGENERATE IMAGE and POST TO INSTAGRAM action buttons
 │   │   ├── AppConfig.tsx             # React context provider for runtime config (readOnly)
 │   │   ├── Page.tsx                  # Two-column flex wrapper (full-width, centred)
 │   │   ├── LColumn.tsx               # Left column shell: fixed lg flex-basis (62%) + inner max-w-prose
@@ -123,9 +140,9 @@ Two services, one flat JSON data source:
 │   │       ├── SimilarPoems.tsx      # Similar poems aside: all 5 axes (overall/theme/form/emotion/imagery) grouped
 │   │       └── PoemBody.tsx          # Toggle show/hide; showBody prop auto-fetches and expands on mount
 │   └── lib/
-│       ├── api.ts                    # Typed fetch wrappers (fetchPoems, fetchPoem, fetchRecentPoems, fetchAwardedPoems, fetchClusters, fetchFeatures)
+│       ├── api.ts                    # Typed fetch wrappers for poems, similarity, clustering, features, and Instagram endpoints (instagramGenerate, instagramUpdate, instagramRegenerate, instagramFonts, instagramFilters)
 │       ├── cluster.ts                # Cluster feature/group label helpers for cluster UI rendering
-│       ├── types.ts                  # PoemSummaryData / ClusterPoem / Poem type hierarchy; Award / SearchState / SimilarityBundle / ClusterResponse / …
+│       ├── types.ts                  # PoemSummaryData / ClusterPoem / Poem type hierarchy; Award / SearchState / SimilarityBundle / ClusterResponse / InstagramData / TextSpecification / FontOption / Placement / …
 │       ├── editable.ts               # Canonical editable-field contract
 │       └── format.ts                 # body ↔ plaintext, date formatting, cleanPoetryUrl, poemToMarkdown, medalColor
 ├── database/
@@ -224,6 +241,7 @@ read or write them.
 | `POEMS_DATABASE` | `<repo>/database/Poems.json`                  | Path to the poems JSON file. Absolute paths used verbatim; relative paths resolved against the**current working directory**. |
 | `CORS_ORIGINS`   | `http://localhost:3000,http://127.0.0.1:3000` | Comma-separated list of allowed origins for browser calls.                                                                         |
 | `READ_ONLY`      | `true`                                        | When `true`, all mutation endpoints (POST/PATCH/DELETE) return `405 Method Not Allowed`.                                       |
+| `OPENAI_API_KEY` | —                                             | Required for Instagram image generation. Loaded from `.env` via `python-dotenv` at startup. Instagram endpoints return errors if absent. |
 
 A `.env` file in the current working directory is auto-loaded (via
 `pydantic-settings`). Settings are exposed through `server.config.Settings`, stored on
@@ -920,6 +938,52 @@ Test files:
   present, `min_cluster_size` exclusion, `k` override, `categories_used`
   echo, invalid category 422, empty categories 422, unknown field 422,
   read-only allowed, small-corpus single-cluster fallback).
+
+## Instagram post generation
+
+The Instagram feature creates a 1080×1080 PNG ready for posting, driven entirely from a poem. It is gated behind `require_write_access` (read-only deployments cannot use it). The pipeline runs in three stages:
+
+1. **Text selection** — the poem title and body are sent to an OpenAI text model (Responses API) which returns a short excerpt and an image prompt as JSON.
+2. **Image generation** — the prompt is sent to the images API to produce a square PNG. In `TESTING = True` mode (set in `server/instagram/instagram.py`), a static `test.png` is used instead and a smaller model handles text selection, avoiding API cost during development.
+3. **Composition** — Pillow overlays the excerpt onto the image at the requested placement and colour, then applies the selected filter. The composed result is stored in memory and served via a dedicated image endpoint.
+
+### API endpoints
+
+All endpoints require write access.
+
+| Method | Path | Description |
+| ------ | ---- | ----------- |
+| POST | `/api/instagram/generate` | Full pipeline: excerpt + prompt from LLM → image → text overlay → filter → stored; returns `InstagramData` with image URL |
+| POST | `/api/instagram/update` | Re-overlays current excerpt + text spec + filter onto the stored raw image; no LLM call |
+| POST | `/api/instagram/regenerate` | Regenerates the image using an updated prompt; full pipeline re-run |
+| GET | `/api/instagram/filters` | Returns the list of available filter names as `string[]` |
+| GET | `/api/instagram/fonts` | Returns available TTF fonts as `[{ filename, label }]`; scans `server/instagram/fonts/` |
+| GET | `/api/instagram/image/{poem_id}` | Serves the raw generated PNG |
+| GET | `/api/instagram/image/{poem_id}/{filter_name}` | Serves the composed (overlay + filter) PNG |
+
+### Image store
+
+Images are held in the module-level `_image_store` dict keyed by `str(poem_id)` (raw) and `"{poem_id}-{filter_name}"` (composed). The store is in-memory only — it is cleared on server restart and is not shared across workers. This is intentional for a single-author local workflow.
+
+### Filters
+
+Twelve Pillow-based filters in `server/instagram/filters.py`: `none`, `aden`, `clarendon`, `crema`, `gingham`, `juno`, `lark`, `ludwig`, `moon`, `perpetua`, `reyes`, `slumber`. Each is a pure function `apply_filter(image, filter_name) -> Image`. Filter names are served by the API so the frontend never hard-codes them.
+
+### Text overlay
+
+`overlay_text(image, text, font_stem, size, colour, location)` in `server/instagram/instagram.py` handles all nine placement positions (`top-left` through `bottom-right`). When `colour="auto"`, luminance is sampled from the text bounding-box region and black or white is chosen for contrast.
+
+### Frontend dialog
+
+`InstagramButton` (rendered on the poem detail page in RW mode) opens `InstagramDialog` — a native `<dialog>` modal. On mount it fetches fonts and filters in parallel, selects a default font (MRU-first), then calls `/api/instagram/generate`. While the API call is in flight the dialog dims all controls and shows a spinner in the image area.
+
+The dialog tracks two independent dirty flags: `dirtyPrompt` (prompt textarea edited since last generate/regenerate) and `dirtyExcerpt` (excerpt textarea edited since last generate or update). Each has an inline UPDATE button that is enabled only when dirty. Any change to filter, text placement, font, or font size immediately calls `/api/instagram/update`. The REGENERATE IMAGE button resets placement and filter to defaults and re-runs the full pipeline.
+
+Font selections are persisted across sessions via a 16-entry MRU list in `localStorage` (`instagram_mru_fonts`). The font dropdown groups recent fonts above the full alphabetical list.
+
+### Next.js proxy timeout
+
+The Next.js dev proxy default (30 s) is too short for OpenAI image generation. `next.config.mjs` sets `experimental.proxyTimeout: 120_000` to avoid ECONNRESET on slow calls.
 
 ## Limitations and assumptions
 

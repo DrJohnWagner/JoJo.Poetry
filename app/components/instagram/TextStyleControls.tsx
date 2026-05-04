@@ -1,17 +1,15 @@
 "use client"
 
 import { useRef } from "react"
+import type { FontOption } from "@/lib/types"
 
 export type ColourMode = "white" | "black" | "auto" | "custom"
-export type FontFamily = "serif" | "sans"
 
 export interface TextStyle {
     colour: ColourMode
     customColour: string
-    font: FontFamily
+    font: string        // filename stem relative to fonts/, e.g. EB_Garamond/EBGaramond-Regular
     fontSize: number
-    bold: boolean
-    italic: boolean
 }
 
 const COLOUR_OPTIONS: { label: string; value: ColourMode }[] = [
@@ -24,9 +22,13 @@ const COLOUR_OPTIONS: { label: string; value: ColourMode }[] = [
 export default function TextStyleControls({
     value,
     onChange,
+    fonts = [],
+    mruFonts = [],
 }: {
     value: TextStyle
     onChange: (v: TextStyle) => void
+    fonts?: FontOption[]
+    mruFonts?: string[]
 }) {
     const colourInputRef = useRef<HTMLInputElement>(null)
 
@@ -35,7 +37,7 @@ export default function TextStyleControls({
     }
 
     return (
-        <div className="flex flex-wrap items-center gap-x-6 gap-y-3 text-sm">
+        <div className="flex flex-col gap-3 text-sm">
             {/* Colour */}
             <div className="flex items-center gap-2">
                 <span className="text-label text-xs uppercase tracking-widest">Text Colour</span>
@@ -75,49 +77,54 @@ export default function TextStyleControls({
                 )}
             </div>
 
-            {/* Font */}
-            <div className="flex items-center gap-2">
-                <span className="text-label text-xs uppercase tracking-widest">Font</span>
-                <select
-                    value={value.font}
-                    onChange={(e) => set({ font: e.target.value as FontFamily })}
-                    className="bg-transparent text-ink border-b border-[#d4d0c8] text-sm focus:outline-none cursor-pointer"
-                >
-                    <option value="serif">Serif (Default)</option>
-                    <option value="sans">Sans</option>
-                </select>
-            </div>
+            {/* Font + Size */}
+            <div className="flex items-center gap-6">
+                <div className="flex items-center gap-2">
+                    <span className="text-label text-xs uppercase tracking-widest">Font</span>
+                    <select
+                        value={value.font}
+                        onChange={(e) => set({ font: e.target.value })}
+                        className="bg-transparent text-ink border-b border-[#d4d0c8] text-sm focus:outline-none cursor-pointer"
+                    >
+                        {fonts.length === 0 ? (
+                            <option value={value.font}>{value.font}</option>
+                        ) : (() => {
+                            const recentFilenames = new Set(mruFonts)
+                            const labelOf = Object.fromEntries(fonts.map((f) => [f.filename, f.label]))
+                            const recentValid = mruFonts.filter((fn) => fn in labelOf)
+                            const rest = fonts.filter((f) => !recentFilenames.has(f.filename))
+                            return (
+                                <>
+                                    {recentValid.length > 0 && (
+                                        <optgroup label="Recent">
+                                            {recentValid.map((fn) => (
+                                                <option key={fn} value={fn}>{labelOf[fn]}</option>
+                                            ))}
+                                        </optgroup>
+                                    )}
+                                    <optgroup label="All Fonts">
+                                        {rest.map((f) => (
+                                            <option key={f.filename} value={f.filename}>{f.label}</option>
+                                        ))}
+                                    </optgroup>
+                                </>
+                            )
+                        })()}
+                    </select>
+                </div>
 
-            {/* Font Size */}
-            <div className="flex items-center gap-2">
-                <span className="text-label text-xs uppercase tracking-widest">Size</span>
-                <input
-                    type="range"
-                    min={12}
-                    max={96}
-                    value={value.fontSize}
-                    onChange={(e) => set({ fontSize: Number(e.target.value) })}
-                    className="w-24 accent-ink"
-                />
-                <span className="text-muted text-xs w-6 text-right">{value.fontSize}</span>
-            </div>
-
-            {/* Bold / Italic */}
-            <div className="flex items-center gap-3">
-                <button
-                    type="button"
-                    onClick={() => set({ bold: !value.bold })}
-                    className={`font-bold text-base transition-colors ${value.bold ? "text-ink border-b border-ink" : "text-muted hover:text-ink"}`}
-                >
-                    B
-                </button>
-                <button
-                    type="button"
-                    onClick={() => set({ italic: !value.italic })}
-                    className={`italic text-base transition-colors ${value.italic ? "text-ink border-b border-ink" : "text-muted hover:text-ink"}`}
-                >
-                    I
-                </button>
+                <div className="flex items-center gap-2">
+                    <span className="text-label text-xs uppercase tracking-widest">Size</span>
+                    <input
+                        type="range"
+                        min={12}
+                        max={96}
+                        value={value.fontSize}
+                        onChange={(e) => set({ fontSize: Number(e.target.value) })}
+                        className="w-24 accent-ink"
+                    />
+                    <span className="text-muted text-xs w-6 text-right">{value.fontSize}</span>
+                </div>
             </div>
         </div>
     )

@@ -1,13 +1,27 @@
 export default function ExcerptEditor({
     value,
+    dirty,
     onChange,
+    onUpdate,
 }: {
     value: string
+    dirty: boolean
     onChange: (v: string) => void
+    onUpdate: () => void
 }) {
     return (
         <div>
-            <span className="text-label tracking-widest text-xs uppercase block mb-2">Excerpt (Editable)</span>
+            <div className="mb-2 flex items-baseline justify-between">
+                <span className="text-label tracking-widest text-xs uppercase">Excerpt (Editable)</span>
+                <button
+                    type="button"
+                    disabled={!dirty}
+                    onClick={onUpdate}
+                    className="text-label text-xs hover:text-ink disabled:pointer-events-none disabled:opacity-30"
+                >
+                    Update
+                </button>
+            </div>
             <textarea
                 value={value}
                 onChange={(e) => onChange(e.target.value)}

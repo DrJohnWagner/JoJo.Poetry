@@ -1,35 +1,32 @@
-export type Filter = "none" | "clarendon" | "gingham" | "lark" | "juno" | "reyes"
+export type Filter = string
 
-const FILTERS: { label: string; value: Filter }[] = [
-    { label: "None",       value: "none"      },
-    { label: "Clarendon",  value: "clarendon" },
-    { label: "Gingham",    value: "gingham"   },
-    { label: "Lark",       value: "lark"      },
-    { label: "Juno",       value: "juno"      },
-    { label: "Reyes",      value: "reyes"     },
-]
+function toLabel(name: string): string {
+    return name.replace(/\b\w/g, (c) => c.toUpperCase())
+}
 
 export default function FilterSelector({
+    filters,
     value,
     onChange,
 }: {
+    filters: string[]
     value: Filter
     onChange: (v: Filter) => void
 }) {
     return (
         <div>
             <span className="text-label tracking-widest text-xs uppercase block mb-2">Filters</span>
-            <div className="flex gap-3 flex-wrap">
-                {FILTERS.map((f) => (
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                {filters.map((f) => (
                     <button
-                        key={f.value}
+                        key={f}
                         type="button"
-                        onClick={() => onChange(f.value)}
+                        onClick={() => onChange(f)}
                         className="flex flex-col items-center gap-1"
                     >
                         <div
                             className={`w-12 h-12 border transition-colors ${
-                                value === f.value
+                                value === f
                                     ? "border-ink"
                                     : "border-[#d4d0c8] hover:border-ink"
                             }`}
@@ -37,12 +34,12 @@ export default function FilterSelector({
                         />
                         <span
                             className={`text-xs transition-colors ${
-                                value === f.value
+                                value === f
                                     ? "text-ink border-b border-ink"
                                     : "text-muted"
                             }`}
                         >
-                            {f.label}
+                            {toLabel(f)}
                         </span>
                     </button>
                 ))}

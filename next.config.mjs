@@ -2,6 +2,9 @@
 const nextConfig = {
     reactStrictMode: true,
     output: "standalone",
+    experimental: {
+        proxyTimeout: 120_000,
+    },
     async rewrites() {
         return [
             {

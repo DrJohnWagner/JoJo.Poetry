@@ -187,3 +187,7 @@
         @apply h-px bg-rule;
     }
 }
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}

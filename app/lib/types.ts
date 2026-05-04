@@ -1,7 +1,29 @@
 export type UUID = string
 
+export interface FontOption {
+    filename: string
+    label: string
+}
+
+export type Placement =
+    | "top-left" | "top" | "top-right"
+    | "left"     | "centre" | "right"
+    | "bottom-left" | "bottom" | "bottom-right"
+
+export interface TextSpecification {
+    colour: string      // resolved hex, e.g. "#ffffff"
+    font: string        // filename stem relative to fonts/, e.g. EB_Garamond/EBGaramond-Regular
+    size: number
+    location: Placement
+}
+
 export interface InstagramData {
     poem_id: UUID
+    excerpt?: string
+    prompt?: string
+    image?: string
+    filter?: string
+    text?: TextSpecification
 }
 
 export interface Author {

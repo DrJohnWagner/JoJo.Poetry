@@ -1,7 +1,7 @@
-export default function ImagePreview({ src }: { src?: string }) {
+export default function ImagePreview({ src, loading }: { src?: string; loading?: boolean }) {
     return (
         <div className="mx-auto" style={{ width: 400, height: 400 }}>
-            {src ? (
+            {src && !loading ? (
                 <img
                     src={src}
                     alt="Instagram preview"
@@ -19,7 +19,20 @@ export default function ImagePreview({ src }: { src?: string }) {
                     }}
                     className="text-muted text-sm"
                 >
-                    No image yet
+                    {loading ? (
+                        <div
+                            style={{
+                                width: 36,
+                                height: 36,
+                                borderRadius: "50%",
+                                border: "2px solid #d4d0c8",
+                                borderTopColor: "#6b6760",
+                                animation: "spin 0.8s linear infinite",
+                            }}
+                        />
+                    ) : (
+                        "No image yet"
+                    )}
                 </div>
             )}
         </div>

@@ -1,4 +1,4 @@
-import type { ClusterResponse, InstagramData, Poem, PoemSummaryData, PoemSummaryDataList, SearchState, SimilarityBundle } from './types'
+import type { ClusterResponse, FontOption, InstagramData, Poem, PoemSummaryData, PoemSummaryDataList, SearchState, SimilarityBundle } from './types'
 import { hasAdvanced } from "./types"
 import { getPins } from "./pins"
 
@@ -127,17 +127,32 @@ export function fetchClusters(categories: string[]): Promise<ClusterResponse> {
     })
 }
 
-export function instagramGenerate(poem_id: string): Promise<InstagramData> {
-    return req<InstagramData>("/api/instagram/generate", {
+export function instagramFilters(): Promise<string[]> {
+    return req<string[]>("/api/instagram/filters")
+}
+
+export function instagramUpdate(data: InstagramData): Promise<InstagramData> {
+    return req<InstagramData>("/api/instagram/update", {
         method: "POST",
-        body: JSON.stringify({ poem_id }),
+        body: JSON.stringify(data),
     })
 }
 
-export function instagramRegenerate(poem_id: string): Promise<InstagramData> {
+export function instagramFonts(): Promise<FontOption[]> {
+    return req<FontOption[]>("/api/instagram/fonts")
+}
+
+export function instagramGenerate(data: InstagramData): Promise<InstagramData> {
+    return req<InstagramData>("/api/instagram/generate", {
+        method: "POST",
+        body: JSON.stringify(data),
+    })
+}
+
+export function instagramRegenerate(data: InstagramData): Promise<InstagramData> {
     return req<InstagramData>("/api/instagram/regenerate", {
         method: "POST",
-        body: JSON.stringify({ poem_id }),
+        body: JSON.stringify(data),
     })
 }
 
