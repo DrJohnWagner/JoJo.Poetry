@@ -142,3 +142,10 @@ Style:
 Output:
 - Return only the generated image.
 """
+
+ANALYSE_IMAGE = (
+    "Analyse this image and respond with JSON containing exactly two fields:\n"
+    '  "alt_text": a concise, descriptive alt text for the image (max 100 words),\n'
+    '  "is_adult": true if the image has erotic or adult-only content, false otherwise.\n'
+    "Respond with raw JSON only — no markdown, no code fences."
+)

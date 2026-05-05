@@ -23,7 +23,7 @@ import numpy as np
 import pytest
 from fastapi.testclient import TestClient
 
-from database.schemas.poem import Poem
+from server.types import Poem
 from server.app import create_app
 from server.clustering.engine import (
     _auto_k,

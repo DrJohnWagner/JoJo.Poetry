@@ -4,7 +4,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from server.instagram.instagram import generate
+from server.social.pipeline import generate
 
 poem_title = "Second Nature"
 poem_body = (

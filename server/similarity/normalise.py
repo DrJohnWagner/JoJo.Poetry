@@ -1,5 +1,5 @@
 from typing import List, Set, Iterable
-from database.schemas.poem import Poem
+from server.types import Poem
 from server.similarity.types import NormalisedPoemFeatures
 
 # One-to-one or one-to-many mappings for standardising terms

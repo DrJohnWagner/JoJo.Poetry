@@ -1,12 +1,10 @@
 from __future__ import annotations
 
-from datetime import datetime
 from typing import List, Literal, Optional
-from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from database.schemas.poem import PoemSummaryData
+from server.types import PoemSummaryData
 
 VALID_CATEGORIES = frozenset(
     {
@@ -18,7 +16,6 @@ VALID_CATEGORIES = frozenset(
     }
 )
 
-# Maps API category name -> Poem field name
 CATEGORY_FIELD_MAP = {
     "themes": "themes",
     "moods": "moods",

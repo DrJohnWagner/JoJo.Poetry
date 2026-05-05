@@ -24,16 +24,13 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Optional
 
-from pydantic import BaseModel, Field
+from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+from server.types import Author
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 DEFAULT_POEMS_DATABASE = REPO_ROOT / "database" / "Poems.json"
-
-
-class Author(BaseModel):
-    pen_name: str
-    full_name: str
 
 
 AUTHOR = Author(

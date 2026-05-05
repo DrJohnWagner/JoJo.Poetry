@@ -7,13 +7,22 @@ emits slugs. ``id`` is the only identifier shared with the frontend.
 from __future__ import annotations
 
 from datetime import datetime, timezone
-from typing import List, Literal, Optional
+from typing import List, Optional
 from uuid import UUID, uuid4
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response, status
-from pydantic import BaseModel, ConfigDict, Field, ValidationError
+from pydantic import Field, ValidationError
 
-from database.schemas.poem import Author, Award, Poem, PoemSummaryData
+from server.types import (
+    Author,
+    Award,
+    HealthResponse,
+    Poem,
+    PoemCreate,
+    PoemPatch,
+    PoemSummaryData,
+    PoemSummaryDataList,
+)
 
 from server.repository import (
     DuplicateIdError,
@@ -62,103 +71,6 @@ def check_for_external_changes(
     """
     if repo.maybe_reload():
         rebuild_similarity_service(repo.list())
-
-
-# --------------------------------------------------------------- response models
-
-class HealthResponse(BaseModel):
-    """Reports whether the process is up and the repository is usable."""
-    model_config = ConfigDict(extra="forbid")
-
-    status: Literal["ok", "degraded"]
-    poems_loaded: int
-    source: str
-
-
-class PoemSummaryDataList(BaseModel):
-    model_config = ConfigDict(extra="forbid")
-
-    items: List[PoemSummaryData]
-
-
-# --------------------------------------------------------------- request models
-
-class PoemCreate(BaseModel):
-    """Create-payload for POST /api/poems.
-
-    Required: ``title``, ``url``, ``body``, ``project``, ``rating``.
-
-    Optional (defaults applied server-side):
-
-    - ``date`` — defaults to the current UTC time (second precision).
-    - ``awards`` / ``themes`` / ``moods`` /
-      ``poetic_forms`` / ``techniques`` / ``tones_voices`` /
-      ``key_images`` / ``contest_fit`` — default
-      to ``[]``.
-    - ``notes`` — defaults to ``[]``.
-
-    Forbidden on input (the server supplies them):
-
-    - ``id`` — always generated as a fresh UUID v4.
-    - ``lines`` / ``words`` — derived from ``body``.
-
-    ``extra="forbid"`` ensures unknown fields — including any attempt
-    to smuggle in ``id``/``lines``/``words`` — are rejected with 422.
-    """
-    model_config = ConfigDict(extra="forbid")
-
-    title: str = Field(min_length=1)
-    url: str
-    body: str = Field(min_length=1)
-    project: str
-    rating: int = Field(ge=0, le=100)
-
-    date: Optional[datetime] = None
-    awards: List[Award] = Field(default_factory=list)
-    themes: List[str] = Field(default_factory=list)
-    moods: List[str] = Field(default_factory=list)
-    poetic_forms: List[str] = Field(default_factory=list)
-    techniques: List[str] = Field(default_factory=list)
-    tones_voices: List[str] = Field(default_factory=list)
-    key_images: List[str] = Field(default_factory=list)
-    contest_fit: List[str] = Field(default_factory=list)
-    socials: List[str] = Field(default_factory=list)
-    notes: List[str] = Field(default_factory=list)
-    author: Optional[Author] = None
-
-
-class PoemPatch(BaseModel):
-    """Partial-update payload for PATCH /api/poems/{id}.
-
-    Semantics:
-
-    - Only fields present in the request body are applied.
-    - Array fields are **replaced wholesale** (not merged). Sending
-      ``{"themes": []}`` clears them; omitting ``themes`` leaves them.
-    - Required fields cannot be nulled.
-    - Derived fields (``lines``, ``words``) are ignored if supplied and
-      recomputed by the server from ``body``.
-    - ``id`` is immutable and rejected.
-    """
-    model_config = ConfigDict(extra="forbid")
-
-    title: Optional[str] = Field(None, min_length=1)
-    url: Optional[str] = None
-    body: Optional[str] = Field(None, min_length=1)
-    awards: Optional[List[Award]] = None
-    date: Optional[datetime] = None
-    themes: Optional[List[str]] = None
-    moods: Optional[List[str]] = None
-    poetic_forms: Optional[List[str]] = None
-    techniques: Optional[List[str]] = None
-    tones_voices: Optional[List[str]] = None
-    key_images: Optional[List[str]] = None
-    project: Optional[str] = None
-    contest_fit: Optional[List[str]] = None
-    rating: Optional[int] = Field(None, ge=0, le=100)
-    socials: Optional[List[str]] = None
-    notes: Optional[List[str]] = None
-    author: Optional[Author] = None
 
 
 # -------------------------------------------------------------------- helpers
@@ -614,8 +526,6 @@ def patch_poem(
     response_class=Response,
     tags=["poems"],
 )
-
-
 def delete_poem(
     poem_id: UUID,
     repo: PoemRepository = Depends(get_repository),
@@ -627,5 +537,3 @@ def delete_poem(
         rebuild_similarity_service(repo.list())
     except PoemNotFoundError:
         raise HTTPException(status_code=404, detail="Poem not found") from None
-
-

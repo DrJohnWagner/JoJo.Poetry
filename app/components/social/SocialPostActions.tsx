@@ -1,12 +1,13 @@
-import { FaInstagram } from "react-icons/fa"
-import { HiOutlineRefresh } from "react-icons/hi"
+import { HiOutlineRefresh, HiOutlineShare } from "react-icons/hi"
 
-export default function InstagramActions({
+export default function SocialPostActions({
     onRegenerate,
     onPost,
+    canPost,
 }: {
     onRegenerate: () => void
     onPost: () => void
+    canPost: boolean
 }) {
     return (
         <div className="flex justify-center gap-8">
@@ -21,10 +22,11 @@ export default function InstagramActions({
             <button
                 type="button"
                 onClick={onPost}
-                className="flex items-center gap-2 text-label hover:text-ink transition-colors text-sm"
+                disabled={!canPost}
+                className="flex items-center gap-2 text-label hover:text-ink transition-colors text-sm disabled:pointer-events-none disabled:opacity-30"
             >
-                <FaInstagram className="text-base" />
-                Post to Instagram
+                <HiOutlineShare className="text-base" />
+                Publish
             </button>
         </div>
     )

@@ -5,6 +5,11 @@ export interface FontOption {
     label: string
 }
 
+export interface FilterOption {
+    name: string
+    image: string
+}
+
 export type Placement =
     | "top-left" | "top" | "top-right"
     | "left"     | "centre" | "right"
@@ -15,15 +20,53 @@ export interface TextSpecification {
     font: string        // filename stem relative to fonts/, e.g. EB_Garamond/EBGaramond-Regular
     size: number
     location: Placement
+    margin: number
 }
 
-export interface InstagramData {
+export interface SocialGenerateRequest {
     poem_id: UUID
-    excerpt?: string
-    prompt?: string
-    image?: string
     filter?: string
     text?: TextSpecification
+    filter_first?: boolean
+}
+
+export interface SocialGenerateResponse {
+    excerpt: string
+    prompt: string
+    image_url: string
+}
+
+export interface SocialUpdateRequest {
+    poem_id: UUID
+    filter: string
+    excerpt?: string
+    text?: TextSpecification
+    filter_first?: boolean
+}
+
+export interface SocialImageResponse {
+    image_url: string
+}
+
+export interface SocialRegenerateRequest {
+    poem_id: UUID
+    prompt: string
+    excerpt?: string
+    filter?: string
+    text?: TextSpecification
+    filter_first?: boolean
+}
+
+export interface SocialPostRequest {
+    poem_id: UUID
+    filter: string
+    excerpt?: string
+    text?: TextSpecification
+    filter_first?: boolean
+}
+
+export interface SocialPostResponse {
+    socials: string[]
 }
 
 export interface Author {

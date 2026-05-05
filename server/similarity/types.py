@@ -1,8 +1,12 @@
+from __future__ import annotations
+
 from typing import List, Set
 from uuid import UUID
-from pydantic import BaseModel, ConfigDict, Field
 
-from database.schemas.poem import PoemSummaryData
+from pydantic import BaseModel, Field
+
+from server.types import PoemSummaryData
+
 
 class NormalisedPoemFeatures(BaseModel):
     id: UUID
@@ -17,6 +21,7 @@ class NormalisedPoemFeatures(BaseModel):
     form_text: str = ""
     image_text: str = ""
 
+
 class StructuredScoreBreakdown(BaseModel):
     theme_sim: float
     emotion_sim: float
@@ -29,10 +34,12 @@ class StructuredScoreBreakdown(BaseModel):
     imagery_overlap: List[str]
     fit_overlap: List[str]
 
+
 class SemanticScoreBreakdown(BaseModel):
     project_tfidf_sim: float
     form_tfidf_sim: float
     image_tfidf_sim: float
+
 
 class FusedScoreBreakdown(BaseModel):
     overall_score: float
@@ -52,3 +59,12 @@ class NeighbourResult(PoemSummaryData):
 class NeighbourListResult(BaseModel):
     query_id: UUID
     neighbours: List[NeighbourResult]
+
+
+class SimilarityBundle(BaseModel):
+    """All similarity dimensions in a single response."""
+    overall: NeighbourListResult
+    theme: NeighbourListResult
+    form: NeighbourListResult
+    emotion: NeighbourListResult
+    imagery: NeighbourListResult

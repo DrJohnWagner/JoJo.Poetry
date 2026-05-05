@@ -3,22 +3,12 @@ from __future__ import annotations
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query
-from pydantic import BaseModel
 
 from server.api import check_for_external_changes
 from server.similarity.service import get_similarity_service
-from server.similarity.types import NeighbourListResult
+from server.similarity.types import NeighbourListResult, SimilarityBundle
 
 router = APIRouter(tags=["similarity"])
-
-
-class SimilarityBundle(BaseModel):
-    """All similarity dimensions in a single response."""
-    overall: NeighbourListResult
-    theme: NeighbourListResult
-    form: NeighbourListResult
-    emotion: NeighbourListResult
-    imagery: NeighbourListResult
 
 
 @router.get("/api/poems/{poem_id}/similar", response_model=SimilarityBundle)

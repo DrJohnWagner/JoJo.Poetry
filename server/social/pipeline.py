@@ -13,6 +13,8 @@ Steps:
 from __future__ import annotations
 
 import base64
+import io
+from datetime import date
 from pathlib import Path
 from typing import Any
 
@@ -20,12 +22,14 @@ import numpy as np
 from openai import OpenAI
 from PIL import Image, ImageDraw, ImageFont
 
-from server.instagram.parsing import parse_json
-from server.instagram.prompts import GENERATE_PROMPT, GENERATE_IMAGE
+from server.social.parsing import parse_json
+from server.social.prompts import GENERATE_PROMPT, GENERATE_IMAGE, ANALYSE_IMAGE
 
 # ── constants ──────────────────────────────────────────────────────────────────
 
-TESTING = True
+TESTING = False # True
+HASHTAGS = "#Poetry #PoetryCommunity #SpilledInk #PoetryIsNotDead #PoetsOfInstagram"
+ADULT_HASHTAG = "#EroticPoetry"
 
 if TESTING:
     TEXT_MODEL = "gpt-5-mini"
@@ -34,10 +38,8 @@ else:
 
 IMAGE_MODEL = "gpt-image-1.5"
 IMAGE_SIZE = "1024x1024"
-INSTA_WIDTH = 1080
-INSTA_HEIGHT = 1080
 FONTS_DIR = Path(__file__).parent / "fonts"
-TEXT_MARGIN = 60
+TEXT_MARGIN = 30
 
 _PLACEMENT: dict[str, tuple[str, str]] = {
     "top-left":     ("left",   "top"),
@@ -69,6 +71,7 @@ def generate(
     )
     excerpt: str = response["excerpt"]
     prompt: str = response["prompt"]
+    excerpt = f"{excerpt}\n\n— {poem_title}"
 
     if TESTING:
         test_png = Path(__file__).parent / "test.png"
@@ -92,6 +95,64 @@ def generate(
     }
 
 
+def regenerate(
+    prompt: str,
+    existing_image_b64: str,
+) -> dict[str, Any]:
+
+    if TESTING:
+        image = existing_image_b64
+    else:
+        raw_b64 = existing_image_b64.removeprefix("data:image/png;base64,")
+        image_bytes = base64.b64decode(raw_b64)
+        response = OpenAI().images.edit(
+            model=IMAGE_MODEL,
+            image=("image.png", io.BytesIO(image_bytes), "image/png"),
+            prompt=prompt
+            + GENERATE_IMAGE.format(
+                prompt=prompt,
+                image_size=IMAGE_SIZE,
+            ),
+            size=IMAGE_SIZE,
+            n=1,
+        )
+        image = f"data:image/png;base64,{response.data[0].b64_json}"
+
+    return {
+        "prompt": prompt,
+        "image": image,
+    }
+
+
+def analyse_image(image_bytes: bytes) -> dict[str, Any]:
+    if TESTING:
+        return {"alt_text": "An artistic image accompanying a poem.", "is_adult": False}
+
+    b64 = base64.b64encode(image_bytes).decode()
+    response = OpenAI().responses.create(
+        model="gpt-4o-mini",
+        input=[
+            {
+                "role": "user",
+                "content": [
+                    {
+                        "type": "input_image",
+                        "image_url": f"data:image/png;base64,{b64}",
+                    },
+                    {"type": "input_text", "text": ANALYSE_IMAGE},
+                ],
+            }
+        ],
+    )
+    return parse_json(response.output_text)
+
+
+def generate_caption(excerpt: str, poem_url: str, is_adult: bool) -> str:
+    today = date.today()
+    tags = f"{HASHTAGS} {ADULT_HASHTAG}" if is_adult else HASHTAGS
+    return f"-\n\n{excerpt}\n\n{poem_url}\n\nCopyright \u00a9 {today.strftime('%-d %B %Y')} by John Wagner\n\n{tags}"
+
+
 def overlay_text(
     image: Image.Image,
     text: str,
@@ -107,7 +168,7 @@ def overlay_text(
 
     font = ImageFont.truetype(str(FONTS_DIR / f"{font_stem}.ttf"), size)
     horiz, vert = _PLACEMENT.get(location, ("center", "middle"))
-    align = "center" if horiz == "center" else horiz
+    align = "left"
 
     bbox = draw.multiline_textbbox((0, 0), text, font=font, align=align)
     text_w = bbox[2] - bbox[0]

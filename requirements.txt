@@ -7,3 +7,4 @@ numpy
 pillow
 openai
 scipy
+cloudinary==1.40.0

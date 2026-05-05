@@ -1,6 +1,6 @@
 from typing import List, Optional
 from uuid import UUID
-from database.schemas.poem import Poem
+from server.types import Poem
 from server.similarity.types import (
     NormalisedPoemFeatures,
     FusedScoreBreakdown,

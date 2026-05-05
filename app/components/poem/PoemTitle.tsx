@@ -3,7 +3,7 @@
 import Link from "next/link"
 import PinToggle from "../PinToggle"
 import CopyButton from "../CopyButton"
-import InstagramButton from "../instagram/InstagramButton"
+import SocialPostButton from "../social/SocialPostButton"
 import { useAppConfig } from "../AppConfig"
 import { poemToMarkdown } from "@/lib/format"
 
@@ -53,7 +53,7 @@ export default function PoemTitle({
                     />
                 )}
                 {hasPinToggle && !readOnly && (
-                    <InstagramButton poemId={id} />
+                    <SocialPostButton poemId={id} title={title} />
                 )}
             </div>
             {hasPinToggle && (

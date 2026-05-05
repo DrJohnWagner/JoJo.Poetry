@@ -6,7 +6,7 @@ import numpy as np
 from sklearn.cluster import AgglomerativeClustering
 from sklearn.metrics import silhouette_score
 
-from database.schemas.poem import Poem
+from server.types import Poem
 from server.clustering.types import (
     CATEGORY_FIELD_MAP,
     Cluster,

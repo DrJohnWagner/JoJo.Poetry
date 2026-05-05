@@ -1,4 +1,4 @@
-import type { ClusterResponse, FontOption, InstagramData, Poem, PoemSummaryData, PoemSummaryDataList, SearchState, SimilarityBundle } from './types'
+import type { ClusterResponse, FilterOption, FontOption, Poem, PoemSummaryData, PoemSummaryDataList, SearchState, SimilarityBundle, SocialGenerateRequest, SocialGenerateResponse, SocialImageResponse, SocialPostRequest, SocialPostResponse, SocialRegenerateRequest, SocialUpdateRequest } from './types'
 import { hasAdvanced } from "./types"
 import { getPins } from "./pins"
 
@@ -127,46 +127,39 @@ export function fetchClusters(categories: string[]): Promise<ClusterResponse> {
     })
 }
 
-export function instagramFilters(): Promise<string[]> {
-    return req<string[]>("/api/instagram/filters")
+export function socialFilters(): Promise<FilterOption[]> {
+    return req<FilterOption[]>("/api/socials/filters")
 }
 
-export function instagramUpdate(data: InstagramData): Promise<InstagramData> {
-    return req<InstagramData>("/api/instagram/update", {
+export function socialFonts(): Promise<FontOption[]> {
+    return req<FontOption[]>("/api/socials/fonts")
+}
+
+export function socialGenerate(data: SocialGenerateRequest): Promise<SocialGenerateResponse> {
+    return req<SocialGenerateResponse>("/api/socials/generate", {
         method: "POST",
         body: JSON.stringify(data),
     })
 }
 
-export function instagramFonts(): Promise<FontOption[]> {
-    return req<FontOption[]>("/api/instagram/fonts")
-}
-
-export function instagramGenerate(data: InstagramData): Promise<InstagramData> {
-    return req<InstagramData>("/api/instagram/generate", {
+export function socialUpdate(data: SocialUpdateRequest): Promise<SocialImageResponse> {
+    return req<SocialImageResponse>("/api/socials/update", {
         method: "POST",
         body: JSON.stringify(data),
     })
 }
 
-export function instagramRegenerate(data: InstagramData): Promise<InstagramData> {
-    return req<InstagramData>("/api/instagram/regenerate", {
+export function socialRegenerate(data: SocialRegenerateRequest): Promise<SocialImageResponse> {
+    return req<SocialImageResponse>("/api/socials/regenerate", {
         method: "POST",
         body: JSON.stringify(data),
     })
 }
 
-export function instagramRender(poem_id: string): Promise<InstagramData> {
-    return req<InstagramData>("/api/instagram/render", {
+export function socialPost(data: SocialPostRequest): Promise<SocialPostResponse> {
+    return req<SocialPostResponse>("/api/socials/post", {
         method: "POST",
-        body: JSON.stringify({ poem_id }),
-    })
-}
-
-export function instagramPost(poem_id: string): Promise<InstagramData> {
-    return req<InstagramData>("/api/instagram/post", {
-        method: "POST",
-        body: JSON.stringify({ poem_id }),
+        body: JSON.stringify(data),
     })
 }
 

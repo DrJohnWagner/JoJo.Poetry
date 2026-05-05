@@ -69,7 +69,7 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 
 
 def _make_poem(**overrides):
-    from database.schemas.poem import Poem
+    from server.types import Poem
 
     base = {
         "id": str(uuid4()),
