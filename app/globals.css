@@ -139,6 +139,18 @@
         @apply border-transparent text-muted hover:border-ink/30 hover:text-ink;
     }
 
+    .button-tab {
+        @apply text-label border-b pb-0.5 transition-colors;
+    }
+
+    .button-tab-active {
+        @apply border-ink text-ink;
+    }
+
+    .button-tab-inactive {
+        @apply border-transparent text-muted hover:border-ink/30 hover:text-ink;
+    }
+
     .button-text {
         font-family: var(--button-text-font-family);
         font-weight: var(--button-text-font-weight);

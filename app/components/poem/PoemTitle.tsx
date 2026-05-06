@@ -3,10 +3,11 @@
 import Link from "next/link"
 import PinToggle from "../PinToggle"
 import CopyButton from "../CopyButton"
+import PDFButton from "../PDFButton"
 import SocialPostButton from "../social/SocialPostButton"
 import { useAppConfig } from "../AppConfig"
 import { poemToMarkdown } from "@/lib/format"
-
+// FaRegFilePdf
 export default function PoemTitle({
     id,
     title,
@@ -51,6 +52,9 @@ export default function PoemTitle({
                         getText={() => poemToMarkdown(id, true)}
                         variant="filled"
                     />
+                )}
+                {hasPinToggle && (
+                    <PDFButton poemId={id} title={title} />
                 )}
                 {hasPinToggle && !readOnly && (
                     <SocialPostButton poemId={id} title={title} />

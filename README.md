@@ -60,6 +60,13 @@ Two services, one flat JSON data source:
 │   │   ├── semantic.py               # SemanticSimilarityIndex: TF-IDF on project/form/image text
 │   │   ├── fusion.py                 # Weighted blend of structured + semantic; axis weights
 │   │   └── service.py                # PoemSimilarityService; module-level init/rebuild helpers
+│   ├── fonts/
+│   │   ├── router.py                 # FastAPI router: GET /api/fonts; font label parsing (CamelCase + underscore → human name)
+│   │   └── <Family>/                 # TTF font files (Alegreya Sans, Cormorant, EB Garamond, IBM Plex Sans, Inter, Libre Baskerville, Playfair Display, Source Sans 3, Source Serif 4, Work Sans)
+│   ├── pdf/
+│   │   ├── router.py                 # FastAPI router: GET /api/pdf/{poem_id}; fetches poem, renders Jinja2 template, compiles via typst Python package, returns PDF bytes
+│   │   ├── poem.typ                  # Jinja2 + Typst template: paper, margin, font, font_size, colour, columns, gutter, title, author, body variables
+│   │   └── Poem.pdf                  # Static stub (unused once real compilation is live)
 │   └── social/
 │       ├── router.py                 # FastAPI router: /api/socials/* endpoints; in-memory image store
 │       ├── types.py                  # Social API Pydantic models: GenerateRequest/Response, UpdateRequest, ImageResponse, RegenerateRequest, PostRequest/Response, TextSpecification
@@ -69,8 +76,7 @@ Two services, one flat JSON data source:
 │       ├── posting.py                # post_to_instagram (Graph API) + post_to_threads (Threads API); returns post URLs
 │       ├── bsky.py                   # post_to_bsky (AT Protocol / Bluesky); returns post URL
 │       ├── parsing.py                # LLM JSON output extraction utilities
-│       ├── prompts.py                # GENERATE_PROMPT, GENERATE_IMAGE, ANALYSE_IMAGE string templates
-│       └── fonts/                    # TTF font files served by /api/socials/fonts
+│       └── prompts.py                # GENERATE_PROMPT, GENERATE_IMAGE, ANALYSE_IMAGE string templates
 ├── requirements.txt                  # Production Python deps
 ├── requirements-dev.txt              # Adds pytest, httpx, jsonschema
 ├── tests/server/                     # pytest suite
@@ -82,18 +88,25 @@ Two services, one flat JSON data source:
 │   ├── poems/new/page.tsx            # Dedicated create page
 │   ├── layout.tsx, globals.css
 │   ├── components/
+│   │   ├── pdf/
+│   │   │   └── PDFDialog.tsx             # Native <dialog>: fetches and renders PDF via react-pdf (pdfjs); loading overlay with spinner; worker configured via import.meta.url (no CDN)
 │   │   ├── social/
 │   │   │   ├── SocialPostButton.tsx      # Icon button that mounts SocialPostDialog
-│   │   │   ├── SocialPostDialog.tsx      # Native <dialog>: loads fonts + filters, runs generate on mount, owns all state (excerpt, prompt, placement, textStyle, filter, dirty flags, loading message)
+│   │   │   ├── SocialPostDialog.tsx      # Native <dialog>: loads fonts + filters, runs generate on mount, owns all state (excerpt, prompt, placement, textStyle, filter, dirty flags, loading message); single loading overlay on content div
 │   │   │   ├── SocialPostSuccessDialog.tsx # Post-success modal: lists created post URLs with links; dismissed with OK
 │   │   │   ├── SocialPostActions.tsx     # REGENERATE IMAGE and PUBLISH action buttons; POST enabled only when no dirty flags
-│   │   │   ├── ImagePreview.tsx          # Generated image; CSS spinner + loading message while in flight
+│   │   │   ├── ImagePreview.tsx          # Generated image preview; shows "No image yet" when src absent
 │   │   │   ├── ImagePromptInput.tsx      # Prompt textarea; UPDATE (dirty) + REVERT (dirty) buttons
 │   │   │   ├── ExcerptEditor.tsx         # Excerpt textarea; UPDATE (dirty) + REVERT (dirty) buttons
 │   │   │   ├── FilterSelector.tsx        # Filter button grid; thumbnails from /api/socials/filters
 │   │   │   ├── TextPlacementGrid.tsx     # 3×3 grid for 9 text placement positions + margin stepper
-│   │   │   ├── TextStyleControls.tsx     # Font dropdown (MRU / all) + size stepper + colour picker + "apply filter before text" checkbox
-│   │   │   └── StepperInput.tsx          # Reusable ±stepper with configurable smallStep / largeStep
+│   │   │   └── TextStyleControls.tsx     # FontSelector + size stepper + colour picker + "apply filter before text" checkbox
+│   │   ├── FontSelector.tsx          # Font <select> with MRU optgroup (Recent) above full alphabetical list; used by TextStyleControls and PDFControls
+│   │   ├── StepperInput.tsx          # Reusable ±stepper with configurable smallStep / largeStep / decimals (int or float)
+│   │   ├── PDFButton.tsx             # Icon button (self-contained): owns open state, mounts PDFDialog on click; dynamically imported with ssr:false to avoid pdfjs DOMMatrix error
+│   │   ├── DialogTitle.tsx           # Shared dialog header: title + subtitle + Close button
+│   │   ├── Tabs.tsx                  # Tab bar: button-tab / button-tab-active / button-tab-inactive styling
+│   │   ├── Tab.tsx                   # Tab panel: renders children only when tab === value
 │   │   ├── AppConfig.tsx             # React context provider for runtime config (readOnly)
 │   │   ├── Page.tsx                  # Two-column flex wrapper (full-width, centred)
 │   │   ├── LColumn.tsx               # Left column shell: fixed lg flex-basis (62%) + inner max-w-prose
@@ -146,7 +159,7 @@ Two services, one flat JSON data source:
 │   │       ├── SimilarPoems.tsx      # Similar poems aside: all 5 axes (overall/theme/form/emotion/imagery) grouped
 │   │       └── PoemBody.tsx          # Toggle show/hide; showBody prop auto-fetches and expands on mount
 │   └── lib/
-│       ├── api.ts                    # Typed fetch wrappers for poems, similarity, clustering, features, and social endpoints (socialGenerate, socialUpdate, socialRegenerate, socialPost, socialFonts, socialFilters)
+│       ├── api.ts                    # Typed fetch wrappers for poems, similarity, clustering, features, social endpoints, and fetchFonts (GET /api/fonts)
 │       ├── cluster.ts                # Cluster feature/group label helpers for cluster UI rendering
 │       ├── types.ts                  # PoemSummaryData / Poem type hierarchy; Award / SearchState / SimilarityBundle / ClusterResponse; social request/response types (SocialGenerateRequest, SocialPostResponse, etc.); FontOption / TextSpecification / Placement
 │       ├── editable.ts               # Canonical editable-field contract
@@ -581,7 +594,6 @@ All endpoints require write access.
 | POST | `/api/socials/regenerate` | Regenerates the image from an updated prompt; returns image_url |
 | POST | `/api/socials/post` | Analyse, caption, upload to Cloudinary, post to all three platforms; appends URLs to poem.socials; returns socials list |
 | GET | `/api/socials/filters` | Available filter names with preview thumbnails |
-| GET | `/api/socials/fonts` | Available TTF fonts as `[{ filename, label }]` |
 | GET | `/api/socials/image/{poem_id}` | Raw generated PNG |
 | GET | `/api/socials/image/{poem_id}/{filter_name}` | Composed (overlay + filter) PNG |
 
@@ -589,10 +601,12 @@ All endpoints require write access.
 
 `SocialPostButton` (rendered on the poem detail page in RW mode) opens
 `SocialPostDialog` — a native `<dialog>` modal. On mount it fetches fonts
-and filters in parallel, selects a default font (MRU-first), then calls
-`/api/socials/generate`. A loading message below the spinner indicates
-which operation is in flight ("Generating image…", "Updating image…",
-"Regenerating image…", "Posting to social media…").
+(`GET /api/fonts`) and filters in parallel, selects a default font
+(MRU-first), then calls `/api/socials/generate`. While any operation is
+in flight the entire content area is dimmed (`opacity-40`,
+`pointer-events-none`) and an absolutely-positioned overlay shows a CSS
+spinner and the current loading message ("Generating image…", "Updating
+image…", "Regenerating image…", "Posting to social media…").
 
 The dialog tracks two independent dirty flags: `dirtyPrompt` and
 `dirtyExcerpt`. Each has UPDATE and REVERT buttons — UPDATE calls the
@@ -605,8 +619,8 @@ appears, listing the created post URLs as clickable links, dismissed
 with OK.
 
 Font selections are persisted via a 16-entry MRU list in `localStorage`
-(`instagram_mru_fonts`). The font dropdown groups recent fonts above the
-full alphabetical list.
+(`instagram_mru_fonts`). The `FontSelector` component groups recent fonts
+above the full alphabetical list and is shared with the PDF controls.
 
 ### Filters
 
@@ -618,6 +632,45 @@ Twelve Pillow-based filters: `none`, `aden`, `clarendon`, `crema`,
 
 `next.config.mjs` sets `experimental.proxyTimeout: 120_000` to avoid
 ECONNRESET during slow OpenAI image generation calls.
+
+## Fonts endpoint
+
+`GET /api/fonts`
+
+Returns all available TTF fonts as `[{ filename, label }]`. `filename`
+is the path relative to `server/fonts/` without extension (e.g.
+`IBM_Plex_Sans/IBMPlexSans-Regular`); `label` is the human-readable
+name derived by splitting CamelCase and underscore segments. Results are
+cached in memory after the first call.
+
+The same fonts are available to the Typst PDF compiler as system fonts
+(installed on the host). The font endpoint is the authoritative source
+for both the social dialog and the PDF controls.
+
+## PDF generation
+
+`GET /api/pdf/{poem_id}`
+
+Fetches the poem by UUID, renders `server/pdf/poem.typ` via Jinja2 with
+`title`, `author` (pen name from `AUTHOR`), `body`, and layout variables
+(`paper`, `margin`, `font`, `font_size`, `colour`, `columns`, `gutter`),
+then compiles the rendered source to PDF using the `typst` Python package
+(embedded Rust compiler — no external binary). Returns the PDF bytes with
+`Content-Disposition: inline`.
+
+The Typst template renders a two-column layout with a centred title and
+author header. All layout parameters are substituted at render time so
+they can be made configurable from the frontend without touching the template.
+
+### Frontend
+
+`PDFButton` (rendered alongside the copy and social buttons on each poem
+in RW mode) is dynamically imported with `ssr: false` to prevent the
+`pdfjs-dist` module from evaluating in Node.js (where `DOMMatrix` is
+undefined). On click it mounts `PDFDialog` — a native `<dialog>` that
+fetches `GET /api/pdf/{poemId}` and renders the result via `react-pdf`
+(pdfjs v5). A loading overlay with a CSS spinner covers the dialog body
+while the PDF loads.
 
 ## Recent poems endpoint
 

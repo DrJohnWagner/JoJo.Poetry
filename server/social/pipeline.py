@@ -12,8 +12,8 @@ Steps:
 
 from __future__ import annotations
 
-import base64
 import io
+import base64
 from datetime import date
 from pathlib import Path
 from typing import Any
@@ -22,20 +22,25 @@ import numpy as np
 from openai import OpenAI
 from PIL import Image, ImageDraw, ImageFont
 
+from server.social.costs import (
+    add_estimates,
+    cost_estimate,
+    usage_from_image,
+    usage_from_response,
+)
 from server.social.parsing import parse_json
-from server.social.prompts import GENERATE_PROMPT, GENERATE_IMAGE, ANALYSE_IMAGE
+from server.social.prompts import GENERATE_PROMPT, GENERATE_IMAGE
+from server.social.types import CostEstimate
 
 # ── constants ──────────────────────────────────────────────────────────────────
 
-TESTING = False # True
+TESTING = None
+TESTING = Path(__file__).parent / "TESTING.png"
+
 HASHTAGS = "#Poetry #PoetryCommunity #SpilledInk #PoetryIsNotDead #PoetsOfInstagram"
 ADULT_HASHTAG = "#EroticPoetry"
 
-if TESTING:
-    TEXT_MODEL = "gpt-5-mini"
-else:
-    TEXT_MODEL = "gpt-5"
-
+TEXT_MODEL = "gpt-5"
 IMAGE_MODEL = "gpt-image-1.5"
 IMAGE_SIZE = "1024x1024"
 FONTS_DIR = Path(__file__).parent / "fonts"
@@ -59,39 +64,50 @@ def generate(
     poem_body: str,
 ) -> dict[str, Any]:
 
-    response = parse_json(
-        OpenAI().responses.create(
-            model=TEXT_MODEL,
-            input=GENERATE_PROMPT.format(
-                title=poem_title,
-                body=poem_body,
-                image_size=IMAGE_SIZE,
-            ),
-        ).output_text
-    )
-    excerpt: str = response["excerpt"]
-    prompt: str = response["prompt"]
-    excerpt = f"{excerpt}\n\n— {poem_title}"
+    if TESTING and TESTING.exists():
+        with open(TESTING, "rb") as f:
+            return {
+                "excerpt": "excerpt",
+                "prompt": "description",
+                "image": base64.b64encode(f.read()).decode("ascii"),
+                "alt_text": "alt_text",
+                "is_adult": False,
+                "cost": CostEstimate(),
+            }
 
-    if TESTING:
-        test_png = Path(__file__).parent / "test.png"
-        image = f"data:image/png;base64,{base64.b64encode(test_png.read_bytes()).decode()}"
-    else:
-        response = OpenAI().images.generate(
-            model=IMAGE_MODEL,
-            prompt=prompt + GENERATE_IMAGE.format(
-                prompt=prompt,
-                image_size=IMAGE_SIZE
-            ),
-            size=IMAGE_SIZE,
-            n=1,
-        )
-        image = f"data:image/png;base64,{response.data[0].b64_json}"
+    text_response = OpenAI().responses.create(
+        model=TEXT_MODEL,
+        input=GENERATE_PROMPT.format(
+            title=poem_title,
+            body=poem_body,
+            image_size=IMAGE_SIZE,
+        ),
+    )
+    parsed = parse_json(text_response.output_text)
+    excerpt: str = parsed["excerpt"]
+    excerpt = f"{excerpt}\n\n— {poem_title}"
+    description: str = parsed["description"]
+    alt_text: str = parsed["alt_text"]
+    is_adult: bool = parsed["is_adult"]
+
+    image_response = OpenAI().images.generate(
+        model=IMAGE_MODEL,
+        prompt=GENERATE_IMAGE.format(description=description, image_size=IMAGE_SIZE),
+        size=IMAGE_SIZE,
+        n=1,
+    )
+    image = f"data:image/png;base64,{image_response.data[0].b64_json}"
 
     return {
         "excerpt": excerpt,
-        "prompt": prompt,
+        "prompt": description,
         "image": image,
+        "alt_text": alt_text,
+        "is_adult": is_adult,
+        "cost": add_estimates(
+            cost_estimate(TEXT_MODEL, usage_from_response(text_response)),
+            cost_estimate(IMAGE_MODEL, usage_from_image(image_response)),
+        ),
     }
 
 
@@ -100,57 +116,65 @@ def regenerate(
     existing_image_b64: str,
 ) -> dict[str, Any]:
 
-    if TESTING:
-        image = existing_image_b64
-    else:
-        raw_b64 = existing_image_b64.removeprefix("data:image/png;base64,")
-        image_bytes = base64.b64decode(raw_b64)
-        response = OpenAI().images.edit(
-            model=IMAGE_MODEL,
-            image=("image.png", io.BytesIO(image_bytes), "image/png"),
-            prompt=prompt
-            + GENERATE_IMAGE.format(
-                prompt=prompt,
-                image_size=IMAGE_SIZE,
-            ),
-            size=IMAGE_SIZE,
-            n=1,
-        )
-        image = f"data:image/png;base64,{response.data[0].b64_json}"
+    if TESTING and TESTING.exists():
+        with open(TESTING, "rb") as f:
+            return {
+                "prompt": "prompt",
+                "image": base64.b64encode(f.read()).decode("ascii"),
+                "cost": CostEstimate(),
+            }
+
+    raw_b64 = existing_image_b64.removeprefix("data:image/png;base64,")
+    image_bytes = base64.b64decode(raw_b64)
+    image_response = OpenAI().images.edit(
+        model=IMAGE_MODEL,
+        image=("image.png", io.BytesIO(image_bytes), "image/png"),
+        prompt=prompt
+        + GENERATE_IMAGE.format(
+            description=prompt,
+            image_size=IMAGE_SIZE,
+        ),
+        size=IMAGE_SIZE,
+        n=1,
+    )
+    image = f"data:image/png;base64,{image_response.data[0].b64_json}"
+    image_cost = cost_estimate(IMAGE_MODEL, usage_from_image(image_response))
 
     return {
         "prompt": prompt,
         "image": image,
+        "cost": image_cost,
     }
 
 
-def analyse_image(image_bytes: bytes) -> dict[str, Any]:
-    if TESTING:
-        return {"alt_text": "An artistic image accompanying a poem.", "is_adult": False}
-
-    b64 = base64.b64encode(image_bytes).decode()
-    response = OpenAI().responses.create(
-        model="gpt-4o-mini",
-        input=[
-            {
-                "role": "user",
-                "content": [
-                    {
-                        "type": "input_image",
-                        "image_url": f"data:image/png;base64,{b64}",
-                    },
-                    {"type": "input_text", "text": ANALYSE_IMAGE},
-                ],
-            }
-        ],
-    )
-    return parse_json(response.output_text)
-
-
-def generate_caption(excerpt: str, poem_url: str, is_adult: bool) -> str:
+def instagram_caption(excerpt: str, poem_url: str, is_adult: bool) -> str:
     today = date.today()
     tags = f"{HASHTAGS} {ADULT_HASHTAG}" if is_adult else HASHTAGS
     return f"-\n\n{excerpt}\n\n{poem_url}\n\nCopyright \u00a9 {today.strftime('%-d %B %Y')} by John Wagner\n\n{tags}"
+
+
+def threads_caption(excerpt: str, poem_url: str, is_adult: bool) -> str:
+    tags = f"#Poetry {ADULT_HASHTAG}" if is_adult else HASHTAGS
+    caption = f"{excerpt}\n\n{poem_url}\n\n{tags}"
+    if len(caption) > 500:
+        caption = f"{excerpt}\n\n{tags}"
+    if len(caption) > 500:
+        caption = f"{excerpt}"
+    if len(caption) > 500:
+        caption = f"{poem_url}\n\n{tags}"
+    return caption
+
+
+def bsky_caption(excerpt: str, poem_url: str, is_adult: bool) -> str:
+    tags = f"#Poetry {ADULT_HASHTAG}" if is_adult else HASHTAGS
+    caption = f"{excerpt}\n\n{poem_url}\n\n{tags}"
+    if len(caption) > 300:
+        caption = f"{excerpt}\n\n{tags}"
+    if len(caption) > 300:
+        caption = f"{excerpt}"
+    if len(caption) > 300:
+        caption = f"{poem_url}\n\n{tags}"
+    return caption
 
 
 def overlay_text(

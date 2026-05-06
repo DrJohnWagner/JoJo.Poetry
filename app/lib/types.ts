@@ -11,29 +11,54 @@ export interface FilterOption {
 }
 
 export type Placement =
-    | "top-left" | "top" | "top-right"
-    | "left"     | "centre" | "right"
-    | "bottom-left" | "bottom" | "bottom-right"
+    | "top-left"
+    | "top"
+    | "top-right"
+    | "left"
+    | "centre"
+    | "right"
+    | "bottom-left"
+    | "bottom"
+    | "bottom-right"
 
 export interface TextSpecification {
-    colour: string      // resolved hex, e.g. "#ffffff"
-    font: string        // filename stem relative to fonts/, e.g. EB_Garamond/EBGaramond-Regular
+    colour: string // resolved hex, e.g. "#ffffff"
+    font: string // filename stem relative to fonts/, e.g. EB_Garamond/EBGaramond-Regular
     size: number
     location: Placement
     margin: number
+    filter_first?: boolean
+}
+
+export interface SocialCostEstimate {
+    input_tokens: number
+    output_tokens: number
+    cached_input_tokens: number
+    cache_creation_input_tokens: number
+    image_input_tokens: number
+    image_output_tokens: number
+    input_cost_usd: number
+    output_cost_usd: number
+    cached_input_cost_usd: number
+    cache_creation_input_cost_usd: number
+    image_input_cost_usd: number
+    image_output_cost_usd: number
+    total_cost_usd: number
 }
 
 export interface SocialGenerateRequest {
     poem_id: UUID
     filter?: string
     text?: TextSpecification
-    filter_first?: boolean
 }
 
 export interface SocialGenerateResponse {
     excerpt: string
     prompt: string
+    alt_text: string
+    is_adult: boolean
     image_url: string
+    cost: SocialCostEstimate | null
 }
 
 export interface SocialUpdateRequest {
@@ -41,11 +66,11 @@ export interface SocialUpdateRequest {
     filter: string
     excerpt?: string
     text?: TextSpecification
-    filter_first?: boolean
 }
 
 export interface SocialImageResponse {
     image_url: string
+    cost: SocialCostEstimate | null
 }
 
 export interface SocialRegenerateRequest {
@@ -54,7 +79,6 @@ export interface SocialRegenerateRequest {
     excerpt?: string
     filter?: string
     text?: TextSpecification
-    filter_first?: boolean
 }
 
 export interface SocialPostRequest {
@@ -62,11 +86,13 @@ export interface SocialPostRequest {
     filter: string
     excerpt?: string
     text?: TextSpecification
-    filter_first?: boolean
+    alt_text: string
+    is_adult: boolean
 }
 
 export interface SocialPostResponse {
     socials: string[]
+    errors: string[]
 }
 
 export interface Author {
@@ -165,7 +191,6 @@ export interface NeighbourListResult {
     query_id: UUID
     neighbours: NeighbourResult[]
 }
-
 
 export interface SimilarityBundle {
     overall: NeighbourListResult

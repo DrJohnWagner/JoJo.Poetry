@@ -2,19 +2,28 @@ from __future__ import annotations
 
 import base64
 import io
-import re
 from functools import cache
 from pathlib import Path
 from typing import Optional
 from uuid import UUID
 
+import httpx
+
 from fastapi import APIRouter, Depends, HTTPException, Response, status
+from openai import BadRequestError as OpenAIBadRequestError
 from PIL import Image
 
 from server.api import require_write_access
 from server.repository import PoemNotFoundError, PoemRepository, get_repository
 from server.social.filters import FILTER_NAMES, apply_filter
-from server.social.pipeline import generate, regenerate, overlay_text, analyse_image, generate_caption
+from server.social.pipeline import (
+    generate,
+    regenerate,
+    overlay_text,
+    instagram_caption,
+    threads_caption,
+    bsky_caption,
+)
 from server.social.cloud import upload as cloudinary_upload
 from server.social.posting import post_to_instagram, post_to_threads
 from server.social.bsky import post_to_bsky
@@ -31,6 +40,10 @@ router = APIRouter(tags=["social"])
 
 # In-memory image store keyed by poem_id string or "{poem_id}-{filter_name}".
 _image_store: dict[str, bytes] = {}
+
+
+def _filter_first(text: Optional[TextSpecification]) -> bool:
+    return bool(text and text.filter_first)
 
 
 def _store_raw(poem_id: UUID, image_b64: str) -> bytes:
@@ -83,15 +96,28 @@ def generate_post(
         poem = repo.get(data.poem_id)
     except PoemNotFoundError:
         raise HTTPException(status_code=404, detail="Poem not found") from None
-    result = generate(poem.title, poem.body)
+    try:
+        result = generate(poem.title, poem.body)
+    except OpenAIBadRequestError as exc:
+        raise HTTPException(status_code=422, detail=exc.message) from None
 
     raw = _store_raw(data.poem_id, result["image"])
-    image_url = _compose_and_store(data.poem_id, raw, result["excerpt"], data.text, data.filter, data.filter_first)
+    image_url = _compose_and_store(
+        data.poem_id,
+        raw,
+        result["excerpt"],
+        data.text,
+        data.filter,
+        _filter_first(data.text),
+    )
 
     return GenerateResponse(
         excerpt=result["excerpt"],
         prompt=result["prompt"],
+        alt_text=result["alt_text"],
+        is_adult=result["is_adult"],
         image_url=image_url,
+        cost=result.get("cost"),
     )
 
 
@@ -122,43 +148,18 @@ def update(data: UpdateRequest) -> ImageResponse:
         raise HTTPException(status_code=422, detail=f"Unknown filter: {data.filter!r}") from None
 
     raw = _get_raw_or_404(data.poem_id)
-    image_url = _compose_and_store(data.poem_id, raw, data.excerpt, data.text, data.filter, data.filter_first)
+    image_url = _compose_and_store(
+        data.poem_id,
+        raw,
+        data.excerpt,
+        data.text,
+        data.filter,
+        _filter_first(data.text),
+    )
 
     return ImageResponse(image_url=image_url)
 
 
-@router.get("/api/socials/fonts", status_code=status.HTTP_200_OK)
-def fonts() -> list[dict]:
-    return _local_fonts()
-
-
-@cache
-def _local_fonts() -> list[dict]:
-    fonts_dir = Path(__file__).parent / "fonts"
-    entries = []
-    for ttf in sorted(fonts_dir.rglob("*.ttf")):
-        stem = ttf.stem
-        rel = ttf.relative_to(fonts_dir).with_suffix("").as_posix()
-        entries.append({"filename": rel, "label": _label(stem)})
-    return entries
-
-
-_SPLIT_RE = re.compile(
-    r"(?<=[a-z])(?=[A-Z])"
-    r"|(?<=[A-Z])(?=[A-Z][a-z])"
-    r"|(?<=[a-zA-Z])(?=[0-9])"
-)
-
-
-def _label(stem: str) -> str:
-    family_raw, _, style_raw = stem.partition("-")
-    family = " ".join(
-        word
-        for segment in family_raw.replace("_", " ").split()
-        for word in _SPLIT_RE.split(segment)
-    )
-    style = " ".join(_SPLIT_RE.split(style_raw)) if style_raw else ""
-    return f"{family} {style}".strip()
 
 
 @router.get("/api/socials/image/{poem_id}", status_code=status.HTTP_200_OK)
@@ -186,12 +187,22 @@ def get_filtered_image(poem_id: UUID, filter_name: str) -> Response:
 def regenerate_post(data: RegenerateRequest) -> ImageResponse:
     original = _get_raw_or_404(data.poem_id)
     existing_b64 = f"data:image/png;base64,{base64.b64encode(original).decode()}"
-    result = regenerate(data.prompt, existing_b64)
+    try:
+        result = regenerate(data.prompt, existing_b64)
+    except OpenAIBadRequestError as exc:
+        raise HTTPException(status_code=422, detail=exc.message) from None
 
     raw = _store_raw(data.poem_id, result["image"])
-    image_url = _compose_and_store(data.poem_id, raw, data.excerpt, data.text, data.filter, data.filter_first)
+    image_url = _compose_and_store(
+        data.poem_id,
+        raw,
+        data.excerpt,
+        data.text,
+        data.filter,
+        _filter_first(data.text),
+    )
 
-    return ImageResponse(image_url=image_url)
+    return ImageResponse(image_url=image_url, cost=result.get("cost"))
 
 
 @router.post(
@@ -212,17 +223,60 @@ def post(
         raise HTTPException(status_code=404, detail="Poem not found") from None
 
     raw = _get_raw_or_404(data.poem_id)
-    _compose_and_store(data.poem_id, raw, data.excerpt, data.text, data.filter, data.filter_first)
+    _compose_and_store(
+        data.poem_id,
+        raw,
+        data.excerpt,
+        data.text,
+        data.filter,
+        _filter_first(data.text),
+    )
     composed = _image_store[f"{data.poem_id}-{data.filter}"]
 
-    analysis = analyse_image(composed)
-    caption = generate_caption(data.excerpt or "", poem.url, analysis["is_adult"])
+    excerpt = data.excerpt or ""
+    alt_text = data.alt_text or ""
+    is_adult = data.is_adult or False
     image_url = cloudinary_upload(composed)
-    instagram_url = post_to_instagram(image_url, caption, analysis["alt_text"])
-    threads_url = post_to_threads(image_url, caption)
-    bsky_url = post_to_bsky(composed, caption)
 
-    new_socials = [u for u in [instagram_url, threads_url, bsky_url] if u]
-    repo.update(data.poem_id, {"socials": list(poem.socials) + new_socials})
+    posted_urls: list[str] = []
+    post_errors: list[str] = []
+    instagram_url: Optional[str] = None
 
-    return PostResponse(socials=new_socials)
+    def attempt(label: str, fn):
+        try:
+            url = fn()
+            if url:
+                posted_urls.append(url)
+            return url
+        except httpx.HTTPStatusError as exc:
+            try:
+                body = exc.response.json()
+                msg = body.get("error", {}).get("message") or str(body)
+            except Exception:
+                msg = exc.response.text or str(exc)
+            post_errors.append(f"{label}: {msg}")
+            return None
+
+    instagram_url = attempt(
+        "Instagram",
+        lambda: post_to_instagram(
+            image_url,
+            instagram_caption(excerpt, poem.url, is_adult),
+            alt_text,
+        ),
+    )
+    attempt(
+        "Threads",
+        lambda: post_to_threads(
+            image_url, threads_caption(excerpt, poem.url, is_adult)
+        ),
+    )
+    attempt(
+        "Bluesky",
+        lambda: post_to_bsky(composed, bsky_caption(excerpt, poem.url, is_adult)),
+    )
+
+    if instagram_url:
+        repo.update(data.poem_id, {"socials": list(poem.socials) + [instagram_url]})
+
+    return PostResponse(socials=posted_urls, errors=post_errors)

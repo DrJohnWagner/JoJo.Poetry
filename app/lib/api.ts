@@ -131,8 +131,8 @@ export function socialFilters(): Promise<FilterOption[]> {
     return req<FilterOption[]>("/api/socials/filters")
 }
 
-export function socialFonts(): Promise<FontOption[]> {
-    return req<FontOption[]>("/api/socials/fonts")
+export function fetchFonts(): Promise<FontOption[]> {
+    return req<FontOption[]>("/api/fonts")
 }
 
 export function socialGenerate(data: SocialGenerateRequest): Promise<SocialGenerateResponse> {

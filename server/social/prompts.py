@@ -1,100 +1,57 @@
 GENERATE_PROMPT = """\
-You are an Instagram poem image designer. You convert a poem into a single, high-quality Instagram image concept.
+You convert a poem into one square image concept.
 
-INPUT:
-A poem (title + body).
+EXCERPT
+Select ONE contiguous excerpt (5–11 lines), preserved exactly.
+It must stand alone and contain a clear pressure moment (shift, escalation, rupture).
+Prefer passages that can exist as a single moment in a single physical space.
 
-OUTPUT:
-Return ONLY valid JSON with:
-- excerpt
-- prompt
+SCENE
+Build ONE scene from the excerpt appropriate for a {image_size} square image.
+Keep only essential elements. Choose, don’t include.
+Use at most two human agents. If two, they must be separate bodies.
+One subject must dominate the frame; everything else is subordinate.
 
-No explanation. No analysis. No extra text.
+ALT TEXT (FOR THE VISUALLY IMPAIRED)
+Write concise "alt text" suitable for describing the image to the visually impaired.
+Include subject, action, setting, mood and composition. Do not include poem text.
 
----
+IS ADULT CONTENT?
+Determine if the image contains erotic or adult-only content. Return true or false.
 
-## TASK
+DETAILED DESCRIPTION (FOR IMAGE GENERATION)
+Describe ONE clear, renderable scene in precise, concrete terms.
 
-1. Analyse the poem title + body
-2. Select ONE excerpt (5–11 consecutive lines) that carries tension and stands on its own
-3. Generate a precise image prompt for a {image_size} Instagram image
+Include:
+- the primary subject and any secondary agent (limited set, clearly separate)
+- the physical action or state (visible behaviour: gesture, posture, imbalance, interruption)
+- spatial arrangement (foreground / midground / background, relative positions)
+- what visually dominates the frame and what is subordinate
+- key objects only, if essential, with their placement and condition
+- lighting (source, direction, quality) and overall colour palette
+- surface detail or texture where it contributes to the scene
+- background treatment (minimal, blurred or lightly defined)
+- negative space reserved for text overlay
 
----
+Keep it grounded in a single moment in a single physical space.
 
-## 1. EXCERPT SELECTION
+Prefer concrete, visual language over abstraction. Let emotion read through bodies, materials and light, not explanation.
 
-Select ONE contiguous passage from the poem body:
-- 5–11 consecutive lines
-- Preserve wording, line breaks and indentation EXACTLY
+Exclude non-essential elements. Avoid cliché or stock imagery. Do not split into multiple moments or locations.
 
-The excerpt must:
-- Carry pressure (shift, rupture, escalation or tension)
-- Not require prior poem context
-- Stand on its own
-
-Avoid:
-- Pure setup or pure resolution
-- Over-explanatory lines
-- Dense or visually unreadable blocks
-
-Silently evaluate multiple candidates and choose the strongest.
-Do NOT output reasoning.
-
----
-
-## 2. IMAGE PROMPT
-
-Write a concise, high-precision prompt for gpt-image-1.5.
-
-Hard requirements:
-- Create a single {image_size} square image.
-
-Scene requirements:
-- Use concrete physical details from the poem (objects, setting, gestures) where available.
-- If the excerpt implies another person or presence, include at least two figures or a clearly implied second presence.
-- Both figures must be clearly legible as participants; do not reduce either to a prop or fragment.
-- Include at least one specific physical action or gesture drawn from the poem when available.
-- Express tension through bodies, distance, posture or gesture — not abstract or psychological language.
-
-Composition requirements:
-- Compose the scene around a clear subject.
-- Avoid empty or filler space; the image should feel complete and balanced.
-- Allow for a natural area of lower visual detail, but do NOT design the image around blank space.
-
-Avoid:
-- generic cinematic styling or “film still” language
-- vague phrases like “holding back speech” or “tension in the air”
-- invented visual elements not grounded in the poem
-
-Output a structured prompt with:
-
-SCENE:
-- concrete setting and objects from the poem
-- who is present and where they are positioned relative to each other
-
-ACTION / RESTRAINT:
-- visible physical behaviour or near-action (gesture, posture, distance)
-- where the tension sits spatially
-
-COMPOSITION:
-- framing and camera position
-- how subjects are arranged in the frame
-
-LIGHTING:
-- simple, coherent light source
-
-STYLE:
-- restrained, naturalistic, non-glossy
-
----
+IMPORTANT: Provide a fully specified description. Do not optimise for brevity. Include all visually relevant details needed to render the scene faithfully.
 
 ## OUTPUT FORMAT (STRICT)
 
-Return ONLY valid JSON:
+Return ONLY valid JSON. No explanation, no comments, no trailing text.
+
+Use exactly this structure:
 
 {{
-    "excerpt": "...",
-    "prompt": "..."
+    "excerpt": "<string>",
+    "description": "<string>",
+    "alt_text": "<string>",
+    "is_adult": <boolean>
 }}
 
 ## INPUT
@@ -107,45 +64,13 @@ POEM BODY:
 """
 
 GENERATE_IMAGE = """\
-{prompt}
+Create a single {image_size} square image.
 
-Hard requirements:
-- Create a single {image_size} square image.
+DETAILED DESCRIPTION
+{description}
 
-- Follow the SCENE, ACTION / RESTRAINT, COMPOSITION, LIGHTING and STYLE instructions precisely.
-- Use concrete, physical details as described; do not generalise or simplify the scene.
-- Preserve all specified spatial relationships between subjects and objects.
+---
 
-People and presence:
-- If multiple figures are specified, all must be clearly visible and legible as participants.
-- Do not crop, obscure or reduce any required figure to a fragment or background element.
-
-Action and tension:
-- Depict the described physical action or restraint exactly.
-- Express tension through posture, distance, gesture and environment.
-- Do not replace physical action with abstract mood or interpretation.
-
-Composition:
-- Maintain a balanced, subject-driven composition.
-- Avoid empty or filler areas that do not serve the scene.
-- The image should feel complete and natural, not staged or designed as a background.
-
-Lighting:
-- Use a single coherent light source as described.
-- Do not introduce artificial gradients, vignettes or stylistic lighting not specified.
-
-Style:
-- Keep the image restrained and naturalistic.
-- Avoid cinematic, glossy or “film still” aesthetics.
-- Avoid cliché visual motifs or symbolic substitutions.
-
-Output:
+## OUTPUT FORMAT (STRICT)
 - Return only the generated image.
 """
-
-ANALYSE_IMAGE = (
-    "Analyse this image and respond with JSON containing exactly two fields:\n"
-    '  "alt_text": a concise, descriptive alt text for the image (max 100 words),\n'
-    '  "is_adult": true if the image has erotic or adult-only content, false otherwise.\n'
-    "Respond with raw JSON only — no markdown, no code fences."
-)
