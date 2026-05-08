@@ -266,6 +266,13 @@ export default function SocialPostDialog({
         applyUpdate()
     }
 
+    async function handleCopy() {
+        if (!image) return
+        const response = await fetch(image)
+        const blob = await response.blob()
+        await navigator.clipboard.write([new ClipboardItem({ "image/png": blob })])
+    }
+
     function handleRegenerate() {
         setFilter("none")
         setPlacement(DEFAULT_PLACEMENT)
@@ -322,11 +329,16 @@ export default function SocialPostDialog({
                 onClose={handleClose}
             />
             <div className="relative">
-                <div className={`space-y-7 px-8 py-2${loading ? " pointer-events-none select-none opacity-40" : ""}`}>
+                <div
+                    className={`space-y-7 px-8 py-2${loading ? "pointer-events-none select-none opacity-40" : ""}`}
+                >
                     <div className="grid grid-cols-[max-content_max-content] gap-8">
                         <div className="flex flex-col justify-center gap-3">
                             <ImagePreview src={image} />
-                            <ErrorMessage message={error} className="text-meta" />
+                            <ErrorMessage
+                                message={error}
+                                className="text-meta"
+                            />
                         </div>
                         <div className="flex justify-center">
                             <FilterSelector
@@ -409,6 +421,7 @@ export default function SocialPostDialog({
                         <div className="my-5">
                             <SocialPostActions
                                 onRegenerate={handleRegenerate}
+                                onCopy={handleCopy}
                                 onPost={handlePost}
                                 canPost={
                                     excerpt === savedExcerpt &&
@@ -419,9 +432,11 @@ export default function SocialPostDialog({
                     </div>
                 </div>
                 {loading && (
-                    <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">
+                    <div className="absolute inset-0 flex flex-col items-center justify-start gap-3 pt-[25%]">
                         <div className="h-9 w-9 animate-spin rounded-full border-2 border-[#d4d0c8] border-t-[#6b6760]" />
-                        <span className="text-muted text-sm">{loadingMessage}</span>
+                        <span className="text-lg text-muted">
+                            {loadingMessage}
+                        </span>
                     </div>
                 )}
             </div>

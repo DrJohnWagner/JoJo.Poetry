@@ -4,6 +4,7 @@ import re
 from functools import cache
 from pathlib import Path
 
+from fontTools.ttLib import TTFont
 from fastapi import APIRouter, status
 
 router = APIRouter(prefix="/api/fonts", tags=["fonts"])
@@ -28,12 +29,25 @@ def font_label(stem: str) -> str:
     return f"{family} {style}".strip()
 
 
+def read_family(path: Path) -> str:
+    names = {
+        r.nameID: r.toUnicode()
+        for r in TTFont(str(path), lazy=True)["name"].names
+        if r.platformID == 3
+    }
+    return names.get(16) or names.get(1) or path.parent.name.replace("_", " ")
+
+
 @cache
 def list_fonts() -> list[dict]:
     entries = []
     for ttf in sorted(FONTS_DIR.rglob("*.ttf")):
         rel = ttf.relative_to(FONTS_DIR).with_suffix("").as_posix()
-        entries.append({"filename": rel, "label": font_label(ttf.stem)})
+        entries.append({
+            "filename": rel,
+            "label": font_label(ttf.stem),
+            "family": read_family(ttf),
+        })
     return entries
 
 

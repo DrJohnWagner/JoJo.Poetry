@@ -1,4 +1,4 @@
-import type { ClusterResponse, FilterOption, FontOption, Poem, PoemSummaryData, PoemSummaryDataList, SearchState, SimilarityBundle, SocialGenerateRequest, SocialGenerateResponse, SocialImageResponse, SocialPostRequest, SocialPostResponse, SocialRegenerateRequest, SocialUpdateRequest } from './types'
+import type { ClusterResponse, FilterOption, FontOption, PDFOptions, Poem, PoemSummaryData, PoemSummaryDataList, SearchState, SimilarityBundle, SocialGenerateRequest, SocialGenerateResponse, SocialImageResponse, SocialPostRequest, SocialPostResponse, SocialRegenerateRequest, SocialUpdateRequest } from './types'
 import { hasAdvanced } from "./types"
 import { getPins } from "./pins"
 
@@ -98,6 +98,25 @@ export function deletePoem(id: string): Promise<void> {
     })
 }
 
+export async function fetchPdf(poemId: string, options: PDFOptions): Promise<Blob> {
+    const res = await fetch(`${BASE}/api/pdf/${encodeURIComponent(poemId)}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(options),
+        cache: "no-store",
+    })
+    if (!res.ok) {
+        let detail = `${res.status} ${res.statusText}`
+        try {
+            const body = await res.json()
+            if (body?.detail)
+                detail = typeof body.detail === "string" ? body.detail : JSON.stringify(body.detail)
+        } catch {}
+        throw new Error(detail)
+    }
+    return res.blob()
+}
+
 export function fetchRecentPoems(k: number = 12): Promise<PoemSummaryDataList> {
     return req<PoemSummaryDataList>(`/api/poems/recent?k=${k}`)
 }
@@ -160,6 +179,13 @@ export function socialPost(data: SocialPostRequest): Promise<SocialPostResponse>
     return req<SocialPostResponse>("/api/socials/post", {
         method: "POST",
         body: JSON.stringify(data),
+    })
+}
+
+export function pdfPost(poemId: string, options: PDFOptions): Promise<SocialPostResponse> {
+    return req<SocialPostResponse>(`/api/pdf/${encodeURIComponent(poemId)}/post`, {
+        method: "POST",
+        body: JSON.stringify(options),
     })
 }
 

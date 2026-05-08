@@ -1,7 +1,7 @@
+"""Fused similarity: blend structured (Jaccard) and semantic (TF-IDF) scores with fixed axis weights."""
 from server.similarity.types import StructuredScoreBreakdown, SemanticScoreBreakdown, FusedScoreBreakdown
 
-# Weights for blending structured vs semantic per axis
-# Structured dominates (e.g., 0.8 / 0.2)
+# Per-axis blend weights (structured vs semantic); axes without a text field are structured-only.
 THEME_WEIGHTS = {"struct": 1.0, "sem": 0.0}       # Themes don't have a specific text field here, so just structured
 FORM_WEIGHTS = {"struct": 0.8, "sem": 0.2}        # form metadata vs form_text
 IMAGERY_WEIGHTS = {"struct": 0.8, "sem": 0.2}     # images metadata vs image_text
@@ -18,6 +18,7 @@ OVERALL_AXES_WEIGHTS = {
 }
 
 def compute_fused_similarity(struct: StructuredScoreBreakdown, sem: SemanticScoreBreakdown) -> FusedScoreBreakdown:
+    """Combine structured and semantic breakdowns into a single weighted overall score."""
     theme_score = struct.theme_sim * THEME_WEIGHTS["struct"]
     
     form_score = (struct.form_sim * FORM_WEIGHTS["struct"]) + (sem.form_tfidf_sim * FORM_WEIGHTS["sem"])

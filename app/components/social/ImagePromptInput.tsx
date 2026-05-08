@@ -48,7 +48,7 @@ export default function ImagePromptInput({
                 value={value}
                 onChange={(e) => onChange(e.target.value)}
                 placeholder="Enter or edit the image prompt…"
-                rows={5}
+                rows={7}
                 className="w-full resize-none border-b border-[#d4d0c8] bg-transparent py-1 text-sm text-ink placeholder:text-muted focus:border-ink focus:outline-none"
             />
         </div>

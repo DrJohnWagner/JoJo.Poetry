@@ -1,3 +1,4 @@
+"""Instagram and Threads posting via the Meta Graph API."""
 from __future__ import annotations
 
 import os
@@ -9,6 +10,7 @@ TIMEOUT = 60.0
 
 
 def post_to_instagram(image_url: str, caption: str, alt_text: str = "") -> str:
+    """Three-step Graph API flow: create media container, publish, fetch shortcode; returns the post URL."""
     user_id = os.environ["INSTAGRAM_USER_ID"]
     token = os.environ["INSTAGRAM_ACCESS_TOKEN"]
 
@@ -39,6 +41,7 @@ def post_to_instagram(image_url: str, caption: str, alt_text: str = "") -> str:
 
 
 def post_to_threads(image_url: str, caption: str) -> str:
+    """Three-step Threads API flow: create container, publish, fetch permalink; returns the post URL."""
     user_id = os.environ["THREADS_USER_ID"]
     token = os.environ["THREADS_ACCESS_TOKEN"]
 

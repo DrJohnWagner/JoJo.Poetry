@@ -1,3 +1,4 @@
+"""Bluesky posting via the AT Protocol XRPC API."""
 from __future__ import annotations
 
 import os
@@ -9,6 +10,7 @@ TIMEOUT = 60.0
 
 
 def post_to_bsky(image_bytes: bytes, caption: str) -> str:
+    """Three-step AT Protocol flow: createSession → uploadBlob → createRecord; returns the bsky.app URL."""
     handle = os.environ["BSKY_HANDLE"]
     password = os.environ["BSKY_APP_PASSWORD"]
 

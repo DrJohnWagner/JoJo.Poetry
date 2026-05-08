@@ -1,33 +1,52 @@
-import { HiOutlineRefresh, HiOutlineShare } from "react-icons/hi"
+"use client"
+
+import { useState } from "react"
+import { FaArrowsRotate, FaCheck, FaCopy, FaEllipsis, FaShareNodes } from "react-icons/fa6"
+import ActionButton from "../ActionButton"
 
 export default function SocialPostActions({
     onRegenerate,
+    onCopy,
     onPost,
     canPost,
 }: {
     onRegenerate: () => void
+    onCopy: () => Promise<void>
     onPost: () => void
     canPost: boolean
 }) {
+    const [copyState, setCopyState] = useState<"idle" | "loading" | "copied">("idle")
+
+    async function handleCopy() {
+        if (copyState !== "idle") return
+        setCopyState("loading")
+        try {
+            await onCopy()
+            setCopyState("copied")
+            setTimeout(() => setCopyState("idle"), 2000)
+        } catch {
+            setCopyState("idle")
+        }
+    }
+
     return (
-        <div className="flex justify-center gap-8">
-            <button
-                type="button"
+        <div className="flex justify-center gap-5">
+            <ActionButton
+                icon={FaArrowsRotate}
+                label="Regenerate Image"
                 onClick={onRegenerate}
-                className="flex items-center gap-2 text-label hover:text-ink transition-colors text-sm"
-            >
-                <HiOutlineRefresh className="text-base" />
-                Regenerate Image
-            </button>
-            <button
-                type="button"
+            />
+            <ActionButton
+                icon={copyState === "copied" ? FaCheck : copyState === "loading" ? FaEllipsis : FaCopy}
+                label={copyState === "copied" ? "Copied" : "Copy"}
+                onClick={handleCopy}
+            />
+            <ActionButton
+                icon={FaShareNodes}
+                label="Publish"
                 onClick={onPost}
                 disabled={!canPost}
-                className="flex items-center gap-2 text-label hover:text-ink transition-colors text-sm disabled:pointer-events-none disabled:opacity-30"
-            >
-                <HiOutlineShare className="text-base" />
-                Publish
-            </button>
+            />
         </div>
     )
 }

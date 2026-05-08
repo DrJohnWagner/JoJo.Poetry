@@ -1,3 +1,4 @@
+"""Instagram-style image filters implemented with PIL and NumPy; supports strength blending and alpha preservation."""
 from __future__ import annotations
 
 import numpy as np
@@ -19,6 +20,7 @@ FILTER_NAMES = [
 ]
 
 def apply_filter(image: Image.Image, filter_name: str, strength: float = 1.0) -> Image.Image:
+    """Apply a named filter at the given strength [0, 1]; alpha channel is preserved."""
     name = _normalise_filter_name(filter_name)
     strength = _clamp_strength(strength)
     fn = _FILTERS.get(name)

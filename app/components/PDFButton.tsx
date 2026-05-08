@@ -2,16 +2,18 @@
 
 import { useState } from "react"
 import dynamic from "next/dynamic"
-import { FaRegFilePdf } from "react-icons/fa6"
+import { FaEllipsis, FaRegFilePdf } from "react-icons/fa6"
 
 const PDFDialog = dynamic(() => import("./pdf/PDFDialog"), { ssr: false })
 
 export default function PDFButton({
     poemId,
     title,
+    onUpdate,
 }: {
     poemId: string
     title: string
+    onUpdate?: () => void
 }) {
     const [open, setOpen] = useState(false)
 
@@ -23,13 +25,18 @@ export default function PDFButton({
                 title="Create PDF file of this poem"
                 className="button-icon"
             >
-                <FaRegFilePdf className="text-base" />
+                {open ? (
+                    <FaEllipsis className="text-base" />
+                ) : (
+                    <FaRegFilePdf className="text-base" />
+                )}
             </button>
             {open && (
                 <PDFDialog
                     poemId={poemId}
                     title={title}
                     onClose={() => setOpen(false)}
+                    onUpdate={onUpdate}
                 />
             )}
         </>

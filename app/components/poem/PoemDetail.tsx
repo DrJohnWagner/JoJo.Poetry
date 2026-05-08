@@ -12,6 +12,7 @@ import PoemFeatures from "./PoemFeatures"
 import PoemButtons from "./PoemButtons"
 import PoemEditor from "./PoemEditor"
 import HorizontalRule from "../HorizontalRule"
+import { fetchPoem } from "@/lib/api"
 import { cleanPoetryUrl } from "@/lib/format"
 import PoemAwards from "./PoemAwards"
 import PoemSummary from "./PoemSummary"
@@ -47,7 +48,9 @@ export default function PoemDetail({ poem: initial }: { poem: Poem }) {
     const LARGE = 500
     const [width, setWidth] = useState(SMALL)
 
-    // const { id, title } = poem
+    function handleUpdate() {
+        fetchPoem(poem.id).then(setPoem).catch(() => {})
+    }
 
     if (editing) {
         return (
@@ -95,6 +98,7 @@ export default function PoemDetail({ poem: initial }: { poem: Poem }) {
                     onPinChange={(p) =>
                         setPoem((prev) => ({ ...prev, pinned: p }))
                     }
+                    onUpdate={handleUpdate}
                     clampProject={false}
                     features={[]}
                 />

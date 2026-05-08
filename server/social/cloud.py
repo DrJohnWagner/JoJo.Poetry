@@ -1,3 +1,4 @@
+"""Cloudinary image upload/delete helpers; credentials are read from environment variables."""
 from __future__ import annotations
 
 import os
@@ -15,6 +16,7 @@ def _config() -> None:
 
 
 def upload(image_bytes: bytes) -> str:
+    """Upload raw image bytes to Cloudinary under jojo_poetry/; returns the secure URL."""
     _config()
     result = cloudinary.uploader.upload(
         image_bytes,

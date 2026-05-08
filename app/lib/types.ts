@@ -3,6 +3,7 @@ export type UUID = string
 export interface FontOption {
     filename: string
     label: string
+    family: string
 }
 
 export interface FilterOption {
@@ -182,6 +183,18 @@ export function hasAdvanced(s: SearchState): boolean {
 
 export function isEmptySearch(s: SearchState): boolean {
     return !s.q.trim() && !hasAdvanced(s)
+}
+
+export interface PDFOptions {
+    paper: string
+    margin: number
+    font: string
+    font_size: number
+    colour: string
+    columns: number
+    gutter: number
+    leading: number
+    spacing: number
 }
 
 export interface NeighbourResult extends PoemSummaryData {

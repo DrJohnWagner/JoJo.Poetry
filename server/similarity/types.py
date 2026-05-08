@@ -1,3 +1,4 @@
+"""Pydantic types for the multi-axis poem similarity system."""
 from __future__ import annotations
 
 from typing import List, Set

@@ -4,7 +4,7 @@ import Link from "next/link"
 import PinToggle from "../PinToggle"
 import CopyButton from "../CopyButton"
 import PDFButton from "../PDFButton"
-import SocialPostButton from "../social/SocialPostButton"
+import SocialPostButton from "../SocialPostButton"
 import { useAppConfig } from "../AppConfig"
 import { poemToMarkdown } from "@/lib/format"
 // FaRegFilePdf
@@ -14,12 +14,14 @@ export default function PoemTitle({
     link = true,
     pinned,
     onPinChange,
+    onUpdate,
 }: {
     id: string
     title: string
     link?: boolean
     pinned?: boolean
     onPinChange?: (pinned: boolean) => void
+    onUpdate?: () => void
 }) {
     const { readOnly } = useAppConfig()
     const hasPinToggle = onPinChange !== undefined
@@ -54,10 +56,10 @@ export default function PoemTitle({
                     />
                 )}
                 {hasPinToggle && (
-                    <PDFButton poemId={id} title={title} />
+                    <PDFButton poemId={id} title={title} onUpdate={onUpdate} />
                 )}
                 {hasPinToggle && !readOnly && (
-                    <SocialPostButton poemId={id} title={title} />
+                    <SocialPostButton poemId={id} title={title} onUpdate={onUpdate} />
                 )}
             </div>
             {hasPinToggle && (

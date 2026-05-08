@@ -1,3 +1,4 @@
+"""Pydantic/dataclass types for the social post pipeline: pricing, cost tracking, and API contracts."""
 from __future__ import annotations
 
 from dataclasses import dataclass

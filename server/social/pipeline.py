@@ -1,14 +1,4 @@
-"""
-generate_instagram_post.py
-
-Pipeline: poem text → Instagram image + caption.
-
-Steps:
-  1. Select excerpt, title and image prompt  (gpt-5, text)
-  2. Generate image                          (gpt-image-1.5, images API)
-  3. QA: evaluate image vs overlay           (gpt-5-mini, vision via Responses API)
-  Caption: formatted string, no model call
-"""
+"""Social image pipeline: poem text → excerpt selection → AI image → text overlay → platform captions."""
 
 from __future__ import annotations
 
@@ -34,8 +24,8 @@ from server.social.types import CostEstimate
 
 # ── constants ──────────────────────────────────────────────────────────────────
 
-TESTING = None
 TESTING = Path(__file__).parent / "TESTING.png"
+TESTING = None
 
 HASHTAGS = "#Poetry #PoetryCommunity #SpilledInk #PoetryIsNotDead #PoetsOfInstagram"
 ADULT_HASHTAG = "#EroticPoetry"
@@ -43,7 +33,7 @@ ADULT_HASHTAG = "#EroticPoetry"
 TEXT_MODEL = "gpt-5"
 IMAGE_MODEL = "gpt-image-1.5"
 IMAGE_SIZE = "1024x1024"
-FONTS_DIR = Path(__file__).parent / "fonts"
+FONTS_DIR = Path(__file__).parent.parent / "fonts"
 TEXT_MARGIN = 30
 
 _PLACEMENT: dict[str, tuple[str, str]] = {
@@ -150,11 +140,12 @@ def regenerate(
 def instagram_caption(excerpt: str, poem_url: str, is_adult: bool) -> str:
     today = date.today()
     tags = f"{HASHTAGS} {ADULT_HASHTAG}" if is_adult else HASHTAGS
-    return f"-\n\n{excerpt}\n\n{poem_url}\n\nCopyright \u00a9 {today.strftime('%-d %B %Y')} by John Wagner\n\n{tags}"
+    return f"-\n\n{excerpt}\n\n{poem_url}\n\nCopyright © {today.strftime('%-d %B %Y')} by John Wagner\n\n{tags}"
 
 
 def threads_caption(excerpt: str, poem_url: str, is_adult: bool) -> str:
-    tags = f"#Poetry {ADULT_HASHTAG}" if is_adult else HASHTAGS
+    """Build a Threads caption, truncating progressively to stay within 500 characters."""
+    tags = f"#Poetry {ADULT_HASHTAG}" if is_adult else "#Poetry"
     caption = f"{excerpt}\n\n{poem_url}\n\n{tags}"
     if len(caption) > 500:
         caption = f"{excerpt}\n\n{tags}"
@@ -166,7 +157,8 @@ def threads_caption(excerpt: str, poem_url: str, is_adult: bool) -> str:
 
 
 def bsky_caption(excerpt: str, poem_url: str, is_adult: bool) -> str:
-    tags = f"#Poetry {ADULT_HASHTAG}" if is_adult else HASHTAGS
+    """Build a Bluesky caption, truncating progressively to stay within 300 characters."""
+    tags = f"#Poetry {ADULT_HASHTAG}" if is_adult else "#Poetry"
     caption = f"{excerpt}\n\n{poem_url}\n\n{tags}"
     if len(caption) > 300:
         caption = f"{excerpt}\n\n{tags}"

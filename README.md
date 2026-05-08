@@ -64,19 +64,21 @@ Two services, one flat JSON data source:
 │   │   ├── router.py                 # FastAPI router: GET /api/fonts; font label parsing (CamelCase + underscore → human name)
 │   │   └── <Family>/                 # TTF font files (Alegreya Sans, Cormorant, EB Garamond, IBM Plex Sans, Inter, Libre Baskerville, Playfair Display, Source Sans 3, Source Serif 4, Work Sans)
 │   ├── pdf/
-│   │   ├── router.py                 # FastAPI router: GET /api/pdf/{poem_id}; fetches poem, renders Jinja2 template, compiles via typst Python package, returns PDF bytes
-│   │   ├── poem.typ                  # Jinja2 + Typst template: paper, margin, font, font_size, colour, columns, gutter, title, author, body variables
-│   │   └── Poem.pdf                  # Static stub (unused once real compilation is live)
+│   │   ├── router.py                 # FastAPI router: POST /api/pdf/{poem_id} → PDF bytes; POST /{poem_id}/post → PNG + multi-platform publish; body_to_stanzas splits on blank lines, inserts empty stanza for 3+ blank lines
+│   │   ├── pipeline.py               # png_from_source (Typst → first-page PNG at 150 PPI) + pdf_caption
+│   │   ├── types.py                  # PDFRequest (paper, margin, font, font_size, colour, columns, gutter, leading, spacing) + PDFPostResponse
+│   │   └── poem.typ                  # Jinja2 + Typst template: paper, margin, font, font_size, colour, columns, gutter, title, author, stanzas
 │   └── social/
 │       ├── router.py                 # FastAPI router: /api/socials/* endpoints; in-memory image store
 │       ├── types.py                  # Social API Pydantic models: GenerateRequest/Response, UpdateRequest, ImageResponse, RegenerateRequest, PostRequest/Response, TextSpecification
-│       ├── pipeline.py               # OpenAI pipeline: excerpt + prompt selection (Responses API) → image generation (images API) → text overlay (Pillow); analyse_image (vision); generate_caption
+│       ├── pipeline.py               # OpenAI pipeline: excerpt + image prompt via text model → image generation → text overlay (Pillow); instagram_caption, threads_caption, bsky_caption with platform truncation
+│       ├── costs.py                  # Pricing table (gpt-5, gpt-image-1/1.5) + usage extraction + cost_estimate + add_estimates
 │       ├── filters.py                # Pillow-based filter library: none, aden, clarendon, crema, gingham, juno, lark, ludwig, moon, perpetua, reyes, slumber
 │       ├── cloud.py                  # Cloudinary upload/delete helpers; returns public image URL
 │       ├── posting.py                # post_to_instagram (Graph API) + post_to_threads (Threads API); returns post URLs
 │       ├── bsky.py                   # post_to_bsky (AT Protocol / Bluesky); returns post URL
 │       ├── parsing.py                # LLM JSON output extraction utilities
-│       └── prompts.py                # GENERATE_PROMPT, GENERATE_IMAGE, ANALYSE_IMAGE string templates
+│       └── prompts.py                # GENERATE_PROMPT and GENERATE_IMAGE string templates
 ├── requirements.txt                  # Production Python deps
 ├── requirements-dev.txt              # Adds pytest, httpx, jsonschema
 ├── tests/server/                     # pytest suite
@@ -89,12 +91,13 @@ Two services, one flat JSON data source:
 │   ├── layout.tsx, globals.css
 │   ├── components/
 │   │   ├── pdf/
-│   │   │   └── PDFDialog.tsx             # Native <dialog>: fetches and renders PDF via react-pdf (pdfjs); loading overlay with spinner; worker configured via import.meta.url (no CDN)
+│   │   │   ├── PDFDialog.tsx             # Native <dialog>: fetches and renders PDF via react-pdf (pdfjs); loading overlay with spinner; worker configured via import.meta.url (no CDN)
+│   │   │   ├── PDFControls.tsx           # PDF layout controls: paper, margin, font, size, colour, columns, gutter, leading, spacing
+│   │   │   └── PDFActions.tsx            # Download (Downloaded flash), Save (File System Access API), Copy (first page → PNG → clipboard), Publish; all with idle/loading/done state feedback
 │   │   ├── social/
-│   │   │   ├── SocialPostButton.tsx      # Icon button that mounts SocialPostDialog
 │   │   │   ├── SocialPostDialog.tsx      # Native <dialog>: loads fonts + filters, runs generate on mount, owns all state (excerpt, prompt, placement, textStyle, filter, dirty flags, loading message); single loading overlay on content div
-│   │   │   ├── SocialPostSuccessDialog.tsx # Post-success modal: lists created post URLs with links; dismissed with OK
-│   │   │   ├── SocialPostActions.tsx     # REGENERATE IMAGE and PUBLISH action buttons; POST enabled only when no dirty flags
+│   │   │   ├── SocialPostActions.tsx     # Regenerate, Copy (3-state), Publish action buttons; Publish enabled only when no dirty flags
+│   │   │   ├── UpdateRevertEditor.tsx    # Shared textarea with UPDATE/REVERT buttons; used for excerpt, prompt, and alt text tabs
 │   │   │   ├── ImagePreview.tsx          # Generated image preview; shows "No image yet" when src absent
 │   │   │   ├── ImagePromptInput.tsx      # Prompt textarea; UPDATE (dirty) + REVERT (dirty) buttons
 │   │   │   ├── ExcerptEditor.tsx         # Excerpt textarea; UPDATE (dirty) + REVERT (dirty) buttons
@@ -103,7 +106,9 @@ Two services, one flat JSON data source:
 │   │   │   └── TextStyleControls.tsx     # FontSelector + size stepper + colour picker + "apply filter before text" checkbox
 │   │   ├── FontSelector.tsx          # Font <select> with MRU optgroup (Recent) above full alphabetical list; used by TextStyleControls and PDFControls
 │   │   ├── StepperInput.tsx          # Reusable ±stepper with configurable smallStep / largeStep / decimals (int or float)
-│   │   ├── PDFButton.tsx             # Icon button (self-contained): owns open state, mounts PDFDialog on click; dynamically imported with ssr:false to avoid pdfjs DOMMatrix error
+│   │   ├── PDFButton.tsx             # Icon button (self-contained): owns open state, mounts PDFDialog on click; shows FaEllipsis while dialog is open; dynamically imported with ssr:false to avoid pdfjs DOMMatrix error
+│   │   ├── SocialPostButton.tsx      # Icon button that mounts SocialPostDialog; shows FaEllipsis while dialog is open
+│   │   ├── SocialPostSuccessDialog.tsx # Post-success modal: lists created post URLs as links; dismissed with OK
 │   │   ├── DialogTitle.tsx           # Shared dialog header: title + subtitle + Close button
 │   │   ├── Tabs.tsx                  # Tab bar: button-tab / button-tab-active / button-tab-inactive styling
 │   │   ├── Tab.tsx                   # Tab panel: renders children only when tab === value
@@ -564,21 +569,19 @@ shared metadata tags. The endpoint is read-safe (available in
 
 The social feature creates a 1080×1080 PNG and publishes it to Instagram,
 Threads, and Bluesky in a single operation. It is gated behind
-`require_write_access`. The pipeline runs in five stages:
+`require_write_access`. The pipeline runs in four stages:
 
 1. **Text selection** — the poem title and body are sent to an OpenAI text
-   model (Responses API) which returns a short excerpt and an image prompt
-   as JSON.
+   model (Responses API) which returns a short excerpt, an image prompt,
+   `alt_text`, and an `is_adult` flag as JSON.
 2. **Image generation** — the prompt is sent to the images API to produce a
-   square PNG. In `TESTING = True` mode (set in `server/social/pipeline.py`),
-   a static `test.png` is used instead, avoiding API cost during development.
+   square PNG. Setting `TESTING` to a `Path` in `server/social/pipeline.py`
+   bypasses the API and reads from that file instead.
 3. **Composition** — the raw image is resized to 1080×1080 (Lanczos). Text
    overlay is applied at the requested placement and colour via Pillow, then
    the selected filter is applied. The `filter_first` flag reverses this order
    (filter before text).
-4. **Image analysis** — the composed image is sent to an OpenAI vision model
-   which returns `alt_text` and an `is_adult` flag.
-5. **Publishing** — the composed image is uploaded to Cloudinary to obtain a
+4. **Publishing** — the composed image is uploaded to Cloudinary to obtain a
    public URL. It is then posted to Instagram (Graph API), Threads (Threads
    API), and Bluesky (AT Protocol) in sequence. The URLs of the created posts
    are appended to `poem.socials` and returned to the frontend.
@@ -599,24 +602,27 @@ All endpoints require write access.
 
 ### Frontend dialog
 
-`SocialPostButton` (rendered on the poem detail page in RW mode) opens
-`SocialPostDialog` — a native `<dialog>` modal. On mount it fetches fonts
-(`GET /api/fonts`) and filters in parallel, selects a default font
-(MRU-first), then calls `/api/socials/generate`. While any operation is
-in flight the entire content area is dimmed (`opacity-40`,
-`pointer-events-none`) and an absolutely-positioned overlay shows a CSS
-spinner and the current loading message ("Generating image…", "Updating
-image…", "Regenerating image…", "Posting to social media…").
+`SocialPostButton` (rendered on the poem detail page in RW mode) shows
+`FaEllipsis` while the dialog is open. It opens `SocialPostDialog` — a
+native `<dialog>` modal. On mount it fetches fonts (`GET /api/fonts`) and
+filters in parallel, selects a default font (MRU-first), then calls
+`/api/socials/generate`. While any operation is in flight the entire content
+area is dimmed (`opacity-40`, `pointer-events-none`) and an
+absolutely-positioned overlay shows a CSS spinner and the current loading
+message.
 
-The dialog tracks two independent dirty flags: `dirtyPrompt` and
-`dirtyExcerpt`. Each has UPDATE and REVERT buttons — UPDATE calls the
-relevant endpoint; REVERT snaps back to the last clean value. Any
-change to filter, placement, style, or margin immediately calls
-`/api/socials/update`. PUBLISH is disabled while either flag is set.
+The dialog tracks two independent dirty flags for excerpt and prompt. Each
+is managed by `UpdateRevertEditor` — a shared textarea with UPDATE and REVERT
+buttons. UPDATE calls the relevant endpoint; REVERT snaps back to the last
+clean value. Any change to filter, placement, style, or margin immediately
+calls `/api/socials/update`. PUBLISH is disabled while either flag is set.
+
+`SocialPostActions` has three buttons: Regenerate, Copy (three-state:
+idle / spinner / checkmark, copies the current image to clipboard), and
+Publish.
 
 On successful publish, the dialog closes and `SocialPostSuccessDialog`
-appears, listing the created post URLs as clickable links, dismissed
-with OK.
+appears, listing the created post URLs as clickable links, dismissed with OK.
 
 Font selections are persisted via a 16-entry MRU list in `localStorage`
 (`instagram_mru_fonts`). The `FontSelector` component groups recent fonts
@@ -649,28 +655,47 @@ for both the social dialog and the PDF controls.
 
 ## PDF generation
 
-`GET /api/pdf/{poem_id}`
+`POST /api/pdf/{poem_id}`
 
 Fetches the poem by UUID, renders `server/pdf/poem.typ` via Jinja2 with
-`title`, `author` (pen name from `AUTHOR`), `body`, and layout variables
-(`paper`, `margin`, `font`, `font_size`, `colour`, `columns`, `gutter`),
-then compiles the rendered source to PDF using the `typst` Python package
-(embedded Rust compiler — no external binary). Returns the PDF bytes with
-`Content-Disposition: inline`.
+`title`, `author` (pen name from `AUTHOR`), `stanzas`, and layout variables
+(`paper`, `margin`, `font`, `font_size`, `colour`, `columns`, `gutter`,
+`leading`, `spacing`), then compiles the rendered source to PDF using the
+`typst` Python package (embedded Rust compiler — no external binary). Returns
+the PDF bytes with `Content-Disposition: inline`.
+
+`body_to_stanzas` splits the body on runs of two or more blank lines into a
+list of Typst stanza strings. A gap of exactly `\n\n` is a plain stanza
+break; a gap of `\n\n\n` or more inserts an empty-string stanza, preserving
+the extra vertical spacing visible in the poem window.
+
+`POST /api/pdf/{poem_id}/post`
+
+Generates a PNG of the first page (via `png_from_source`, 150 PPI), uploads
+it to Cloudinary, then posts to Instagram, Threads, and Bluesky. The
+Instagram URL is appended to `poem.socials`. Returns `{ socials, errors }`.
 
 The Typst template renders a two-column layout with a centred title and
-author header. All layout parameters are substituted at render time so
-they can be made configurable from the frontend without touching the template.
+author header. All layout parameters are substituted at render time.
 
 ### Frontend
 
 `PDFButton` (rendered alongside the copy and social buttons on each poem
 in RW mode) is dynamically imported with `ssr: false` to prevent the
 `pdfjs-dist` module from evaluating in Node.js (where `DOMMatrix` is
-undefined). On click it mounts `PDFDialog` — a native `<dialog>` that
-fetches `GET /api/pdf/{poemId}` and renders the result via `react-pdf`
-(pdfjs v5). A loading overlay with a CSS spinner covers the dialog body
-while the PDF loads.
+undefined). It shows `FaEllipsis` while the dialog is open. On click it
+mounts `PDFDialog` — a native `<dialog>` that calls `POST /api/pdf/{poemId}`
+and renders the result via `react-pdf` (pdfjs v5). A loading overlay with a
+CSS spinner covers the dialog body while any operation is in flight.
+
+`PDFControls` exposes all layout parameters: paper size, margin, font (with
+MRU selector), font size, colour, columns, gutter, leading, and spacing.
+
+`PDFActions` provides four buttons, all with state feedback:
+- **Download** — anchor click to browser default location; flashes "Downloaded" + checkmark for 2 s.
+- **Save** — File System Access API (`showSaveFilePicker`); spinner while the picker is open.
+- **Copy** — renders the first page to a canvas via pdfjs at 2× scale, writes PNG to the clipboard; three-state (idle / spinner / checkmark).
+- **Publish** — calls `POST /api/pdf/{poemId}/post`; spinner while in flight.
 
 ## Recent poems endpoint
 

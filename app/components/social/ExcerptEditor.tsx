@@ -40,8 +40,7 @@ export default function ExcerptEditor({
                 value={value}
                 onChange={(e) => onChange(e.target.value)}
                 rows={7}
-                className="w-full resize-none whitespace-pre border-b border-[#d4d0c8] bg-transparent py-1 font-serif text-sm leading-relaxed text-ink placeholder:text-muted focus:outline-none"
-                style={{ fontFamily: "var(--font-serif, Georgia, serif)" }}
+                className="w-full resize-none whitespace-pre border-b border-[#d4d0c8] bg-transparent py-1 font-serif text-base leading-relaxed text-ink placeholder:text-muted focus:outline-none"
                 spellCheck={false}
             />
         </div>

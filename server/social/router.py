@@ -1,3 +1,4 @@
+"""Social post API: generate, update, regenerate, and publish poem images to Instagram, Threads, and Bluesky."""
 from __future__ import annotations
 
 import base64
@@ -67,6 +68,7 @@ def _compose_and_store(
     filter_name: str,
     filter_first: bool = False,
 ) -> str:
+    """Resize to 1080×1080, apply filter and text overlay (order controlled by filter_first), cache result."""
     image = Image.open(io.BytesIO(raw)).resize((1080, 1080), Image.LANCZOS)
     if filter_first:
         image = apply_filter(image, filter_name)
@@ -98,18 +100,19 @@ def generate_post(
         raise HTTPException(status_code=404, detail="Poem not found") from None
     try:
         result = generate(poem.title, poem.body)
+        raw = _store_raw(data.poem_id, result["image"])
+        image_url = _compose_and_store(
+            data.poem_id,
+            raw,
+            result["excerpt"],
+            data.text,
+            data.filter,
+            _filter_first(data.text),
+        )
     except OpenAIBadRequestError as exc:
         raise HTTPException(status_code=422, detail=exc.message) from None
-
-    raw = _store_raw(data.poem_id, result["image"])
-    image_url = _compose_and_store(
-        data.poem_id,
-        raw,
-        result["excerpt"],
-        data.text,
-        data.filter,
-        _filter_first(data.text),
-    )
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=str(exc)) from None
 
     return GenerateResponse(
         excerpt=result["excerpt"],

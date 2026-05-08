@@ -1,3 +1,4 @@
+"""Extract and parse JSON from LLM output, with light repair for common model mistakes."""
 from __future__ import annotations
 
 import json
@@ -5,33 +6,6 @@ import re
 from typing import Any, Optional, Type
 
 from pydantic import BaseModel, TypeAdapter, ValidationError
-
-# from LLMUtilities.parsing.json_parsing import parse_json
-
-# text = """
-# Here is your result:
-
-# ```json
-# {
-#   "name": "JoJo",
-#   "score": 42,
-# }
-# ```
-# """
-
-# data = parse_json(text)
-# print(data)
-
-# WITH VALIDATION:
-# from pydantic import BaseModel
-# from LLMUtilities.parsing.json_parsing import parse_json_as
-
-# class Result(BaseModel):
-#     name: str
-#     score: int
-
-# obj = parse_json_as(text, Result)
-# print(obj.score)
 
 
 _JSON_BLOCK_RE = re.compile(

@@ -1,3 +1,4 @@
+"""Agglomerative clustering of poems over binary tag features with auto k selection."""
 from __future__ import annotations
 
 from typing import Dict, List, Literal, Tuple
@@ -111,6 +112,7 @@ def _build_matrix(
 
 
 def _auto_k(matrix: np.ndarray, n_poems: int) -> int:
+    """Sweep k from 2 to min(n-1, max(3, n//3), 10); return k with highest silhouette score."""
     max_k = min(n_poems - 1, max(3, n_poems // 3), 10)
     if max_k < 2:
         return 0
@@ -145,6 +147,7 @@ def _features_and_label(
     feature_names: List[str],
     top_n: int,
 ) -> Tuple[str, List[str]]:
+    """Rank features by lift (cluster frequency / corpus frequency); label from majority features."""
     if len(cluster_rows) == 0 or not feature_names:
         return "cluster", []
 
@@ -244,6 +247,7 @@ def _empty_response(
 
 
 def run_clustering(poems: List[Poem], req: ClusterRequest) -> ClusterResponse:
+    """Cluster poems by tag overlap; poems with no signal or in undersized clusters go to excluded."""
     categories = sorted(dict.fromkeys(req.categories))
 
     total_poems = len(poems)

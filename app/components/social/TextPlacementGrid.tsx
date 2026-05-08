@@ -1,6 +1,5 @@
 export type { Placement } from "@/lib/types"
 import type { Placement } from "@/lib/types"
-import StepperInput from "./StepperInput"
 
 const GRID: { label: string; value: Placement; symbol: string }[] = [
     { label: "Top Left",     value: "top-left",     symbol: "↖" },
@@ -17,13 +16,9 @@ const GRID: { label: string; value: Placement; symbol: string }[] = [
 export default function TextPlacementGrid({
     value,
     onChange,
-    margin,
-    onMarginChange,
 }: {
     value: Placement
     onChange: (v: Placement) => void
-    margin: number
-    onMarginChange: (v: number) => void
 }) {
     return (
         <div>
@@ -42,23 +37,11 @@ export default function TextPlacementGrid({
                                 ? "border border-ink text-ink"
                                 : "border border-[#d4d0c8] text-muted hover:border-ink hover:text-ink"
                         }`}
-                        style={{ width: 36, height: 36 }}
+                        style={{ width: 40, height: 40 }}
                     >
                         {cell.symbol}
                     </button>
                 ))}
-            </div>
-            <div className="mt-3">
-                <span className="text-label mb-1 block text-xs uppercase tracking-widest">
-                    Margin
-                </span>
-                <StepperInput
-                    value={margin}
-                    onChange={onMarginChange}
-                    min={0}
-                    smallStep={1}
-                    largeStep={5}
-                />
             </div>
         </div>
     )
