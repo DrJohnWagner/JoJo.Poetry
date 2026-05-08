@@ -4,12 +4,14 @@ export default function UpdateRevertEditor({
     onChange,
     onUpdate,
     onRevert,
+    wordWrap = true,
 }: {
     value: string
     dirty: boolean
     onChange: (v: string) => void
     onUpdate?: () => void
     onRevert?: () => void
+    wordWrap?: boolean
 }) {
     const disabledClassName = "disabled:pointer-events-none disabled:opacity-30"
     const buttonClassName = `text-label text-xs hover:text-ink ${disabledClassName}`
@@ -49,7 +51,7 @@ export default function UpdateRevertEditor({
                 value={value}
                 onChange={(e) => onChange(e.target.value)}
                 rows={8}
-                className="w-full resize-none whitespace-pre border-b border-[#d4d0c8] bg-transparent py-1 text-base leading-relaxed text-ink placeholder:text-muted focus:outline-none"
+                className={`w-full resize-none border-b border-[#d4d0c8] bg-transparent py-1 text-base leading-relaxed text-ink placeholder:text-muted focus:outline-none${wordWrap ? "" : " whitespace-pre overflow-x-auto"}`}
                 spellCheck={false}
             />
         </div>

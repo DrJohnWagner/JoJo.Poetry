@@ -110,6 +110,12 @@
           "type": "integer",
           "minimum": 0
       },
+      "mechanism": {
+          "description": "Optional. Description of the poem's mechanisms, one string per paragraph. Defaults to [] when absent.",
+          "type": "array",
+          "default": [],
+          "items": { "type": "string", "minLength": 1 }
+      },
       "notes": {
           "description": "Optional. Editorial notes, one string per note. Defaults to [] when absent.",
           "type": "array",

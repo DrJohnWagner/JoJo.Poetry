@@ -375,6 +375,7 @@ export default function SocialPostDialog({
                                 onChange={(v) => setExcerpt(v)}
                                 onUpdate={handleExcerptUpdate}
                                 onRevert={() => setExcerpt(savedExcerpt)}
+                                wordWrap={false}
                             />
                         </Tab>
                         <Tab tab={1} value={tab}>

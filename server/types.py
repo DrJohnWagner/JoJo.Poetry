@@ -53,6 +53,7 @@ class Poem(PoemSummaryData):
     tones_voices: List[str]
     key_images: List[str]
     contest_fit: List[str]
+    mechanism: List[str] = Field(default_factory=list)
     notes: List[str] = Field(default_factory=list)
     socials: List[str] = Field(default_factory=list)
     author: Optional[Author] = None
@@ -99,6 +100,7 @@ class PoemCreate(BaseModel):
     tones_voices: List[str] = Field(default_factory=list)
     key_images: List[str] = Field(default_factory=list)
     contest_fit: List[str] = Field(default_factory=list)
+    mechanism: List[str] = Field(default_factory=list)
     socials: List[str] = Field(default_factory=list)
     notes: List[str] = Field(default_factory=list)
     author: Optional[Author] = None
@@ -123,5 +125,6 @@ class PoemPatch(BaseModel):
     contest_fit: Optional[List[str]] = None
     rating: Optional[int] = Field(None, ge=0, le=100)
     socials: Optional[List[str]] = None
+    mechanism: Optional[List[str]] = None
     notes: Optional[List[str]] = None
     author: Optional[Author] = None

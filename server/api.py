@@ -11,16 +11,13 @@ from typing import List, Optional
 from uuid import UUID, uuid4
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response, status
-from pydantic import Field, ValidationError
+from pydantic import ValidationError
 
 from server.types import (
-    Author,
-    Award,
     HealthResponse,
     Poem,
     PoemCreate,
     PoemPatch,
-    PoemSummaryData,
     PoemSummaryDataList,
 )
 
@@ -35,11 +32,7 @@ from server.repository import (
 )
 from server.config import (
     AUTHOR,
-    MOOD_FEATURES,
-    POETIC_FORM_FEATURES,
-    TECHNIQUE_FEATURES,
-    THEME_FEATURES,
-    TONE_VOICE_FEATURES,
+    FEATURE_GROUPS,
 )
 from server.similarity.service import rebuild_similarity_service
 
@@ -166,7 +159,6 @@ def _poem_medals(p: Poem) -> List[str]:
 
 router = APIRouter()
 
-
 # ------------------------------------------------------------------ endpoints
 
 @router.get("/health", response_model=HealthResponse, tags=["meta"])
@@ -186,15 +178,6 @@ def get_author() -> dict[str, str]:
     return AUTHOR.model_dump()
 
 
-_FEATURE_GROUPS: dict[str, list[str]] = {
-    "themes": THEME_FEATURES,
-    "moods": MOOD_FEATURES,
-    "poetic_forms": POETIC_FORM_FEATURES,
-    "techniques": TECHNIQUE_FEATURES,
-    "tones_voices": TONE_VOICE_FEATURES,
-}
-
-
 @router.get("/api/features/{group}", response_model=List[str], tags=["meta"])
 def get_features(group: str) -> List[str]:
     """Controlled vocabulary for a tag group.
@@ -202,11 +185,11 @@ def get_features(group: str) -> List[str]:
     ``group`` must be one of: ``themes``, ``moods``, ``poetic_forms``,
     ``techniques``, ``tones_voices``.
     """
-    features = _FEATURE_GROUPS.get(group)
+    features = FEATURE_GROUPS.get(group)
     if features is None:
         raise HTTPException(
             status_code=404,
-            detail=f"Unknown group '{group}'. Allowed: {sorted(_FEATURE_GROUPS)}",
+            detail=f"Unknown group '{group}'. Allowed: {sorted(FEATURE_GROUPS)}",
         )
     return features
 

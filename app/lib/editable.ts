@@ -24,6 +24,7 @@ export const EDITABLE_FIELDS = [
     "key_images",
     "contest_fit",
     "socials",
+    "mechanism",
     "notes",
 ] as const
 export type EditableField = (typeof EDITABLE_FIELDS)[number]
@@ -55,6 +56,7 @@ export interface PoemDraft {
     key_images: string
     contest_fit: string
     socials: string // comma-separated
+    mechanism: string // newline-separated paragraphs
     notes: string // newline-separated
 }
 
@@ -75,6 +77,7 @@ export function draftFromPoem(p: Poem, plainBody: string): PoemDraft {
         key_images: p.key_images.join(", "),
         contest_fit: p.contest_fit.join(", "),
         socials: p.socials.join(", "),
+        mechanism: p.mechanism.join("\n"),
         notes: p.notes.join("\n"),
     }
 }
@@ -120,6 +123,16 @@ export function diffDraft(
         if (next.length !== prev.length || next.some((v, i) => v !== prev[i])) {
             ;(out as Record<string, unknown>)[k] = next
         }
+    }
+    const nextMechanism = draft.mechanism
+        .split("\n")
+        .map((s) => s.trim())
+        .filter(Boolean)
+    if (
+        nextMechanism.length !== base.mechanism.length ||
+        nextMechanism.some((v, i) => v !== base.mechanism[i])
+    ) {
+        out.mechanism = nextMechanism
     }
     const nextNotes = draft.notes
         .split("\n")

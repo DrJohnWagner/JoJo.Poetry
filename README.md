@@ -46,7 +46,7 @@ Two services, one flat JSON data source:
 │   ├── app.py                        # FastAPI factory, CORS, lifespan load + similarity init; load_dotenv() for OPENAI_API_KEY
 │   ├── api.py                        # All routes (read, search, POST/PATCH/DELETE, features vocabulary, awards, recent)
 │   ├── types.py                      # Core poem schema: Author, Award, PoemSummaryData, Poem; poem-endpoint API types: HealthResponse, PoemSummaryDataList, PoemCreate, PoemPatch
-│   ├── config.py                     # Settings (POEMS_DATABASE, READ_ONLY) + controlled-vocabulary constants (THEME_FEATURES, MOOD_FEATURES, POETIC_FORM_FEATURES, TECHNIQUE_FEATURES, TONE_VOICE_FEATURES)
+│   ├── config.py                     # Settings (POEMS_DATABASE, READ_ONLY) + controlled-vocabulary constants (THEME_FEATURES, MOOD_FEATURES, POETIC_FORM_FEATURES, TECHNIQUE_FEATURES, TONE_VOICE_FEATURES) + FEATURE_GROUPS dict
 │   ├── repository.py                 # In-memory, file-backed PoemRepository
 │   ├── clustering/
 │   │   ├── router.py                 # FastAPI router: POST /api/poems/cluster
@@ -97,7 +97,7 @@ Two services, one flat JSON data source:
 │   │   ├── social/
 │   │   │   ├── SocialPostDialog.tsx      # Native <dialog>: loads fonts + filters, runs generate on mount, owns all state (excerpt, prompt, placement, textStyle, filter, dirty flags, loading message); single loading overlay on content div
 │   │   │   ├── SocialPostActions.tsx     # Regenerate, Copy (3-state), Publish action buttons; Publish enabled only when no dirty flags
-│   │   │   ├── UpdateRevertEditor.tsx    # Shared textarea with UPDATE/REVERT buttons; used for excerpt, prompt, and alt text tabs
+│   │   │   ├── UpdateRevertEditor.tsx    # Shared textarea with UPDATE/REVERT buttons; wordWrap prop (default true; false disables wrapping); used for excerpt (wordWrap=false), prompt, and alt text tabs
 │   │   │   ├── ImagePreview.tsx          # Generated image preview; shows "No image yet" when src absent
 │   │   │   ├── ImagePromptInput.tsx      # Prompt textarea; UPDATE (dirty) + REVERT (dirty) buttons
 │   │   │   ├── ExcerptEditor.tsx         # Excerpt textarea; UPDATE (dirty) + REVERT (dirty) buttons
@@ -156,13 +156,14 @@ Two services, one flat JSON data source:
 │   │       ├── PoemNotes.tsx         # Unordered list of per-poem notes
 │   │       ├── PoemSocial.tsx        # Social URL rendered as hostname link
 │   │       ├── InstagramEmbed        # Dynamically imported (ssr: false) from react-social-media-embed; toggled via Show/Hide socials; width and captioned toggles
+│   │       ├── PoemMechanismEditor.tsx # Multi-line textarea for the mechanism field; one paragraph per line
 │   │       ├── PoemEditor.tsx        # Inline editor; receives full Poem loaded on demand
-│   │       ├── PoemDetail.tsx        # Reading view + Edit toggle
+│   │       ├── PoemDetail.tsx        # Reading view + Edit toggle; mechanism field shown with 5-line clamp and SHOW MORE / SHOW LESS toggle
 │   │       ├── PoemCreateForm.tsx    # Dedicated POST form with defaults + guards
 │   │       ├── FeaturesEditor.tsx    # Multi-select for controlled-vocabulary groups (themes/moods/poetic_forms/techniques/tones_voices); fetches options from /api/features/{group}
 │   │       ├── PoemMetadataEditor.tsx# Shared rating/date/url grid; FeaturesEditor for the five controlled-vocab fields; FeatureInput for free-text fields (key_images, contest_fit, socials)
 │   │       ├── SimilarPoems.tsx      # Similar poems aside: all 5 axes (overall/theme/form/emotion/imagery) grouped
-│   │       └── PoemBody.tsx          # Toggle show/hide; showBody prop auto-fetches and expands on mount
+│   │       └── PoemBody.tsx          # Toggle show/hide; showBody prop auto-fetches and expands on mount; numbered prop adds 3-char right-aligned line numbers
 │   └── lib/
 │       ├── api.ts                    # Typed fetch wrappers for poems, similarity, clustering, features, social endpoints, and fetchFonts (GET /api/fonts)
 │       ├── cluster.ts                # Cluster feature/group label helpers for cluster UI rendering
@@ -200,6 +201,7 @@ The runtime Pydantic mirror is `server/types.py`.
 | `lines`, `words`                                                                        | int ≥ 0                         | yes                        | **derived**       | no                            | Recomputed from `body` on every write.                                                             |
 | `socials`                                                                               | `string[]`                      | optional (default `[]`)    | yes               | no                            | Social media post URLs. Appended automatically when a post is published. All entries rendered as hostname links; Instagram URLs additionally rendered as embedded posts via `react-social-media-embed`. |
 | `notes`                                                                                 | `string[]`                      | optional (default `[]`)    | yes               | yes                           | One string per note; edited via multi-line textbox (one line = one note).                          |
+| `mechanism`                                                                             | `string[]`                      | optional (default `[]`)    | yes               | no                            | Authorial description of the poem's mechanisms; one string per paragraph. Displayed on the detail page with a 5-line clamp and SHOW MORE / SHOW LESS toggle; edited via multi-line textbox (one paragraph per line). |
 | `author`                                                                                | `{pen_name, full_name}`         | optional (default `null`)  | yes (API)         | no                            | Author identity. Displayed on the detail page; no inline editor (structured object).               |
 
 Strictness: `extra="forbid"` on the Pydantic model and

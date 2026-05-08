@@ -178,6 +178,14 @@ TONE_VOICE_FEATURES: list[str] = sorted(
     ]
 )
 
+FEATURE_GROUPS: dict[str, list[str]] = {
+    "themes": THEME_FEATURES,
+    "moods": MOOD_FEATURES,
+    "poetic_forms": POETIC_FORM_FEATURES,
+    "techniques": TECHNIQUE_FEATURES,
+    "tones_voices": TONE_VOICE_FEATURES,
+}
+
 #
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(

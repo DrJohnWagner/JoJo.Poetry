@@ -52,12 +52,17 @@ function renderInline(line: string, lineIndex: number): ReactNode[] {
     return nodes
 }
 
-function renderBody(body: string): ReactNode[] {
+function renderBody(body: string, numbered = false): ReactNode[] {
     const normalised = body.replace(/<br\s*\/?>\n?/gi, "\n")
     const lines = normalised.split(/\r?\n/)
 
     return lines.map((line, index) => (
         <Fragment key={`line-${index}`}>
+            {numbered && (
+                <span className="select-none font-mono text-muted">
+                    {String(index + 1).padStart(3)}{" "}
+                </span>
+            )}
             {renderInline(line, index)}
             {index < lines.length - 1 ? "\n" : null}
         </Fragment>
@@ -67,9 +72,11 @@ function renderBody(body: string): ReactNode[] {
 export default function PoemBody({
     poemId,
     showBody = false,
+    numbered = false,
 }: {
     poemId: string
     showBody?: boolean
+    numbered?: boolean
 }) {
     const [open, setOpen] = useState(showBody)
     const [body, setBody] = useState<string | null>(null)
@@ -113,7 +120,7 @@ export default function PoemBody({
             <ErrorMessage message={error} show={open} />
             {open && body !== null && (
                 <div className="mt-4 text-body text-body-poem">
-                    {renderBody(body)}
+                    {renderBody(body, numbered)}
                 </div>
             )}
         </div>

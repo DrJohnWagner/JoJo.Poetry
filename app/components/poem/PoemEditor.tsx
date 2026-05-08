@@ -10,6 +10,7 @@ import {
     isDirty,
     type PoemDraft,
 } from "@/lib/editable"
+import PoemMechanismEditor from "./PoemMechanismEditor"
 import PoemNotesEditor from "./PoemNotesEditor"
 import PoemMetadataEditor, {
     inputCls,
@@ -132,6 +133,11 @@ export default function PoemEditor({
                     style={{ tabSize: 4, MozTabSize: 4 } as React.CSSProperties}
                 />
             </Labelled>
+
+            <PoemMechanismEditor
+                value={draft.mechanism}
+                onChange={(v) => set("mechanism", v)}
+            />
 
             <PoemNotesEditor
                 value={draft.notes}

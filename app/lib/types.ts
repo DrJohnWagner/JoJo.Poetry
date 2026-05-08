@@ -133,6 +133,7 @@ export interface Poem extends ClusterPoem {
     author?: Author
     url: string
     body: string
+    mechanism: string[]
     notes: string[]
     socials: string[]
     // moods: string[]
