@@ -56,7 +56,7 @@ from pathlib import Path
 from typing import Dict, List, Optional
 from uuid import UUID
 
-from database.schemas.poem import Poem
+from server.types import Poem
 
 
 class RepositoryError(RuntimeError):

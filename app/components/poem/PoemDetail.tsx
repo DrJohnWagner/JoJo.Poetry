@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import type { Poem } from "@/lib/types"
 import { useAppConfig } from "../AppConfig"
 import PoemBody from "./PoemBody"
@@ -12,6 +12,7 @@ import PoemFeatures from "./PoemFeatures"
 import PoemButtons from "./PoemButtons"
 import PoemEditor from "./PoemEditor"
 import HorizontalRule from "../HorizontalRule"
+import { fetchPoem } from "@/lib/api"
 import { cleanPoetryUrl } from "@/lib/format"
 import PoemAwards from "./PoemAwards"
 import PoemSummary from "./PoemSummary"
@@ -46,8 +47,19 @@ export default function PoemDetail({ poem: initial }: { poem: Poem }) {
     const SMALL = 350
     const LARGE = 500
     const [width, setWidth] = useState(SMALL)
+    const mechanismRef = useRef<HTMLDivElement>(null)
+    const [mechanismExpanded, setMechanismExpanded] = useState(false)
+    const [mechanismOverflows, setMechanismOverflows] = useState(false)
 
-    // const { id, title } = poem
+    useEffect(() => {
+        const el = mechanismRef.current
+        if (!el || mechanismExpanded) return
+        setMechanismOverflows(el.scrollHeight > el.clientHeight + 1)
+    }, [poem.mechanism, mechanismExpanded])
+
+    function handleUpdate() {
+        fetchPoem(poem.id).then(setPoem).catch(() => {})
+    }
 
     if (editing) {
         return (
@@ -95,6 +107,7 @@ export default function PoemDetail({ poem: initial }: { poem: Poem }) {
                     onPinChange={(p) =>
                         setPoem((prev) => ({ ...prev, pinned: p }))
                     }
+                    onUpdate={handleUpdate}
                     clampProject={false}
                     features={[]}
                 />
@@ -107,6 +120,31 @@ export default function PoemDetail({ poem: initial }: { poem: Poem }) {
             </section>
 
             <HorizontalRule />
+
+            {poem.mechanism.length > 0 && (
+                <>
+                    <section aria-label="Mechanism" className="my-5">
+                        <p className="text-label mb-3">Mechanism</p>
+                        <div
+                            ref={mechanismRef}
+                            className={`font-sans text-sm leading-relaxed text-ink/80 space-y-3${mechanismExpanded ? "" : " line-clamp-5"}`}
+                        >
+                            {poem.mechanism.map((para, i) => (
+                                <p key={i}>{para}</p>
+                            ))}
+                        </div>
+                        {(mechanismOverflows || mechanismExpanded) && (
+                            <button
+                                onClick={() => setMechanismExpanded((e) => !e)}
+                                className="mt-3 text-label hover:text-ink"
+                            >
+                                {mechanismExpanded ? "SHOW LESS" : "SHOW MORE"}
+                            </button>
+                        )}
+                    </section>
+                    <HorizontalRule />
+                </>
+            )}
 
             <dl className="grid grid-cols-1 items-start gap-x-4 gap-y-2 text-[0.95rem] md:grid-cols-[max-content_1fr]">
                 {poem.author && (

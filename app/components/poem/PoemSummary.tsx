@@ -12,6 +12,7 @@ export default function PoemSummary({
     variant = "complete",
     pinned,
     onPinChange,
+    onUpdate,
     clampProject = true,
     showAwards = false,
 }: {
@@ -20,6 +21,7 @@ export default function PoemSummary({
     variant?: Variant
     pinned?: boolean
     onPinChange?: (pinned: boolean) => void
+    onUpdate?: () => void
     clampProject?: boolean
     showAwards?: boolean
 }) {
@@ -30,6 +32,7 @@ export default function PoemSummary({
                 title={poem.title}
                 pinned={pinned}
                 onPinChange={onPinChange}
+                onUpdate={onUpdate}
             />
             <PoemStatistics poem={poem} variant={variant} />
             <PoemProject project={poem.project} clamp={clampProject} />

@@ -7,13 +7,19 @@ emits slugs. ``id`` is the only identifier shared with the frontend.
 from __future__ import annotations
 
 from datetime import datetime, timezone
-from typing import List, Literal, Optional
+from typing import List, Optional
 from uuid import UUID, uuid4
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response, status
-from pydantic import BaseModel, ConfigDict, Field, ValidationError
+from pydantic import ValidationError
 
-from database.schemas.poem import Author, Award, Poem, PoemSummaryData
+from server.types import (
+    HealthResponse,
+    Poem,
+    PoemCreate,
+    PoemPatch,
+    PoemSummaryDataList,
+)
 
 from server.repository import (
     DuplicateIdError,
@@ -26,20 +32,9 @@ from server.repository import (
 )
 from server.config import (
     AUTHOR,
-    MOOD_FEATURES,
-    POETIC_FORM_FEATURES,
-    TECHNIQUE_FEATURES,
-    THEME_FEATURES,
-    TONE_VOICE_FEATURES,
-)
-from server.clustering.engine import run_clustering
-from server.clustering.types import (
-    VALID_CATEGORIES,
-    ClusterRequest,
-    ClusterResponse,
+    FEATURE_GROUPS,
 )
 from server.similarity.service import rebuild_similarity_service
-from server.similarity.types import NeighbourListResult
 
 # ------------------------------------------------------------------ constants
 
@@ -69,103 +64,6 @@ def check_for_external_changes(
     """
     if repo.maybe_reload():
         rebuild_similarity_service(repo.list())
-
-
-# --------------------------------------------------------------- response models
-
-class HealthResponse(BaseModel):
-    """Reports whether the process is up and the repository is usable."""
-    model_config = ConfigDict(extra="forbid")
-
-    status: Literal["ok", "degraded"]
-    poems_loaded: int
-    source: str
-
-
-class PoemSummaryDataList(BaseModel):
-    model_config = ConfigDict(extra="forbid")
-
-    items: List[PoemSummaryData]
-
-
-# --------------------------------------------------------------- request models
-
-class PoemCreate(BaseModel):
-    """Create-payload for POST /api/poems.
-
-    Required: ``title``, ``url``, ``body``, ``project``, ``rating``.
-
-    Optional (defaults applied server-side):
-
-    - ``date`` — defaults to the current UTC time (second precision).
-    - ``awards`` / ``themes`` / ``moods`` /
-      ``poetic_forms`` / ``techniques`` / ``tones_voices`` /
-      ``key_images`` / ``contest_fit`` — default
-      to ``[]``.
-    - ``notes`` — defaults to ``[]``.
-
-    Forbidden on input (the server supplies them):
-
-    - ``id`` — always generated as a fresh UUID v4.
-    - ``lines`` / ``words`` — derived from ``body``.
-
-    ``extra="forbid"`` ensures unknown fields — including any attempt
-    to smuggle in ``id``/``lines``/``words`` — are rejected with 422.
-    """
-    model_config = ConfigDict(extra="forbid")
-
-    title: str = Field(min_length=1)
-    url: str
-    body: str = Field(min_length=1)
-    project: str
-    rating: int = Field(ge=0, le=100)
-
-    date: Optional[datetime] = None
-    awards: List[Award] = Field(default_factory=list)
-    themes: List[str] = Field(default_factory=list)
-    moods: List[str] = Field(default_factory=list)
-    poetic_forms: List[str] = Field(default_factory=list)
-    techniques: List[str] = Field(default_factory=list)
-    tones_voices: List[str] = Field(default_factory=list)
-    key_images: List[str] = Field(default_factory=list)
-    contest_fit: List[str] = Field(default_factory=list)
-    socials: List[str] = Field(default_factory=list)
-    notes: List[str] = Field(default_factory=list)
-    author: Optional[Author] = None
-
-
-class PoemPatch(BaseModel):
-    """Partial-update payload for PATCH /api/poems/{id}.
-
-    Semantics:
-
-    - Only fields present in the request body are applied.
-    - Array fields are **replaced wholesale** (not merged). Sending
-      ``{"themes": []}`` clears them; omitting ``themes`` leaves them.
-    - Required fields cannot be nulled.
-    - Derived fields (``lines``, ``words``) are ignored if supplied and
-      recomputed by the server from ``body``.
-    - ``id`` is immutable and rejected.
-    """
-    model_config = ConfigDict(extra="forbid")
-
-    title: Optional[str] = Field(None, min_length=1)
-    url: Optional[str] = None
-    body: Optional[str] = Field(None, min_length=1)
-    awards: Optional[List[Award]] = None
-    date: Optional[datetime] = None
-    themes: Optional[List[str]] = None
-    moods: Optional[List[str]] = None
-    poetic_forms: Optional[List[str]] = None
-    techniques: Optional[List[str]] = None
-    tones_voices: Optional[List[str]] = None
-    key_images: Optional[List[str]] = None
-    project: Optional[str] = None
-    contest_fit: Optional[List[str]] = None
-    rating: Optional[int] = Field(None, ge=0, le=100)
-    socials: Optional[List[str]] = None
-    notes: Optional[List[str]] = None
-    author: Optional[Author] = None
 
 
 # -------------------------------------------------------------------- helpers
@@ -261,7 +159,6 @@ def _poem_medals(p: Poem) -> List[str]:
 
 router = APIRouter()
 
-
 # ------------------------------------------------------------------ endpoints
 
 @router.get("/health", response_model=HealthResponse, tags=["meta"])
@@ -281,15 +178,6 @@ def get_author() -> dict[str, str]:
     return AUTHOR.model_dump()
 
 
-_FEATURE_GROUPS: dict[str, list[str]] = {
-    "themes": THEME_FEATURES,
-    "moods": MOOD_FEATURES,
-    "poetic_forms": POETIC_FORM_FEATURES,
-    "techniques": TECHNIQUE_FEATURES,
-    "tones_voices": TONE_VOICE_FEATURES,
-}
-
-
 @router.get("/api/features/{group}", response_model=List[str], tags=["meta"])
 def get_features(group: str) -> List[str]:
     """Controlled vocabulary for a tag group.
@@ -297,11 +185,11 @@ def get_features(group: str) -> List[str]:
     ``group`` must be one of: ``themes``, ``moods``, ``poetic_forms``,
     ``techniques``, ``tones_voices``.
     """
-    features = _FEATURE_GROUPS.get(group)
+    features = FEATURE_GROUPS.get(group)
     if features is None:
         raise HTTPException(
             status_code=404,
-            detail=f"Unknown group '{group}'. Allowed: {sorted(_FEATURE_GROUPS)}",
+            detail=f"Unknown group '{group}'. Allowed: {sorted(FEATURE_GROUPS)}",
         )
     return features
 
@@ -533,32 +421,6 @@ def poems_with_awards(
     return PoemSummaryDataList(items=awarded)
 
 
-@router.post("/api/poems/cluster", response_model=ClusterResponse, tags=["poems"])
-def cluster_poems(
-    payload: ClusterRequest,
-    repo: PoemRepository = Depends(get_repository),
-    _: None = Depends(check_for_external_changes),
-) -> ClusterResponse:
-    """Cluster the corpus by one or more metadata categories.
-
-    Categories must be drawn from: ``themes``, ``moods``,
-    ``poetic_forms``, ``techniques``, ``tones_voices``,
-    ``images`` (maps to ``key_images``), ``contest_fit``.
-
-    If ``k`` is omitted the number of clusters is chosen automatically via
-    silhouette-score sweep. Poems in clusters smaller than
-    ``min_cluster_size`` are returned in ``excluded`` with reason
-    ``"cluster too small"``.
-    """
-    bad = [c for c in payload.categories if c not in VALID_CATEGORIES]
-    if bad:
-        raise HTTPException(
-            status_code=422,
-            detail=f"Unknown categories: {bad}. Allowed: {sorted(VALID_CATEGORIES)}",
-        )
-    return run_clustering(repo.list(), payload)
-
-
 @router.get("/api/poems/{poem_id}", response_model=Poem, tags=["poems"])
 def get_poem(
     poem_id: UUID,
@@ -647,8 +509,6 @@ def patch_poem(
     response_class=Response,
     tags=["poems"],
 )
-
-
 def delete_poem(
     poem_id: UUID,
     repo: PoemRepository = Depends(get_repository),
@@ -660,109 +520,3 @@ def delete_poem(
         rebuild_similarity_service(repo.list())
     except PoemNotFoundError:
         raise HTTPException(status_code=404, detail="Poem not found") from None
-
-
-# --------------------------------------------------------- similarity endpoints
-
-class SimilarityBundle(BaseModel):
-    """All similarity dimensions in a single response."""
-    overall: NeighbourListResult
-    theme: NeighbourListResult
-    form: NeighbourListResult
-    emotion: NeighbourListResult
-    imagery: NeighbourListResult
-
-
-@router.get("/api/poems/{poem_id}/similar", response_model=SimilarityBundle, tags=["similarity"])
-def get_similar_bundle(
-    poem_id: UUID,
-    _: None = Depends(check_for_external_changes),
-    k_overall: int = Query(5, ge=1, le=50),
-    k_theme: int = Query(3, ge=1, le=50),
-    k_form: int = Query(3, ge=1, le=50),
-    k_emotion: int = Query(3, ge=1, le=50),
-    k_imagery: int = Query(3, ge=1, le=50),
-) -> SimilarityBundle:
-    """All similarity dimensions in one call, with per-category k values."""
-    from server.similarity.service import get_similarity_service
-    svc = get_similarity_service()
-    results = {
-        "overall": svc.get_overall_similar(poem_id, k_overall),
-        "theme":   svc.get_theme_similar(poem_id, k_theme),
-        "form":    svc.get_form_similar(poem_id, k_form),
-        "emotion": svc.get_emotion_similar(poem_id, k_emotion),
-        "imagery": svc.get_imagery_similar(poem_id, k_imagery),
-    }
-    if any(v is None for v in results.values()):
-        raise HTTPException(status_code=404, detail="Poem not found")
-    return SimilarityBundle(**results)
-
-
-@router.get("/api/poems/{poem_id}/similar/overall", response_model=NeighbourListResult, tags=["similarity"])
-def get_similar_overall(
-    poem_id: UUID,
-    _: None = Depends(check_for_external_changes),
-    k: int = Query(5, ge=1, le=50),
-) -> NeighbourListResult:
-    """Overall similarity across all dimensions."""
-    from server.similarity.service import get_similarity_service
-    res = get_similarity_service().get_overall_similar(poem_id, k)
-    if res is None:
-        raise HTTPException(status_code=404, detail="Poem not found")
-    return res
-
-
-@router.get("/api/poems/{poem_id}/similar/theme", response_model=NeighbourListResult, tags=["similarity"])
-def get_similar_theme(
-    poem_id: UUID,
-    _: None = Depends(check_for_external_changes),
-    k: int = Query(5, ge=1, le=50),
-) -> NeighbourListResult:
-    """Similarity by theme tags."""
-    from server.similarity.service import get_similarity_service
-    res = get_similarity_service().get_theme_similar(poem_id, k)
-    if res is None:
-        raise HTTPException(status_code=404, detail="Poem not found")
-    return res
-
-
-@router.get("/api/poems/{poem_id}/similar/form", response_model=NeighbourListResult, tags=["similarity"])
-def get_similar_form(
-    poem_id: UUID,
-    _: None = Depends(check_for_external_changes),
-    k: int = Query(5, ge=1, le=50),
-) -> NeighbourListResult:
-    """Similarity by form and craft."""
-    from server.similarity.service import get_similarity_service
-    res = get_similarity_service().get_form_similar(poem_id, k)
-    if res is None:
-        raise HTTPException(status_code=404, detail="Poem not found")
-    return res
-
-
-@router.get("/api/poems/{poem_id}/similar/emotion", response_model=NeighbourListResult, tags=["similarity"])
-def get_similar_emotion(
-    poem_id: UUID,
-    _: None = Depends(check_for_external_changes),
-    k: int = Query(5, ge=1, le=50),
-) -> NeighbourListResult:
-    """Similarity by emotional register."""
-    from server.similarity.service import get_similarity_service
-    res = get_similarity_service().get_emotion_similar(poem_id, k)
-    if res is None:
-        raise HTTPException(status_code=404, detail="Poem not found")
-    return res
-
-
-@router.get("/api/poems/{poem_id}/similar/imagery", response_model=NeighbourListResult, tags=["similarity"])
-def get_similar_imagery(
-    poem_id: UUID,
-    _: None = Depends(check_for_external_changes),
-    k: int = Query(5, ge=1, le=50),
-) -> NeighbourListResult:
-    """Similarity by key imagery."""
-    from server.similarity.service import get_similarity_service
-    res = get_similarity_service().get_imagery_similar(poem_id, k)
-    if res is None:
-        raise HTTPException(status_code=404, detail="Poem not found")
-    return res

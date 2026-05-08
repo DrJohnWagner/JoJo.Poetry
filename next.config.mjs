@@ -1,7 +1,10 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-    reactStrictMode: true,
+    reactStrictMode: false,
     output: "standalone",
+    experimental: {
+        proxyTimeout: 120_000,
+    },
     async rewrites() {
         return [
             {

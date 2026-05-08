@@ -1,9 +1,12 @@
+"""Structured (Jaccard) similarity over normalised poem tag sets."""
 from typing import Set, Tuple
 from server.similarity.types import NormalisedPoemFeatures, StructuredScoreBreakdown
 
+
 def jaccard_similarity(set1: Set[str], set2: Set[str]) -> Tuple[float, list[str]]:
+    """Jaccard similarity over two tag sets; returns 0.0 when both are empty (no artificial boost)."""
     if not set1 and not set2:
-        return 0.0, [] # Or 1.0? Usually 0 if both empty for similarity, let's say 0.0 to avoid artificial boosting
+        return 0.0, []
     intersection = set1.intersection(set2)
     union = set1.union(set2)
     if not union:

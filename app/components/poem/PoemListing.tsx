@@ -1,6 +1,13 @@
 "use client"
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import {
+    useCallback,
+    useEffect,
+    useMemo,
+    useRef,
+    startTransition,
+    useState,
+} from "react"
 import { useSearchParams } from "next/navigation"
 import { deletePoem, fetchPoem, fetchPoems } from "@/lib/api"
 import { getPins } from "@/lib/pins"
@@ -40,7 +47,7 @@ export default function PoemListing({
     const [localPins, setLocalPins] = useState<Set<string>>(new Set())
 
     useEffect(() => {
-        setLocalPins(getPins())
+        startTransition(() => setLocalPins(getPins()))
     }, [])
 
     function confirmDiscard(reason: string): boolean {
@@ -68,15 +75,17 @@ export default function PoemListing({
         if (raw === lastProcessedParams.current) return
         lastProcessedParams.current = raw
         if (searchParams.has("reset")) {
-            setSearch(EMPTY)
+            startTransition(() => setSearch(EMPTY))
             lastProcessedParams.current = ""
             window.history.replaceState(null, "", "/")
             return
         }
         const themes = searchParams.getAll("themes")
-        setSearch((prev) => {
-            if (themes.join(",") === prev.themes.join(",")) return prev
-            return { ...prev, themes }
+        startTransition(() => {
+            setSearch((prev) => {
+                if (themes.join(",") === prev.themes.join(",")) return prev
+                return { ...prev, themes }
+            })
         })
         if (themes.length > 0) {
             lastProcessedParams.current = ""

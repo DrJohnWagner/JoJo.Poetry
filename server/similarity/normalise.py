@@ -1,11 +1,10 @@
+"""Normalise raw Poem fields into NormalisedPoemFeatures for similarity computation."""
 from typing import List, Set, Iterable
-from database.schemas.poem import Poem
+from server.types import Poem
 from server.similarity.types import NormalisedPoemFeatures
 
-# One-to-one or one-to-many mappings for standardising terms
-SYNONYMS = {
-    # e.g., "nature": ["nature", "outdoors"]
-}
+# One-to-one or one-to-many tag synonym mappings; empty = no normalisation applied.
+SYNONYMS = {}
 
 def _normalise_term(term: str) -> str:
     return term.strip().lower()
@@ -29,6 +28,7 @@ def _normalise_list(terms: Iterable[str]) -> Set[str]:
     return normalised
 
 def normalise_poem(poem: Poem) -> NormalisedPoemFeatures:
+    """Map a Poem to normalised features; form merges poetic_forms, techniques, and tones_voices."""
     themes = _normalise_list(poem.themes)
     emotion = _normalise_list(poem.moods)
     form = (

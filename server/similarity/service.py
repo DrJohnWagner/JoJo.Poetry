@@ -1,6 +1,7 @@
+"""Poem similarity service: singleton holding the normalised corpus and TF-IDF index."""
 from typing import List, Optional
 from uuid import UUID
-from database.schemas.poem import Poem
+from server.types import Poem
 from server.similarity.types import (
     NormalisedPoemFeatures,
     FusedScoreBreakdown,
@@ -13,6 +14,7 @@ from server.similarity.semantic import SemanticSimilarityIndex
 from server.similarity.fusion import compute_fused_similarity
 
 class PoemSimilarityService:
+    """Holds normalised features and the semantic index; requires rebuild() before any query."""
     def __init__(self):
         self.poems: List[NormalisedPoemFeatures] = []
         self.semantic_index = SemanticSimilarityIndex()
@@ -25,6 +27,7 @@ class PoemSimilarityService:
         self.semantic_index.fit(self.poems)
 
     def _get_neighbours(self, query_id: UUID, sort_key: callable, k: int) -> Optional[NeighbourListResult]:
+        """Compute fused similarity to all other poems and return the top-k by sort_key."""
         if query_id not in self.poem_map:
             return None
 
@@ -79,7 +82,7 @@ class PoemSimilarityService:
     def get_imagery_similar(self, query_id: UUID, k: int = 5) -> Optional[NeighbourListResult]:
         return self._get_neighbours(query_id, lambda f: f.imagery_score, k)
 
-# Global service instance
+# Global singleton; None until init_similarity_service() is called at startup.
 _similarity_service: Optional[PoemSimilarityService] = None
 
 def get_similarity_service() -> PoemSimilarityService:

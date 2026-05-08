@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react"
 import { useRouter } from "next/navigation"
 import { createPoem } from "@/lib/api"
 import { plainTextToBody } from "@/lib/format"
+import PoemMechanismEditor from "./poem/PoemMechanismEditor"
 import PoemNotesEditor from "./poem/PoemNotesEditor"
 import PoemMetadataEditor, {
     inputCls,
@@ -41,6 +42,7 @@ export default function PoemCreateForm() {
     const [keyImages, setKeyImages] = useState("")
     const [contestFit, setContestFit] = useState("")
     const [socials, setSocials] = useState("")
+    const [mechanism, setMechanism] = useState("")
     const [notes, setNotes] = useState("")
 
     const [saving, setSaving] = useState(false)
@@ -61,6 +63,7 @@ export default function PoemCreateForm() {
         keyImages !== "" ||
         contestFit !== "" ||
         socials !== "" ||
+        mechanism !== "" ||
         notes !== ""
 
     useEffect(() => {
@@ -121,6 +124,8 @@ export default function PoemCreateForm() {
         if (keyImages.trim()) payload.key_images = splitTags(keyImages)
         if (contestFit.trim()) payload.contest_fit = splitTags(contestFit)
         if (socials.trim()) payload.socials = splitTags(socials)
+        const mechanismLines = mechanism.split("\n").map((s) => s.trim()).filter(Boolean)
+        if (mechanismLines.length > 0) payload.mechanism = mechanismLines
         const noteLines = notes.split("\n").map((s) => s.trim()).filter(Boolean)
         if (noteLines.length > 0) payload.notes = noteLines
 
@@ -189,6 +194,8 @@ export default function PoemCreateForm() {
                     style={{ tabSize: 4, MozTabSize: 4 } as React.CSSProperties}
                 />
             </Labelled>
+
+            <PoemMechanismEditor value={mechanism} onChange={setMechanism} />
 
             <PoemNotesEditor value={notes} onChange={setNotes} />
 

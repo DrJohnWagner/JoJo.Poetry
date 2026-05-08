@@ -13,7 +13,10 @@ from typing import Optional
 
 import os
 
+from dotenv import load_dotenv
 from fastapi import FastAPI
+
+load_dotenv()
 from fastapi.middleware.cors import CORSMiddleware
 
 from server.config import Settings, get_settings
@@ -55,6 +58,21 @@ def create_app(settings: Optional[Settings] = None) -> FastAPI:
 
     from server.api import router as read_router
     app.include_router(read_router)
+
+    from server.similarity.router import router as similarity_router
+    app.include_router(similarity_router)
+
+    from server.clustering.router import router as clustering_router
+    app.include_router(clustering_router)
+
+    from server.social.router import router as social_router
+    app.include_router(social_router)
+
+    from server.pdf.router import router as pdf_router
+    app.include_router(pdf_router)
+
+    from server.fonts.router import router as fonts_router
+    app.include_router(fonts_router)
 
     return app
 

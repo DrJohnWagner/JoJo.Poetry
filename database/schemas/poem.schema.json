@@ -110,10 +110,11 @@
           "type": "integer",
           "minimum": 0
       },
-      "pinned": {
-          "description": "Optional. Whether the poem is pinned in listings. Defaults to false when absent.",
-          "type": "boolean",
-          "default": false
+      "mechanism": {
+          "description": "Optional. Description of the poem's mechanisms, one string per paragraph. Defaults to [] when absent.",
+          "type": "array",
+          "default": [],
+          "items": { "type": "string", "minLength": 1 }
       },
       "notes": {
           "description": "Optional. Editorial notes, one string per note. Defaults to [] when absent.",
@@ -145,17 +146,23 @@
     "Award": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["url", "medal"],
+      "required": ["url", "medal", "title", "closed"],
       "properties": {
         "url": { "type": "string", "format": "uri" },
         "medal": {
-          "description": "Medal tier. Observed values: Gold. Kept open-vocabulary for flexibility.",
+          "description": "Medal tier: Gold, Silver, Bronze, Honorable Mention, None.",
           "type": "string",
           "minLength": 1
         },
         "title": {
-          "description": "Optional name of the contest.",
-          "type": "string"
+          "description": "Name of the contest.",
+          "type": "string",
+          "minLength": 1
+        },
+        "closed": {
+          "description": "ISO 8601 datetime when the contest closed.",
+          "type": "string",
+          "minLength": 1
         }
       }
     }

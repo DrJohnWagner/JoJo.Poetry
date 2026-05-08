@@ -1,3 +1,4 @@
+"""TF-IDF similarity index over project, form-text, and image-text fields."""
 from typing import List, Dict
 from uuid import UUID
 import numpy as np
@@ -5,7 +6,9 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 from server.similarity.types import NormalisedPoemFeatures, SemanticScoreBreakdown
 
+
 class SemanticSimilarityIndex:
+    """Fitted TF-IDF index for three text axes; falls back to zero scores if corpus is empty."""
     def __init__(self):
         self.project_vectoriser = TfidfVectorizer(analyzer='word', ngram_range=(1, 2), stop_words='english')
         self.form_vectoriser = TfidfVectorizer(analyzer='char_wb', ngram_range=(3, 5))
@@ -31,9 +34,8 @@ class SemanticSimilarityIndex:
         form_texts = [p.form_text for p in poems]
         image_texts = [p.image_text for p in poems]
 
-        # Handle empty corpuses safely
+        # sklearn raises ValueError when all documents are empty; return a (n, 1) zero matrix instead.
         def safe_fit_transform(vectoriser, texts):
-            # If all texts are empty or whitespace, vectoriser will fail
             has_content = any(t.strip() for t in texts)
             if has_content:
                 try:
