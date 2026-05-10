@@ -1,0 +1,1768 @@
+{
+  "poem_id": "d0dc543f-6922-4e8d-9ebb-cbd562936fe0",
+  "summary": {
+    "max_indentation_depth": 0,
+    "fraction_indented_lines": 0.0,
+    "avg_indentation_depth": 0.0,
+    "indentation_volatility": 0.0,
+    "median_line_length": 18.0,
+    "shortest_line": 9,
+    "longest_line": 33,
+    "line_length_range": 24,
+    "punctuation_per_line": 0.7838,
+    "dash_count": 0,
+    "comma_density": 0.1892,
+    "terminal_stop_density": 0.5946,
+    "enjambment_ratio": 0.4054,
+    "interruption_density_mean": 0.1216,
+    "stanza_volatility": 2.25,
+    "repetition_pressure": 0.4094,
+    "negation_density": 0.0394,
+    "pressure_peak_line": 33,
+    "left_margin_returns": 0,
+    "breath_interruption_severity": 0.0838,
+    "momentum_persistence_score": 0.6365,
+    "syntax_fracture_density": 0.2162
+  },
+  "scoring": {
+    "scores": [
+      {
+        "metric": "momentum_persistence_score",
+        "family": "rhythm",
+        "value": 0.6365,
+        "percentile_rank": 81.2512,
+        "rarity": 0.625,
+        "score": 1.012538
+      },
+      {
+        "metric": "pressure_peak_line",
+        "family": "structure",
+        "value": 33.0,
+        "percentile_rank": 79.2857,
+        "rarity": 0.5857,
+        "score": 0.918107
+      },
+      {
+        "metric": "syntax_fracture_density",
+        "family": "structure",
+        "value": 0.2162,
+        "percentile_rank": 13.3425,
+        "rarity": 0.7331,
+        "score": 0.857785
+      },
+      {
+        "metric": "stanza_volatility",
+        "family": "structure",
+        "value": 2.25,
+        "percentile_rank": 75.0756,
+        "rarity": 0.5015,
+        "score": 0.677636
+      },
+      {
+        "metric": "enjambment_ratio",
+        "family": "rhythm",
+        "value": 0.4054,
+        "percentile_rank": 25.6262,
+        "rarity": 0.4875,
+        "score": 0.639478
+      },
+      {
+        "metric": "negation_density",
+        "family": "semantics",
+        "value": 0.0394,
+        "percentile_rank": 82.6113,
+        "rarity": 0.6522,
+        "score": 0.538086
+      },
+      {
+        "metric": "line_length_range",
+        "family": "line_length",
+        "value": 24.0,
+        "percentile_rank": 21.087,
+        "rarity": 0.5783,
+        "score": 0.537917
+      },
+      {
+        "metric": "terminal_stop_density",
+        "family": "punctuation",
+        "value": 0.5946,
+        "percentile_rank": 74.3738,
+        "rarity": 0.4875,
+        "score": 0.479608
+      },
+      {
+        "metric": "longest_line",
+        "family": "line_length",
+        "value": 33.0,
+        "percentile_rank": 21.7073,
+        "rarity": 0.5659,
+        "score": 0.42449
+      },
+      {
+        "metric": "median_line_length",
+        "family": "line_length",
+        "value": 18.0,
+        "percentile_rank": 22.2727,
+        "rarity": 0.5545,
+        "score": 0.374406
+      },
+      {
+        "metric": "shortest_line",
+        "family": "line_length",
+        "value": 9.0,
+        "percentile_rank": 69.2308,
+        "rarity": 0.3846,
+        "score": 0.257232
+      },
+      {
+        "metric": "comma_density",
+        "family": "punctuation",
+        "value": 0.1892,
+        "percentile_rank": 40.6557,
+        "rarity": 0.1869,
+        "score": 0.252295
+      },
+      {
+        "metric": "punctuation_per_line",
+        "family": "punctuation",
+        "value": 0.7838,
+        "percentile_rank": 37.7023,
+        "rarity": 0.246,
+        "score": 0.210601
+      },
+      {
+        "metric": "max_indentation_depth",
+        "family": "indentation",
+        "value": 0.0,
+        "percentile_rank": 0.0,
+        "rarity": 0.0,
+        "score": 0.0
+      },
+      {
+        "metric": "fraction_indented_lines",
+        "family": "indentation",
+        "value": 0.0,
+        "percentile_rank": 0.0,
+        "rarity": 0.0,
+        "score": 0.0
+      },
+      {
+        "metric": "avg_indentation_depth",
+        "family": "indentation",
+        "value": 0.0,
+        "percentile_rank": 0.0,
+        "rarity": 0.0,
+        "score": 0.0
+      },
+      {
+        "metric": "indentation_volatility",
+        "family": "indentation",
+        "value": 0.0,
+        "percentile_rank": 0.0,
+        "rarity": 0.0,
+        "score": 0.0
+      },
+      {
+        "metric": "dash_count",
+        "family": "punctuation",
+        "value": 0.0,
+        "percentile_rank": 0.0,
+        "rarity": 0.0,
+        "score": 0.0
+      },
+      {
+        "metric": "interruption_density_mean",
+        "family": "rhythm",
+        "value": 0.1216,
+        "percentile_rank": 5.294,
+        "rarity": 0.0,
+        "score": 0.0
+      },
+      {
+        "metric": "breath_interruption_severity",
+        "family": "rhythm",
+        "value": 0.0838,
+        "percentile_rank": 5.6832,
+        "rarity": 0.0,
+        "score": 0.0
+      },
+      {
+        "metric": "left_margin_returns",
+        "family": "structure",
+        "value": 0.0,
+        "percentile_rank": 0.0,
+        "rarity": 0.0,
+        "score": 0.0
+      },
+      {
+        "metric": "repetition_pressure",
+        "family": "semantics",
+        "value": 0.4094,
+        "percentile_rank": 34.7254,
+        "rarity": 0.0,
+        "score": 0.0
+      }
+    ],
+    "top_metrics": [
+      "momentum_persistence_score",
+      "pressure_peak_line",
+      "negation_density",
+      "line_length_range",
+      "terminal_stop_density",
+      "max_indentation_depth"
+    ]
+  },
+  "render_plan": {
+    "primary": {
+      "type": "stanza_architecture",
+      "score": 1.13878,
+      "driven_by": [
+        "syntax_fracture_density",
+        "stanza_volatility"
+      ],
+      "contributing_metrics": [
+        "syntax_fracture_density",
+        "stanza_volatility"
+      ],
+      "role": "primary",
+      "overlays": [],
+      "display_mode": "expanded",
+      "families": [
+        "structure"
+      ],
+      "ui_priority": 0.9,
+      "density": "medium",
+      "supports_overlay": false,
+      "suppresses": [],
+      "suppressed_by": null,
+      "explanation": "Structurally cohesive syntax and unstable stanza architecture drive structural instability."
+    },
+    "secondary": [
+      {
+        "type": "fracture_map",
+        "score": 0.99156,
+        "driven_by": [
+          "syntax_fracture_density",
+          "pressure_peak_line",
+          "breath_interruption_severity"
+        ],
+        "contributing_metrics": [
+          "syntax_fracture_density",
+          "pressure_peak_line",
+          "breath_interruption_severity",
+          "left_margin_returns"
+        ],
+        "role": "secondary",
+        "overlays": [
+          {
+            "overlay_type": "semantic_pressure_overlay",
+            "host_visualisation": "fracture_map",
+            "score": 0.55241,
+            "driven_by": [
+              "negation_density",
+              "repetition_pressure"
+            ]
+          }
+        ],
+        "display_mode": "compact",
+        "families": [
+          "rhythm",
+          "structure"
+        ],
+        "ui_priority": 0.75,
+        "density": "high",
+        "supports_overlay": true,
+        "suppresses": [],
+        "suppressed_by": null,
+        "explanation": "Structurally cohesive syntax and a concentrated pressure peak fracture the poem's syntactic continuity."
+      },
+      {
+        "type": "line_length_contour",
+        "score": 0.71795,
+        "driven_by": [
+          "line_length_range",
+          "longest_line",
+          "median_line_length"
+        ],
+        "contributing_metrics": [
+          "line_length_range",
+          "longest_line",
+          "median_line_length",
+          "shortest_line"
+        ],
+        "role": "secondary",
+        "overlays": [],
+        "display_mode": "compact",
+        "families": [
+          "line_length"
+        ],
+        "ui_priority": 0.85,
+        "density": "high",
+        "supports_overlay": true,
+        "suppresses": [
+          "line_length_distribution"
+        ],
+        "suppressed_by": null,
+        "explanation": "Tightly controlled line lengths and compact maximum lines define the poem's breath variation."
+      }
+    ],
+    "supporting": [
+      {
+        "type": "momentum_profile",
+        "score": 0.40474,
+        "driven_by": [
+          "momentum_persistence_score",
+          "enjambment_ratio",
+          "terminal_stop_density"
+        ],
+        "contributing_metrics": [
+          "momentum_persistence_score",
+          "enjambment_ratio",
+          "terminal_stop_density",
+          "breath_interruption_severity"
+        ],
+        "role": "supporting",
+        "overlays": [],
+        "display_mode": "compact",
+        "families": [
+          "rhythm"
+        ],
+        "ui_priority": 0.8,
+        "density": "high",
+        "supports_overlay": true,
+        "suppresses": [],
+        "suppressed_by": "interruption_density_profile",
+        "explanation": "Sustained forward momentum and heavily terminal lines characterise rhythmic continuity."
+      }
+    ],
+    "overlays": [
+      {
+        "overlay_type": "semantic_pressure_overlay",
+        "host_visualisation": "fracture_map",
+        "score": 0.55241,
+        "driven_by": [
+          "negation_density",
+          "repetition_pressure"
+        ]
+      }
+    ],
+    "ordered_visualisations": [
+      {
+        "type": "stanza_architecture",
+        "score": 1.13878,
+        "driven_by": [
+          "syntax_fracture_density",
+          "stanza_volatility"
+        ],
+        "contributing_metrics": [
+          "syntax_fracture_density",
+          "stanza_volatility"
+        ],
+        "role": "primary",
+        "overlays": [],
+        "display_mode": "expanded",
+        "families": [
+          "structure"
+        ],
+        "ui_priority": 0.9,
+        "density": "medium",
+        "supports_overlay": false,
+        "suppresses": [],
+        "suppressed_by": null,
+        "explanation": "Structurally cohesive syntax and unstable stanza architecture drive structural instability."
+      },
+      {
+        "type": "fracture_map",
+        "score": 0.99156,
+        "driven_by": [
+          "syntax_fracture_density",
+          "pressure_peak_line",
+          "breath_interruption_severity"
+        ],
+        "contributing_metrics": [
+          "syntax_fracture_density",
+          "pressure_peak_line",
+          "breath_interruption_severity",
+          "left_margin_returns"
+        ],
+        "role": "secondary",
+        "overlays": [
+          {
+            "overlay_type": "semantic_pressure_overlay",
+            "host_visualisation": "fracture_map",
+            "score": 0.55241,
+            "driven_by": [
+              "negation_density",
+              "repetition_pressure"
+            ]
+          }
+        ],
+        "display_mode": "compact",
+        "families": [
+          "rhythm",
+          "structure"
+        ],
+        "ui_priority": 0.75,
+        "density": "high",
+        "supports_overlay": true,
+        "suppresses": [],
+        "suppressed_by": null,
+        "explanation": "Structurally cohesive syntax and a concentrated pressure peak fracture the poem's syntactic continuity."
+      },
+      {
+        "type": "line_length_contour",
+        "score": 0.71795,
+        "driven_by": [
+          "line_length_range",
+          "longest_line",
+          "median_line_length"
+        ],
+        "contributing_metrics": [
+          "line_length_range",
+          "longest_line",
+          "median_line_length",
+          "shortest_line"
+        ],
+        "role": "secondary",
+        "overlays": [],
+        "display_mode": "compact",
+        "families": [
+          "line_length"
+        ],
+        "ui_priority": 0.85,
+        "density": "high",
+        "supports_overlay": true,
+        "suppresses": [
+          "line_length_distribution"
+        ],
+        "suppressed_by": null,
+        "explanation": "Tightly controlled line lengths and compact maximum lines define the poem's breath variation."
+      },
+      {
+        "type": "momentum_profile",
+        "score": 0.40474,
+        "driven_by": [
+          "momentum_persistence_score",
+          "enjambment_ratio",
+          "terminal_stop_density"
+        ],
+        "contributing_metrics": [
+          "momentum_persistence_score",
+          "enjambment_ratio",
+          "terminal_stop_density",
+          "breath_interruption_severity"
+        ],
+        "role": "supporting",
+        "overlays": [],
+        "display_mode": "compact",
+        "families": [
+          "rhythm"
+        ],
+        "ui_priority": 0.8,
+        "density": "high",
+        "supports_overlay": true,
+        "suppresses": [],
+        "suppressed_by": "interruption_density_profile",
+        "explanation": "Sustained forward momentum and heavily terminal lines characterise rhythmic continuity."
+      }
+    ]
+  },
+  "per_line": {
+    "indentation": [
+      {
+        "line": 1,
+        "leading_spaces": 0,
+        "indent_level": 0,
+        "text": "I began as a softness"
+      },
+      {
+        "line": 2,
+        "leading_spaces": 0,
+        "indent_level": 0,
+        "text": "in a place already full."
+      },
+      {
+        "line": 3,
+        "leading_spaces": 0,
+        "indent_level": 0,
+        "text": "There was warmth,"
+      },
+      {
+        "line": 4,
+        "leading_spaces": 0,
+        "indent_level": 0,
+        "text": "a steady wash of iron,"
+      },
+      {
+        "line": 5,
+        "leading_spaces": 0,
+        "indent_level": 0,
+        "text": "corridors of red"
+      },
+      {
+        "line": 6,
+        "leading_spaces": 0,
+        "indent_level": 0,
+        "text": "opening and closing"
+      },
+      {
+        "line": 7,
+        "leading_spaces": 0,
+        "indent_level": 0,
+        "text": "without decision."
+      },
+      {
+        "line": 8,
+        "leading_spaces": 0,
+        "indent_level": 0,
+        "text": "I learned the walls by touch."
+      },
+      {
+        "line": 9,
+        "leading_spaces": 0,
+        "indent_level": 0,
+        "text": "They yielded."
+      },
+      {
+        "line": 10,
+        "leading_spaces": 0,
+        "indent_level": 0,
+        "text": "They tightened."
+      },
+      {
+        "line": 11,
+        "leading_spaces": 0,
+        "indent_level": 0,
+        "text": "They thinned."
+      },
+      {
+        "line": 12,
+        "leading_spaces": 0,
+        "indent_level": 0,
+        "text": "Where there was current,"
+      },
+      {
+        "line": 13,
+        "leading_spaces": 0,
+        "indent_level": 0,
+        "text": "I followed it."
+      },
+      {
+        "line": 14,
+        "leading_spaces": 0,
+        "indent_level": 0,
+        "text": "Where there was stillness,"
+      },
+      {
+        "line": 15,
+        "leading_spaces": 0,
+        "indent_level": 0,
+        "text": "I pressed until it altered."
+      },
+      {
+        "line": 16,
+        "leading_spaces": 0,
+        "indent_level": 0,
+        "text": "Division was not ambition."
+      },
+      {
+        "line": 17,
+        "leading_spaces": 0,
+        "indent_level": 0,
+        "text": "It was repetition."
+      },
+      {
+        "line": 18,
+        "leading_spaces": 0,
+        "indent_level": 0,
+        "text": "A quiet doubling"
+      },
+      {
+        "line": 19,
+        "leading_spaces": 0,
+        "indent_level": 0,
+        "text": "that felt like continuity."
+      },
+      {
+        "line": 20,
+        "leading_spaces": 0,
+        "indent_level": 0,
+        "text": "The larger body dimmed gradually."
+      },
+      {
+        "line": 21,
+        "leading_spaces": 0,
+        "indent_level": 0,
+        "text": "Signals that once arrived"
+      },
+      {
+        "line": 22,
+        "leading_spaces": 0,
+        "indent_level": 0,
+        "text": "in bright pulses"
+      },
+      {
+        "line": 23,
+        "leading_spaces": 0,
+        "indent_level": 0,
+        "text": "came irregularly,"
+      },
+      {
+        "line": 24,
+        "leading_spaces": 0,
+        "indent_level": 0,
+        "text": "then not at all."
+      },
+      {
+        "line": 25,
+        "leading_spaces": 0,
+        "indent_level": 0,
+        "text": "The rooms cooled."
+      },
+      {
+        "line": 26,
+        "leading_spaces": 0,
+        "indent_level": 0,
+        "text": "The rivers slowed."
+      },
+      {
+        "line": 27,
+        "leading_spaces": 0,
+        "indent_level": 0,
+        "text": "I did not register alarm."
+      },
+      {
+        "line": 28,
+        "leading_spaces": 0,
+        "indent_level": 0,
+        "text": "Only difference."
+      },
+      {
+        "line": 29,
+        "leading_spaces": 0,
+        "indent_level": 0,
+        "text": "Space narrowed."
+      },
+      {
+        "line": 30,
+        "leading_spaces": 0,
+        "indent_level": 0,
+        "text": "Then widened strangely,"
+      },
+      {
+        "line": 31,
+        "leading_spaces": 0,
+        "indent_level": 0,
+        "text": "as if boundaries had forgotten"
+      },
+      {
+        "line": 32,
+        "leading_spaces": 0,
+        "indent_level": 0,
+        "text": "their instructions."
+      },
+      {
+        "line": 33,
+        "leading_spaces": 0,
+        "indent_level": 0,
+        "text": "At the end,"
+      },
+      {
+        "line": 34,
+        "leading_spaces": 0,
+        "indent_level": 0,
+        "text": "there was no verdict."
+      },
+      {
+        "line": 35,
+        "leading_spaces": 0,
+        "indent_level": 0,
+        "text": "Only the absence"
+      },
+      {
+        "line": 36,
+        "leading_spaces": 0,
+        "indent_level": 0,
+        "text": "of resistance."
+      },
+      {
+        "line": 37,
+        "leading_spaces": 0,
+        "indent_level": 0,
+        "text": "I would have continued."
+      }
+    ],
+    "line_lengths": [
+      {
+        "line": 1,
+        "with_spaces": 21,
+        "without_spaces": 17
+      },
+      {
+        "line": 2,
+        "with_spaces": 24,
+        "without_spaces": 20
+      },
+      {
+        "line": 3,
+        "with_spaces": 17,
+        "without_spaces": 15
+      },
+      {
+        "line": 4,
+        "with_spaces": 22,
+        "without_spaces": 18
+      },
+      {
+        "line": 5,
+        "with_spaces": 16,
+        "without_spaces": 14
+      },
+      {
+        "line": 6,
+        "with_spaces": 19,
+        "without_spaces": 17
+      },
+      {
+        "line": 7,
+        "with_spaces": 17,
+        "without_spaces": 16
+      },
+      {
+        "line": 8,
+        "with_spaces": 29,
+        "without_spaces": 24
+      },
+      {
+        "line": 9,
+        "with_spaces": 13,
+        "without_spaces": 12
+      },
+      {
+        "line": 10,
+        "with_spaces": 15,
+        "without_spaces": 14
+      },
+      {
+        "line": 11,
+        "with_spaces": 13,
+        "without_spaces": 12
+      },
+      {
+        "line": 12,
+        "with_spaces": 24,
+        "without_spaces": 21
+      },
+      {
+        "line": 13,
+        "with_spaces": 14,
+        "without_spaces": 12
+      },
+      {
+        "line": 14,
+        "with_spaces": 26,
+        "without_spaces": 23
+      },
+      {
+        "line": 15,
+        "with_spaces": 27,
+        "without_spaces": 23
+      },
+      {
+        "line": 16,
+        "with_spaces": 26,
+        "without_spaces": 23
+      },
+      {
+        "line": 17,
+        "with_spaces": 18,
+        "without_spaces": 16
+      },
+      {
+        "line": 18,
+        "with_spaces": 16,
+        "without_spaces": 14
+      },
+      {
+        "line": 19,
+        "with_spaces": 26,
+        "without_spaces": 23
+      },
+      {
+        "line": 20,
+        "with_spaces": 33,
+        "without_spaces": 29
+      },
+      {
+        "line": 21,
+        "with_spaces": 25,
+        "without_spaces": 22
+      },
+      {
+        "line": 22,
+        "with_spaces": 16,
+        "without_spaces": 14
+      },
+      {
+        "line": 23,
+        "with_spaces": 17,
+        "without_spaces": 16
+      },
+      {
+        "line": 24,
+        "with_spaces": 16,
+        "without_spaces": 13
+      },
+      {
+        "line": 25,
+        "with_spaces": 17,
+        "without_spaces": 15
+      },
+      {
+        "line": 26,
+        "with_spaces": 18,
+        "without_spaces": 16
+      },
+      {
+        "line": 27,
+        "with_spaces": 25,
+        "without_spaces": 21
+      },
+      {
+        "line": 28,
+        "with_spaces": 16,
+        "without_spaces": 15
+      },
+      {
+        "line": 29,
+        "with_spaces": 15,
+        "without_spaces": 14
+      },
+      {
+        "line": 30,
+        "with_spaces": 23,
+        "without_spaces": 21
+      },
+      {
+        "line": 31,
+        "with_spaces": 30,
+        "without_spaces": 26
+      },
+      {
+        "line": 32,
+        "with_spaces": 19,
+        "without_spaces": 18
+      },
+      {
+        "line": 33,
+        "with_spaces": 11,
+        "without_spaces": 9
+      },
+      {
+        "line": 34,
+        "with_spaces": 21,
+        "without_spaces": 18
+      },
+      {
+        "line": 35,
+        "with_spaces": 16,
+        "without_spaces": 14
+      },
+      {
+        "line": 36,
+        "with_spaces": 14,
+        "without_spaces": 13
+      },
+      {
+        "line": 37,
+        "with_spaces": 23,
+        "without_spaces": 20
+      }
+    ],
+    "interruption": [
+      {
+        "line": 1,
+        "score": 0.0,
+        "dash_score": 0.0,
+        "comma_score": 0.0,
+        "semicolon_score": 0.0,
+        "colon_score": 0.0,
+        "midline_terminal_score": 0.0,
+        "indent_shift_score": 0.0,
+        "short_line_score": 0.0,
+        "text": "I began as a softness",
+        "events": []
+      },
+      {
+        "line": 2,
+        "score": 0.0,
+        "dash_score": 0.0,
+        "comma_score": 0.0,
+        "semicolon_score": 0.0,
+        "colon_score": 0.0,
+        "midline_terminal_score": 0.0,
+        "indent_shift_score": 0.0,
+        "short_line_score": 0.0,
+        "text": "in a place already full.",
+        "events": []
+      },
+      {
+        "line": 3,
+        "score": 0.5,
+        "dash_score": 0.0,
+        "comma_score": 0.5,
+        "semicolon_score": 0.0,
+        "colon_score": 0.0,
+        "midline_terminal_score": 0.0,
+        "indent_shift_score": 0.0,
+        "short_line_score": 0.0,
+        "text": "There was warmth,",
+        "events": [
+          {
+            "type": "comma",
+            "x": 1.0,
+            "value": 0.5
+          }
+        ]
+      },
+      {
+        "line": 4,
+        "score": 0.5,
+        "dash_score": 0.0,
+        "comma_score": 0.5,
+        "semicolon_score": 0.0,
+        "colon_score": 0.0,
+        "midline_terminal_score": 0.0,
+        "indent_shift_score": 0.0,
+        "short_line_score": 0.0,
+        "text": "a steady wash of iron,",
+        "events": [
+          {
+            "type": "comma",
+            "x": 1.0,
+            "value": 0.5
+          }
+        ]
+      },
+      {
+        "line": 5,
+        "score": 0.0,
+        "dash_score": 0.0,
+        "comma_score": 0.0,
+        "semicolon_score": 0.0,
+        "colon_score": 0.0,
+        "midline_terminal_score": 0.0,
+        "indent_shift_score": 0.0,
+        "short_line_score": 0.0,
+        "text": "corridors of red",
+        "events": []
+      },
+      {
+        "line": 6,
+        "score": 0.0,
+        "dash_score": 0.0,
+        "comma_score": 0.0,
+        "semicolon_score": 0.0,
+        "colon_score": 0.0,
+        "midline_terminal_score": 0.0,
+        "indent_shift_score": 0.0,
+        "short_line_score": 0.0,
+        "text": "opening and closing",
+        "events": []
+      },
+      {
+        "line": 7,
+        "score": 0.0,
+        "dash_score": 0.0,
+        "comma_score": 0.0,
+        "semicolon_score": 0.0,
+        "colon_score": 0.0,
+        "midline_terminal_score": 0.0,
+        "indent_shift_score": 0.0,
+        "short_line_score": 0.0,
+        "text": "without decision.",
+        "events": []
+      },
+      {
+        "line": 8,
+        "score": 0.0,
+        "dash_score": 0.0,
+        "comma_score": 0.0,
+        "semicolon_score": 0.0,
+        "colon_score": 0.0,
+        "midline_terminal_score": 0.0,
+        "indent_shift_score": 0.0,
+        "short_line_score": 0.0,
+        "text": "I learned the walls by touch.",
+        "events": []
+      },
+      {
+        "line": 9,
+        "score": 0.0,
+        "dash_score": 0.0,
+        "comma_score": 0.0,
+        "semicolon_score": 0.0,
+        "colon_score": 0.0,
+        "midline_terminal_score": 0.0,
+        "indent_shift_score": 0.0,
+        "short_line_score": 0.0,
+        "text": "They yielded.",
+        "events": []
+      },
+      {
+        "line": 10,
+        "score": 0.0,
+        "dash_score": 0.0,
+        "comma_score": 0.0,
+        "semicolon_score": 0.0,
+        "colon_score": 0.0,
+        "midline_terminal_score": 0.0,
+        "indent_shift_score": 0.0,
+        "short_line_score": 0.0,
+        "text": "They tightened.",
+        "events": []
+      },
+      {
+        "line": 11,
+        "score": 0.0,
+        "dash_score": 0.0,
+        "comma_score": 0.0,
+        "semicolon_score": 0.0,
+        "colon_score": 0.0,
+        "midline_terminal_score": 0.0,
+        "indent_shift_score": 0.0,
+        "short_line_score": 0.0,
+        "text": "They thinned.",
+        "events": []
+      },
+      {
+        "line": 12,
+        "score": 0.5,
+        "dash_score": 0.0,
+        "comma_score": 0.5,
+        "semicolon_score": 0.0,
+        "colon_score": 0.0,
+        "midline_terminal_score": 0.0,
+        "indent_shift_score": 0.0,
+        "short_line_score": 0.0,
+        "text": "Where there was current,",
+        "events": [
+          {
+            "type": "comma",
+            "x": 1.0,
+            "value": 0.5
+          }
+        ]
+      },
+      {
+        "line": 13,
+        "score": 0.0,
+        "dash_score": 0.0,
+        "comma_score": 0.0,
+        "semicolon_score": 0.0,
+        "colon_score": 0.0,
+        "midline_terminal_score": 0.0,
+        "indent_shift_score": 0.0,
+        "short_line_score": 0.0,
+        "text": "I followed it.",
+        "events": []
+      },
+      {
+        "line": 14,
+        "score": 0.5,
+        "dash_score": 0.0,
+        "comma_score": 0.5,
+        "semicolon_score": 0.0,
+        "colon_score": 0.0,
+        "midline_terminal_score": 0.0,
+        "indent_shift_score": 0.0,
+        "short_line_score": 0.0,
+        "text": "Where there was stillness,",
+        "events": [
+          {
+            "type": "comma",
+            "x": 1.0,
+            "value": 0.5
+          }
+        ]
+      },
+      {
+        "line": 15,
+        "score": 0.0,
+        "dash_score": 0.0,
+        "comma_score": 0.0,
+        "semicolon_score": 0.0,
+        "colon_score": 0.0,
+        "midline_terminal_score": 0.0,
+        "indent_shift_score": 0.0,
+        "short_line_score": 0.0,
+        "text": "I pressed until it altered.",
+        "events": []
+      },
+      {
+        "line": 16,
+        "score": 0.0,
+        "dash_score": 0.0,
+        "comma_score": 0.0,
+        "semicolon_score": 0.0,
+        "colon_score": 0.0,
+        "midline_terminal_score": 0.0,
+        "indent_shift_score": 0.0,
+        "short_line_score": 0.0,
+        "text": "Division was not ambition.",
+        "events": []
+      },
+      {
+        "line": 17,
+        "score": 0.0,
+        "dash_score": 0.0,
+        "comma_score": 0.0,
+        "semicolon_score": 0.0,
+        "colon_score": 0.0,
+        "midline_terminal_score": 0.0,
+        "indent_shift_score": 0.0,
+        "short_line_score": 0.0,
+        "text": "It was repetition.",
+        "events": []
+      },
+      {
+        "line": 18,
+        "score": 0.0,
+        "dash_score": 0.0,
+        "comma_score": 0.0,
+        "semicolon_score": 0.0,
+        "colon_score": 0.0,
+        "midline_terminal_score": 0.0,
+        "indent_shift_score": 0.0,
+        "short_line_score": 0.0,
+        "text": "A quiet doubling",
+        "events": []
+      },
+      {
+        "line": 19,
+        "score": 0.0,
+        "dash_score": 0.0,
+        "comma_score": 0.0,
+        "semicolon_score": 0.0,
+        "colon_score": 0.0,
+        "midline_terminal_score": 0.0,
+        "indent_shift_score": 0.0,
+        "short_line_score": 0.0,
+        "text": "that felt like continuity.",
+        "events": []
+      },
+      {
+        "line": 20,
+        "score": 0.0,
+        "dash_score": 0.0,
+        "comma_score": 0.0,
+        "semicolon_score": 0.0,
+        "colon_score": 0.0,
+        "midline_terminal_score": 0.0,
+        "indent_shift_score": 0.0,
+        "short_line_score": 0.0,
+        "text": "The larger body dimmed gradually.",
+        "events": []
+      },
+      {
+        "line": 21,
+        "score": 0.0,
+        "dash_score": 0.0,
+        "comma_score": 0.0,
+        "semicolon_score": 0.0,
+        "colon_score": 0.0,
+        "midline_terminal_score": 0.0,
+        "indent_shift_score": 0.0,
+        "short_line_score": 0.0,
+        "text": "Signals that once arrived",
+        "events": []
+      },
+      {
+        "line": 22,
+        "score": 0.0,
+        "dash_score": 0.0,
+        "comma_score": 0.0,
+        "semicolon_score": 0.0,
+        "colon_score": 0.0,
+        "midline_terminal_score": 0.0,
+        "indent_shift_score": 0.0,
+        "short_line_score": 0.0,
+        "text": "in bright pulses",
+        "events": []
+      },
+      {
+        "line": 23,
+        "score": 0.5,
+        "dash_score": 0.0,
+        "comma_score": 0.5,
+        "semicolon_score": 0.0,
+        "colon_score": 0.0,
+        "midline_terminal_score": 0.0,
+        "indent_shift_score": 0.0,
+        "short_line_score": 0.0,
+        "text": "came irregularly,",
+        "events": [
+          {
+            "type": "comma",
+            "x": 1.0,
+            "value": 0.5
+          }
+        ]
+      },
+      {
+        "line": 24,
+        "score": 0.0,
+        "dash_score": 0.0,
+        "comma_score": 0.0,
+        "semicolon_score": 0.0,
+        "colon_score": 0.0,
+        "midline_terminal_score": 0.0,
+        "indent_shift_score": 0.0,
+        "short_line_score": 0.0,
+        "text": "then not at all.",
+        "events": []
+      },
+      {
+        "line": 25,
+        "score": 0.0,
+        "dash_score": 0.0,
+        "comma_score": 0.0,
+        "semicolon_score": 0.0,
+        "colon_score": 0.0,
+        "midline_terminal_score": 0.0,
+        "indent_shift_score": 0.0,
+        "short_line_score": 0.0,
+        "text": "The rooms cooled.",
+        "events": []
+      },
+      {
+        "line": 26,
+        "score": 0.0,
+        "dash_score": 0.0,
+        "comma_score": 0.0,
+        "semicolon_score": 0.0,
+        "colon_score": 0.0,
+        "midline_terminal_score": 0.0,
+        "indent_shift_score": 0.0,
+        "short_line_score": 0.0,
+        "text": "The rivers slowed.",
+        "events": []
+      },
+      {
+        "line": 27,
+        "score": 0.0,
+        "dash_score": 0.0,
+        "comma_score": 0.0,
+        "semicolon_score": 0.0,
+        "colon_score": 0.0,
+        "midline_terminal_score": 0.0,
+        "indent_shift_score": 0.0,
+        "short_line_score": 0.0,
+        "text": "I did not register alarm.",
+        "events": []
+      },
+      {
+        "line": 28,
+        "score": 0.0,
+        "dash_score": 0.0,
+        "comma_score": 0.0,
+        "semicolon_score": 0.0,
+        "colon_score": 0.0,
+        "midline_terminal_score": 0.0,
+        "indent_shift_score": 0.0,
+        "short_line_score": 0.0,
+        "text": "Only difference.",
+        "events": []
+      },
+      {
+        "line": 29,
+        "score": 0.0,
+        "dash_score": 0.0,
+        "comma_score": 0.0,
+        "semicolon_score": 0.0,
+        "colon_score": 0.0,
+        "midline_terminal_score": 0.0,
+        "indent_shift_score": 0.0,
+        "short_line_score": 0.0,
+        "text": "Space narrowed.",
+        "events": []
+      },
+      {
+        "line": 30,
+        "score": 0.5,
+        "dash_score": 0.0,
+        "comma_score": 0.5,
+        "semicolon_score": 0.0,
+        "colon_score": 0.0,
+        "midline_terminal_score": 0.0,
+        "indent_shift_score": 0.0,
+        "short_line_score": 0.0,
+        "text": "Then widened strangely,",
+        "events": [
+          {
+            "type": "comma",
+            "x": 1.0,
+            "value": 0.5
+          }
+        ]
+      },
+      {
+        "line": 31,
+        "score": 0.0,
+        "dash_score": 0.0,
+        "comma_score": 0.0,
+        "semicolon_score": 0.0,
+        "colon_score": 0.0,
+        "midline_terminal_score": 0.0,
+        "indent_shift_score": 0.0,
+        "short_line_score": 0.0,
+        "text": "as if boundaries had forgotten",
+        "events": []
+      },
+      {
+        "line": 32,
+        "score": 0.0,
+        "dash_score": 0.0,
+        "comma_score": 0.0,
+        "semicolon_score": 0.0,
+        "colon_score": 0.0,
+        "midline_terminal_score": 0.0,
+        "indent_shift_score": 0.0,
+        "short_line_score": 0.0,
+        "text": "their instructions.",
+        "events": []
+      },
+      {
+        "line": 33,
+        "score": 1.5,
+        "dash_score": 0.0,
+        "comma_score": 0.5,
+        "semicolon_score": 0.0,
+        "colon_score": 0.0,
+        "midline_terminal_score": 0.0,
+        "indent_shift_score": 0.0,
+        "short_line_score": 1.0,
+        "text": "At the end,",
+        "events": [
+          {
+            "type": "comma",
+            "x": 1.0,
+            "value": 0.5
+          },
+          {
+            "type": "short_line",
+            "x": 0.0,
+            "value": 0.3333333333333333
+          }
+        ]
+      },
+      {
+        "line": 34,
+        "score": 0.0,
+        "dash_score": 0.0,
+        "comma_score": 0.0,
+        "semicolon_score": 0.0,
+        "colon_score": 0.0,
+        "midline_terminal_score": 0.0,
+        "indent_shift_score": 0.0,
+        "short_line_score": 0.0,
+        "text": "there was no verdict.",
+        "events": []
+      },
+      {
+        "line": 35,
+        "score": 0.0,
+        "dash_score": 0.0,
+        "comma_score": 0.0,
+        "semicolon_score": 0.0,
+        "colon_score": 0.0,
+        "midline_terminal_score": 0.0,
+        "indent_shift_score": 0.0,
+        "short_line_score": 0.0,
+        "text": "Only the absence",
+        "events": []
+      },
+      {
+        "line": 36,
+        "score": 0.0,
+        "dash_score": 0.0,
+        "comma_score": 0.0,
+        "semicolon_score": 0.0,
+        "colon_score": 0.0,
+        "midline_terminal_score": 0.0,
+        "indent_shift_score": 0.0,
+        "short_line_score": 0.0,
+        "text": "of resistance.",
+        "events": []
+      },
+      {
+        "line": 37,
+        "score": 0.0,
+        "dash_score": 0.0,
+        "comma_score": 0.0,
+        "semicolon_score": 0.0,
+        "colon_score": 0.0,
+        "midline_terminal_score": 0.0,
+        "indent_shift_score": 0.0,
+        "short_line_score": 0.0,
+        "text": "I would have continued.",
+        "events": []
+      }
+    ],
+    "punctuation": [
+      {
+        "line": 1,
+        "period_count": 0,
+        "comma_count": 0,
+        "dash_count": 0,
+        "semicolon_count": 0,
+        "other_count": 0,
+        "text": "I began as a softness"
+      },
+      {
+        "line": 2,
+        "period_count": 1,
+        "comma_count": 0,
+        "dash_count": 0,
+        "semicolon_count": 0,
+        "other_count": 0,
+        "text": "in a place already full."
+      },
+      {
+        "line": 3,
+        "period_count": 0,
+        "comma_count": 1,
+        "dash_count": 0,
+        "semicolon_count": 0,
+        "other_count": 0,
+        "text": "There was warmth,"
+      },
+      {
+        "line": 4,
+        "period_count": 0,
+        "comma_count": 1,
+        "dash_count": 0,
+        "semicolon_count": 0,
+        "other_count": 0,
+        "text": "a steady wash of iron,"
+      },
+      {
+        "line": 5,
+        "period_count": 0,
+        "comma_count": 0,
+        "dash_count": 0,
+        "semicolon_count": 0,
+        "other_count": 0,
+        "text": "corridors of red"
+      },
+      {
+        "line": 6,
+        "period_count": 0,
+        "comma_count": 0,
+        "dash_count": 0,
+        "semicolon_count": 0,
+        "other_count": 0,
+        "text": "opening and closing"
+      },
+      {
+        "line": 7,
+        "period_count": 1,
+        "comma_count": 0,
+        "dash_count": 0,
+        "semicolon_count": 0,
+        "other_count": 0,
+        "text": "without decision."
+      },
+      {
+        "line": 8,
+        "period_count": 1,
+        "comma_count": 0,
+        "dash_count": 0,
+        "semicolon_count": 0,
+        "other_count": 0,
+        "text": "I learned the walls by touch."
+      },
+      {
+        "line": 9,
+        "period_count": 1,
+        "comma_count": 0,
+        "dash_count": 0,
+        "semicolon_count": 0,
+        "other_count": 0,
+        "text": "They yielded."
+      },
+      {
+        "line": 10,
+        "period_count": 1,
+        "comma_count": 0,
+        "dash_count": 0,
+        "semicolon_count": 0,
+        "other_count": 0,
+        "text": "They tightened."
+      },
+      {
+        "line": 11,
+        "period_count": 1,
+        "comma_count": 0,
+        "dash_count": 0,
+        "semicolon_count": 0,
+        "other_count": 0,
+        "text": "They thinned."
+      },
+      {
+        "line": 12,
+        "period_count": 0,
+        "comma_count": 1,
+        "dash_count": 0,
+        "semicolon_count": 0,
+        "other_count": 0,
+        "text": "Where there was current,"
+      },
+      {
+        "line": 13,
+        "period_count": 1,
+        "comma_count": 0,
+        "dash_count": 0,
+        "semicolon_count": 0,
+        "other_count": 0,
+        "text": "I followed it."
+      },
+      {
+        "line": 14,
+        "period_count": 0,
+        "comma_count": 1,
+        "dash_count": 0,
+        "semicolon_count": 0,
+        "other_count": 0,
+        "text": "Where there was stillness,"
+      },
+      {
+        "line": 15,
+        "period_count": 1,
+        "comma_count": 0,
+        "dash_count": 0,
+        "semicolon_count": 0,
+        "other_count": 0,
+        "text": "I pressed until it altered."
+      },
+      {
+        "line": 16,
+        "period_count": 1,
+        "comma_count": 0,
+        "dash_count": 0,
+        "semicolon_count": 0,
+        "other_count": 0,
+        "text": "Division was not ambition."
+      },
+      {
+        "line": 17,
+        "period_count": 1,
+        "comma_count": 0,
+        "dash_count": 0,
+        "semicolon_count": 0,
+        "other_count": 0,
+        "text": "It was repetition."
+      },
+      {
+        "line": 18,
+        "period_count": 0,
+        "comma_count": 0,
+        "dash_count": 0,
+        "semicolon_count": 0,
+        "other_count": 0,
+        "text": "A quiet doubling"
+      },
+      {
+        "line": 19,
+        "period_count": 1,
+        "comma_count": 0,
+        "dash_count": 0,
+        "semicolon_count": 0,
+        "other_count": 0,
+        "text": "that felt like continuity."
+      },
+      {
+        "line": 20,
+        "period_count": 1,
+        "comma_count": 0,
+        "dash_count": 0,
+        "semicolon_count": 0,
+        "other_count": 0,
+        "text": "The larger body dimmed gradually."
+      },
+      {
+        "line": 21,
+        "period_count": 0,
+        "comma_count": 0,
+        "dash_count": 0,
+        "semicolon_count": 0,
+        "other_count": 0,
+        "text": "Signals that once arrived"
+      },
+      {
+        "line": 22,
+        "period_count": 0,
+        "comma_count": 0,
+        "dash_count": 0,
+        "semicolon_count": 0,
+        "other_count": 0,
+        "text": "in bright pulses"
+      },
+      {
+        "line": 23,
+        "period_count": 0,
+        "comma_count": 1,
+        "dash_count": 0,
+        "semicolon_count": 0,
+        "other_count": 0,
+        "text": "came irregularly,"
+      },
+      {
+        "line": 24,
+        "period_count": 1,
+        "comma_count": 0,
+        "dash_count": 0,
+        "semicolon_count": 0,
+        "other_count": 0,
+        "text": "then not at all."
+      },
+      {
+        "line": 25,
+        "period_count": 1,
+        "comma_count": 0,
+        "dash_count": 0,
+        "semicolon_count": 0,
+        "other_count": 0,
+        "text": "The rooms cooled."
+      },
+      {
+        "line": 26,
+        "period_count": 1,
+        "comma_count": 0,
+        "dash_count": 0,
+        "semicolon_count": 0,
+        "other_count": 0,
+        "text": "The rivers slowed."
+      },
+      {
+        "line": 27,
+        "period_count": 1,
+        "comma_count": 0,
+        "dash_count": 0,
+        "semicolon_count": 0,
+        "other_count": 0,
+        "text": "I did not register alarm."
+      },
+      {
+        "line": 28,
+        "period_count": 1,
+        "comma_count": 0,
+        "dash_count": 0,
+        "semicolon_count": 0,
+        "other_count": 0,
+        "text": "Only difference."
+      },
+      {
+        "line": 29,
+        "period_count": 1,
+        "comma_count": 0,
+        "dash_count": 0,
+        "semicolon_count": 0,
+        "other_count": 0,
+        "text": "Space narrowed."
+      },
+      {
+        "line": 30,
+        "period_count": 0,
+        "comma_count": 1,
+        "dash_count": 0,
+        "semicolon_count": 0,
+        "other_count": 0,
+        "text": "Then widened strangely,"
+      },
+      {
+        "line": 31,
+        "period_count": 0,
+        "comma_count": 0,
+        "dash_count": 0,
+        "semicolon_count": 0,
+        "other_count": 0,
+        "text": "as if boundaries had forgotten"
+      },
+      {
+        "line": 32,
+        "period_count": 1,
+        "comma_count": 0,
+        "dash_count": 0,
+        "semicolon_count": 0,
+        "other_count": 0,
+        "text": "their instructions."
+      },
+      {
+        "line": 33,
+        "period_count": 0,
+        "comma_count": 1,
+        "dash_count": 0,
+        "semicolon_count": 0,
+        "other_count": 0,
+        "text": "At the end,"
+      },
+      {
+        "line": 34,
+        "period_count": 1,
+        "comma_count": 0,
+        "dash_count": 0,
+        "semicolon_count": 0,
+        "other_count": 0,
+        "text": "there was no verdict."
+      },
+      {
+        "line": 35,
+        "period_count": 0,
+        "comma_count": 0,
+        "dash_count": 0,
+        "semicolon_count": 0,
+        "other_count": 0,
+        "text": "Only the absence"
+      },
+      {
+        "line": 36,
+        "period_count": 1,
+        "comma_count": 0,
+        "dash_count": 0,
+        "semicolon_count": 0,
+        "other_count": 0,
+        "text": "of resistance."
+      },
+      {
+        "line": 37,
+        "period_count": 1,
+        "comma_count": 0,
+        "dash_count": 0,
+        "semicolon_count": 0,
+        "other_count": 0,
+        "text": "I would have continued."
+      }
+    ],
+    "stanzas": {
+      "stanza_lengths": [
+        2,
+        5,
+        1,
+        3,
+        4,
+        4,
+        1,
+        6,
+        2,
+        4,
+        2,
+        2,
+        1
+      ],
+      "total_stanzas": 13,
+      "total_lines": 37,
+      "average_lines_per_stanza": 2.8461538461538463
+    }
+  }
+}

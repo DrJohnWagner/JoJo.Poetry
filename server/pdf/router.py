@@ -17,6 +17,7 @@ from server.config import AUTHOR
 from server.fonts.router import FONTS_DIR, list_fonts
 from server.pdf.pipeline import pdf_caption, png_from_source
 from server.pdf.types import PDFPostResponse, PDFRequest
+from server.api import require_write_access
 from server.repository import PoemNotFoundError, PoemRepository, get_repository
 from server.social.bsky import post_to_bsky
 from server.social.cloud import upload as cloudinary_upload
@@ -179,7 +180,7 @@ def create_pdf(
     )
 
 
-@router.post("/{poem_id}/post", response_model=PDFPostResponse)
+@router.post("/{poem_id}/post", response_model=PDFPostResponse, dependencies=[Depends(require_write_access)])
 def post_pdf(
     poem_id: UUID,
     options: PDFRequest,

@@ -79,6 +79,11 @@ function poemToMarkdownFromPoem(poem: Poem, full: boolean): string {
             `**Author's Notes:**\n${poem.notes.map((n) => `- ${n}`).join("\n")}`
         )
 
+    if (poem.mechanism.length)
+        parts.push(
+            `**Mechanism:**\n${poem.mechanism.map((p) => `> ${p}`).join("\n>\n")}`
+        )
+
     const tags: string[] = []
     if (poem.project) tags.push(`**Project:** ${poem.project}`)
     if (poem.themes.length) tags.push(`**Themes:** ${poem.themes.join(", ")}`)

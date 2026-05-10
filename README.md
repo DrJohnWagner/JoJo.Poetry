@@ -38,6 +38,32 @@ Two services, one flat JSON data source:
   of poem objects. It is the only persistent store; there is no
   database server.
 
+## Analytics visualisation stack
+
+The repository now includes a second rendering path for poem analytics.
+
+- **Backend analytics pipeline** (`server/analytics/`): computes per-line
+  metrics and summary scores, ranks visual candidates, and emits a
+  `render_plan` payload consumed by the frontend.
+- **Frontend analytics renderer** (`app/lib/analytics/` + `app/components/analytics/`):
+  extracts typed visual data from API responses, builds declarative render
+  specs, and draws SVG primitives through a shared render engine.
+- **Design model**: each visual is assembled from primitive layers (bars,
+  traces, overlays, event plots, summaries) plus axis and margin metadata.
+  The engine handles scaling, layout, and axis drawing consistently.
+
+Current analytics emphasis in this branch:
+
+- **Interruption Density** rebuilt as a two-panel view:
+  left panel for interruption events by normalised x position and right
+  panel for per-line density summary.
+- **Theme centralisation** moved analytics render constants into
+  `app/lib/analytics/render/theme.ts` so colours and spacing are controlled
+  in one place.
+- **Render-spec architecture** in
+  `app/lib/analytics/render/spec/index.ts` now drives visual composition
+  per visual type, reducing hardcoded drawing logic in UI components.
+
 ## Repository layout
 
 ```

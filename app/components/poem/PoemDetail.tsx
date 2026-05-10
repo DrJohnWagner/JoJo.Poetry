@@ -16,6 +16,7 @@ import { fetchPoem } from "@/lib/api"
 import { cleanPoetryUrl } from "@/lib/format"
 import PoemAwards from "./PoemAwards"
 import PoemSummary from "./PoemSummary"
+import { PoemAnalytics } from "@/components/analytics/PoemAnalytics"
 import dynamic from "next/dynamic"
 
 const InstagramEmbed = dynamic(
@@ -41,6 +42,7 @@ export default function PoemDetail({ poem: initial }: { poem: Poem }) {
     const { readOnly } = useAppConfig()
     const [poem, setPoem] = useState<Poem>(initial)
     const [open, setOpen] = useState(false)
+    const [analyticsOpen, setAnalyticsOpen] = useState(false)
     const [caption, setCaption] = useState(false)
     const [editing, setEditing] = useState(false)
     const [liveTitle, setLiveTitle] = useState(initial.title)
@@ -117,6 +119,22 @@ export default function PoemDetail({ poem: initial }: { poem: Poem }) {
 
             <section aria-label="Poem body" className="my-5">
                 <PoemBody poemId={poem.id} showBody={true} />
+            </section>
+
+            <HorizontalRule />
+
+            <section aria-label="Analytics" className="my-5">
+                <button
+                    onClick={() => setAnalyticsOpen((a) => !a)}
+                    className="text-label hover:text-ink"
+                >
+                    {analyticsOpen ? "Hide analytics" : "Show analytics"}
+                </button>
+                {analyticsOpen && (
+                    <div className="mt-4">
+                        <PoemAnalytics poemId={poem.id} width={600} />
+                    </div>
+                )}
             </section>
 
             <HorizontalRule />

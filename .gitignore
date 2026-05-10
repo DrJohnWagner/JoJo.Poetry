@@ -1,5 +1,6 @@
 # Miscellaneous files to ignore in git
 verify.sh
+scratch/
 
 # ---- Python ----
 .venv/

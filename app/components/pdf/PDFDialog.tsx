@@ -6,7 +6,7 @@ import type { PageCallback } from "react-pdf/dist/shared/types.js"
 import "react-pdf/dist/Page/AnnotationLayer.css"
 import "react-pdf/dist/Page/TextLayer.css"
 import { fetchFonts, fetchPdf, pdfPost } from "@/lib/api"
-import { getDefaultFont, getMruFonts } from "@/lib/fonts"
+import { addMruFont, getDefaultFont, getMruFonts } from "@/lib/fonts"
 import type { FontOption, PDFOptions, SocialPostResponse } from "@/lib/types"
 import DialogTitle from "../DialogTitle"
 import ErrorMessage from "../ErrorMessage"
@@ -109,7 +109,12 @@ export default function PDFDialog({
         generate(options)
     }, [options, generate])
 
+    function pushFont() {
+        addMruFont(options.font)
+    }
+
     async function handleCopy() {
+        pushFont()
         if (!pdfUrl) return
         const pdf = await pdfjs.getDocument(pdfUrl).promise
         const page = await pdf.getPage(1)
@@ -131,6 +136,7 @@ export default function PDFDialog({
     }
 
     function handleDownload() {
+        pushFont()
         if (!pdfUrl) return
         const a = document.createElement("a")
         a.href = pdfUrl
@@ -139,6 +145,7 @@ export default function PDFDialog({
     }
 
     async function handleSave() {
+        pushFont()
         if (!pdfUrl) return
         type FilePicker = Window & {
             showSaveFilePicker(opts: {
@@ -171,6 +178,7 @@ export default function PDFDialog({
     }
 
     async function handlePublish() {
+        pushFont()
         setLoadingMessage("Publishing…")
         setLoading(true)
         try {

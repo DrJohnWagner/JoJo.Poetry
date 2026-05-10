@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { FaCheck, FaCopy, FaDownload, FaEllipsis, FaFloppyDisk, FaShareNodes } from "react-icons/fa6"
 import ActionButton from "../ActionButton"
+import { useAppConfig } from "../AppConfig"
 
 export default function PDFActions({
     onDownload,
@@ -47,6 +48,8 @@ export default function PDFActions({
         }
     }
 
+    const { readOnly } = useAppConfig()
+
     return (
         <div className="flex justify-center gap-5">
             <ActionButton
@@ -64,7 +67,9 @@ export default function PDFActions({
                 label={copyState === "copied" ? "Copied" : "Copy"}
                 onClick={handleCopy}
             />
-            <ActionButton icon={FaShareNodes} label="Publish" onClick={onPublish} />
+            {!readOnly && (
+                <ActionButton icon={FaShareNodes} label="Publish" onClick={onPublish} />
+            )}
         </div>
     )
 }

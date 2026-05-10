@@ -11,3 +11,4 @@ cloudinary==1.40.0
 typst
 Jinja2
 fonttools
+python-dotenv
