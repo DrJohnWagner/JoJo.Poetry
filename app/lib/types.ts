@@ -196,6 +196,15 @@ export interface PDFOptions {
     gutter: number
     leading: number
     spacing: number
+    analytics_images?: PDFAnalyticsImage[]
+}
+
+export interface PDFAnalyticsImage {
+    title: string
+    summary: string
+    tier: "primary" | "secondary"
+    mime_type: string
+    data_base64: string
 }
 
 export interface NeighbourResult extends PoemSummaryData {

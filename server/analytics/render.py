@@ -91,15 +91,16 @@ _METRIC_PROSE: dict[str, tuple[str, str]] = {
 }
 
 _VIS_ENDINGS: dict[str, str] = {
-    "indentation_map":              "shape the poem's spatial behaviour",
+    "indentation_map": "shape the poem's spatial behaviour",
     "interruption_density_profile": "interrupt the poem's forward movement",
-    "line_length_contour":          "define the poem's breath variation",
-    "stanza_architecture":          "drive structural instability",
-    "momentum_profile":             "characterise rhythmic continuity",
-    "punctuation_pressure_strip":    "apply localised punctuation pressure",
-    "fracture_map":                 "fracture the poem's syntactic continuity",
-    "line_length_distribution":     "define the poem's line-length vocabulary",
-    "semantic_pressure_overlay":    "annotate structural patterns",
+    "line_length_map": "define the poem's breath variation",
+    "stanza_architecture": "drive structural instability",
+    "momentum_profile": "characterise rhythmic continuity",
+    "punctuation_pressure_strip": "apply localised punctuation pressure",
+    "fracture_map": "fracture the poem's syntactic continuity",
+    "line_length_distribution": "define the poem's line-length vocabulary",
+    "semantic_pressure_overlay": "annotate structural patterns",
+    "indentation_overlay": "mark indentation shifts across lines",
 }
 
 _VIS_DENSITY: dict[str, str] = {
@@ -493,7 +494,14 @@ def attach_overlays(
     attached = []
     for overlay in overlay_candidates:
         preferred = vis_meta[overlay.key].get("preferred_hosts", [])
-        host = max(hosts, key=lambda h: h.score * _host_affinity(h.key, preferred))
+        allowed = vis_meta[overlay.key].get("allowed_hosts")
+        eligible_hosts = [h for h in hosts if not allowed or h.key in allowed]
+        if not eligible_hosts:
+            continue
+
+        host = max(
+            eligible_hosts, key=lambda h: h.score * _host_affinity(h.key, preferred)
+        )
         attached.append(OverlayAttachment(
             overlay_type=overlay.key,
             host_visualisation=host.key,

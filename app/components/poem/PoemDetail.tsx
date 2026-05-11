@@ -123,29 +123,13 @@ export default function PoemDetail({ poem: initial }: { poem: Poem }) {
 
             <HorizontalRule />
 
-            <section aria-label="Analytics" className="my-5">
-                <button
-                    onClick={() => setAnalyticsOpen((a) => !a)}
-                    className="text-label hover:text-ink"
-                >
-                    {analyticsOpen ? "Hide analytics" : "Show analytics"}
-                </button>
-                {analyticsOpen && (
-                    <div className="mt-4">
-                        <PoemAnalytics poemId={poem.id} width={600} />
-                    </div>
-                )}
-            </section>
-
-            <HorizontalRule />
-
             {poem.mechanism.length > 0 && (
                 <>
                     <section aria-label="Mechanism" className="my-5">
                         <p className="text-label mb-3">Mechanism</p>
                         <div
                             ref={mechanismRef}
-                            className={`font-sans text-sm leading-relaxed text-ink/80 space-y-3${mechanismExpanded ? "" : " line-clamp-5"}`}
+                            className={`font-sans text-sm leading-relaxed text-ink/80 space-y-3${mechanismExpanded ? "" : "line-clamp-5"}`}
                         >
                             {poem.mechanism.map((para, i) => (
                                 <p key={i}>{para}</p>
@@ -154,7 +138,7 @@ export default function PoemDetail({ poem: initial }: { poem: Poem }) {
                         {(mechanismOverflows || mechanismExpanded) && (
                             <button
                                 onClick={() => setMechanismExpanded((e) => !e)}
-                                className="mt-3 text-label hover:text-ink"
+                                className="text-label mt-3 hover:text-ink"
                             >
                                 {mechanismExpanded ? "SHOW LESS" : "SHOW MORE"}
                             </button>
@@ -226,6 +210,26 @@ export default function PoemDetail({ poem: initial }: { poem: Poem }) {
                     </a>
                 </dd>
             </dl>
+
+            <HorizontalRule />
+
+            <section aria-label="Analytics" className="my-5">
+                <button
+                    onClick={() => setAnalyticsOpen((a) => !a)}
+                    className="text-label hover:text-ink"
+                >
+                    {analyticsOpen ? "Hide analytics" : "Show analytics"}
+                </button>
+                {analyticsOpen && (
+                    <div
+                        className="mt-4"
+                        data-analytics-root
+                        data-poem-id={poem.id}
+                    >
+                        <PoemAnalytics poemId={poem.id} width={600} />
+                    </div>
+                )}
+            </section>
 
             <HorizontalRule />
 

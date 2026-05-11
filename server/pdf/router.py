@@ -1,6 +1,8 @@
 """PDF generation endpoint: Jinja2 → Typst source → compiled PDF or PNG, with multi-platform post."""
 from __future__ import annotations
 
+import base64
+import binascii
 import re
 import tempfile
 from pathlib import Path
@@ -16,7 +18,7 @@ from fastapi.responses import Response
 from server.config import AUTHOR
 from server.fonts.router import FONTS_DIR, list_fonts
 from server.pdf.pipeline import pdf_caption, png_from_source
-from server.pdf.types import PDFPostResponse, PDFRequest
+from server.pdf.types import PDFAnalyticsImage, PDFPostResponse, PDFRequest
 from server.api import require_write_access
 from server.repository import PoemNotFoundError, PoemRepository, get_repository
 from server.social.bsky import post_to_bsky
@@ -127,8 +129,65 @@ def body_to_stanzas(body: str) -> list[str]:
     return result
 
 
-def build_source(poem, options: PDFRequest) -> str:
+def _image_suffix_from_mime(mime_type: str) -> str:
+    mime = mime_type.lower().strip()
+    if mime == "image/png":
+        return "png"
+    if mime in {"image/jpeg", "image/jpg"}:
+        return "jpg"
+    if mime == "image/webp":
+        return "webp"
+    if mime == "image/svg+xml":
+        return "svg"
+    return "bin"
+
+
+def _materialize_analytics_images(
+    images: list[PDFAnalyticsImage],
+    output_dir: Path,
+) -> tuple[list[dict[str, str]], list[dict[str, str]]]:
+    primary: list[dict[str, str]] = []
+    secondary: list[dict[str, str]] = []
+
+    for idx, image in enumerate(images):
+        payload = image.data_base64.strip()
+        if payload.startswith("data:"):
+            _, _, payload = payload.partition(",")
+
+        try:
+            binary = base64.b64decode(payload, validate=True)
+        except (binascii.Error, ValueError):
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail=f"Invalid base64 image payload at analytics_images[{idx}]",
+            )
+
+        suffix = _image_suffix_from_mime(image.mime_type)
+        image_path = output_dir / f"analytics-{idx}.{suffix}"
+        image_path.write_bytes(binary)
+
+        item = {
+            "title": escape_line(image.title),
+            "summary": escape_line(image.summary),
+            "image_path": image_path.name,
+        }
+        if image.tier == "primary":
+            primary.append(item)
+        else:
+            secondary.append(item)
+
+    return primary, secondary
+
+
+def build_source(
+    poem,
+    options: PDFRequest,
+    analytics_primary: list[dict[str, str]] | None = None,
+    analytics_secondary: list[dict[str, str]] | None = None,
+) -> str:
     weight, style = parse_weight_style(options.font)
+    primary = analytics_primary or []
+    secondary = analytics_secondary or []
     return TEMPLATE.render(
         paper=options.paper,
         margin=f"{options.margin}cm",
@@ -146,6 +205,8 @@ def build_source(poem, options: PDFRequest) -> str:
         author=AUTHOR.pen_name,
         body=poem_to_typst(poem.body),
         stanzas=body_to_stanzas(poem.body),
+        analytics_primary=primary,
+        analytics_secondary=secondary,
     )
 
 
@@ -160,9 +221,13 @@ def create_pdf(
     except PoemNotFoundError:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Poem not found")
 
-    source = build_source(poem, options)
-
     with tempfile.TemporaryDirectory() as tmp:
+        tmp_path = Path(tmp)
+        analytics_primary, analytics_secondary = _materialize_analytics_images(
+            options.analytics_images,
+            tmp_path,
+        )
+        source = build_source(poem, options, analytics_primary, analytics_secondary)
         typ_file = Path(tmp) / "poem.typ"
         typ_file.write_text(source)
         try:
@@ -194,8 +259,16 @@ def post_pdf(
         )
 
     try:
-        source = build_source(poem, options)
-        png_bytes = png_from_source(source)
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = Path(tmp)
+            analytics_primary, analytics_secondary = _materialize_analytics_images(
+                options.analytics_images,
+                tmp_path,
+            )
+            source = build_source(poem, options, analytics_primary, analytics_secondary)
+            png_bytes = png_from_source(source, working_dir=tmp_path)
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e)

@@ -1,5 +1,15 @@
 """Pydantic types for the PDF generation endpoint."""
+from typing import Literal
+
 from pydantic import BaseModel
+
+
+class PDFAnalyticsImage(BaseModel):
+    title: str
+    summary: str = ""
+    tier: Literal["primary", "secondary"] = "secondary"
+    mime_type: str = "image/png"
+    data_base64: str
 
 
 class PDFRequest(BaseModel):
@@ -13,6 +23,7 @@ class PDFRequest(BaseModel):
     gutter: float = 1.2
     leading: float = 0.6
     spacing: float = 1.2
+    analytics_images: list[PDFAnalyticsImage] = []
 
 
 class PDFPostResponse(BaseModel):

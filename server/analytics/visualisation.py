@@ -27,9 +27,7 @@ from __future__ import annotations
 from typing import Any
 
 VISUALISATION_META: dict[str, dict[str, Any]] = {
-
     # ── Primary structural charts ──────────────────────────────────────────
-
     "indentation_map": {
         "metrics": {
             "indentation_volatility",
@@ -45,7 +43,7 @@ VISUALISATION_META: dict[str, dict[str, Any]] = {
         ),
         "preferred_if": {
             "indentation_volatility": 0.75,
-            "left_margin_returns":    0.65,
+            "left_margin_returns": 0.65,
             "fraction_indented_lines": 0.60,
         },
         "base_weight": 1.3,
@@ -61,7 +59,6 @@ VISUALISATION_META: dict[str, dict[str, Any]] = {
             "Accepts semantic_pressure_overlay when negation or repetition is active."
         ),
     },
-
     "interruption_density_profile": {
         "metrics": {
             "interruption_density_mean",
@@ -78,9 +75,9 @@ VISUALISATION_META: dict[str, dict[str, Any]] = {
             "Pressure peak annotated as a marker."
         ),
         "preferred_if": {
-            "interruption_density_mean":    0.70,
+            "interruption_density_mean": 0.70,
             "breath_interruption_severity": 0.65,
-            "pressure_peak_line":           0.60,
+            "pressure_peak_line": 0.60,
         },
         "base_weight": 1.3,
         "min_score": 0.55,
@@ -95,8 +92,7 @@ VISUALISATION_META: dict[str, dict[str, Any]] = {
             "Subsumes punctuation_pressure_matrix when both would be selected."
         ),
     },
-
-    "line_length_contour": {
+    "line_length_map": {
         "metrics": {
             "line_length_range",
             "median_line_length",
@@ -109,8 +105,8 @@ VISUALISATION_META: dict[str, dict[str, Any]] = {
             "Reveals breath variation, expansion, and contraction across the poem."
         ),
         "preferred_if": {
-            "line_length_range":   0.65,
-            "median_line_length":  0.60,
+            "line_length_range": 0.65,
+            "median_line_length": 0.60,
         },
         "base_weight": 1.1,
         "min_score": 0.50,
@@ -126,7 +122,6 @@ VISUALISATION_META: dict[str, dict[str, Any]] = {
             "Suppresses line_length_distribution when selected."
         ),
     },
-
     "stanza_architecture": {
         "metrics": {
             "stanza_volatility",
@@ -153,9 +148,7 @@ VISUALISATION_META: dict[str, dict[str, Any]] = {
             "regardless of other signals."
         ),
     },
-
     # ── Secondary / supporting charts ─────────────────────────────────────
-
     "momentum_profile": {
         "metrics": {
             "momentum_persistence_score",
@@ -170,7 +163,7 @@ VISUALISATION_META: dict[str, dict[str, Any]] = {
         ),
         "preferred_if": {
             "momentum_persistence_score": 0.65,
-            "enjambment_ratio":           0.60,
+            "enjambment_ratio": 0.60,
         },
         "base_weight": 1.1,
         "min_score": 0.50,
@@ -186,7 +179,6 @@ VISUALISATION_META: dict[str, dict[str, Any]] = {
             "rather than a sibling. Standalone only when interruption is absent."
         ),
     },
-
     "punctuation_pressure_strip": {
         "metrics": {
             "punctuation_per_line",
@@ -201,12 +193,12 @@ VISUALISATION_META: dict[str, dict[str, Any]] = {
         ),
         "preferred_if": {
             "punctuation_per_line": 0.65,
-            "dash_count":           0.65,
+            "dash_count": 0.65,
         },
         "requires_any": {
             "terminal_stop_density": 0.50,
-            "dash_count":            0.50,
-            "punctuation_per_line":  0.50,
+            "dash_count": 0.50,
+            "punctuation_per_line": 0.50,
         },
         "base_weight": 1.0,
         "min_score": 0.40,
@@ -223,7 +215,6 @@ VISUALISATION_META: dict[str, dict[str, Any]] = {
             "interruption density."
         ),
     },
-
     "fracture_map": {
         "metrics": {
             "syntax_fracture_density",
@@ -238,7 +229,7 @@ VISUALISATION_META: dict[str, dict[str, Any]] = {
         ),
         "preferred_if": {
             "syntax_fracture_density": 0.70,
-            "left_margin_returns":     0.65,
+            "left_margin_returns": 0.65,
         },
         "base_weight": 1.1,
         "min_score": 0.55,
@@ -255,7 +246,6 @@ VISUALISATION_META: dict[str, dict[str, Any]] = {
             "of those primaries."
         ),
     },
-
     "line_length_distribution": {
         "metrics": {
             "median_line_length",
@@ -276,20 +266,53 @@ VISUALISATION_META: dict[str, dict[str, Any]] = {
         "max_instances": 1,
         "visualisation_type": "distribution",
         "ui_priority": 0.55,
-        "suppress_if_present": ["line_length_contour"],
+        "suppress_if_present": ["line_length_map"],
         "suppression_weight": 0.40,
         "supports_overlay": False,
         "notes": (
-            "Secondary to line_length_contour. "
+            "Secondary to line_length_map. "
             "Useful when distribution shape is the interpretive point "
             "(bimodal, heavy-tailed) rather than positional variation. "
             "Higher min_score than the contour — only surface when line-length "
             "variation is genuinely unusual."
         ),
     },
-
     # ── Overlay-only ──────────────────────────────────────────────────────
-
+    "indentation_overlay": {
+        "metrics": {
+            "indentation_volatility",
+            "left_margin_returns",
+            "fraction_indented_lines",
+        },
+        "families": {"indentation"},
+        "description": (
+            "Line-level indent-shift annotation layer. "
+            "Marks lines where indentation increases (→) or decreases (←). "
+            "Not a standalone chart — annotates the interruption density host."
+        ),
+        "preferred_if": {
+            "indentation_volatility": 0.65,
+            "left_margin_returns": 0.60,
+        },
+        "base_weight": 0.9,
+        "min_score": 0.25,
+        "max_instances": 1,
+        "visualisation_type": "overlay",
+        "ui_priority": 0.50,
+        "suppress_if_present": [],
+        "supports_overlay": False,
+        "preferred_hosts": [
+            "interruption_density_profile",
+        ],
+        "allowed_hosts": [
+            "interruption_density_profile",
+        ],
+        "notes": (
+            "Only meaningful when interruption_density_profile is selected — "
+            "it shows the spatial dimension that chart otherwise omits. "
+            "Not useful on other hosts where indentation_map already renders this data."
+        ),
+    },
     "semantic_pressure_overlay": {
         "metrics": {
             "negation_density",
@@ -301,7 +324,7 @@ VISUALISATION_META: dict[str, dict[str, Any]] = {
             "Not a standalone chart — annotates a host visualisation."
         ),
         "preferred_if": {
-            "negation_density":    0.65,
+            "negation_density": 0.65,
             "repetition_pressure": 0.60,
         },
         "base_weight": 1.0,
@@ -312,15 +335,19 @@ VISUALISATION_META: dict[str, dict[str, Any]] = {
         "suppress_if_present": [],
         "supports_overlay": False,
         "preferred_hosts": [
-            "interruption_density_profile",
             "momentum_profile",
             "indentation_map",
-            "line_length_contour",
+            "line_length_map",
+        ],
+        "allowed_hosts": [
+            "momentum_profile",
+            "indentation_map",
+            "line_length_map",
         ],
         "notes": (
             "Always rendered as an annotation layer on a host chart. "
-            "Preferred hosts in priority order: interruption_density_profile, "
-            "momentum_profile, indentation_map, line_length_contour. "
+            "Preferred hosts in priority order: momentum_profile, "
+            "indentation_map, line_length_map. "
             "Never rendered standalone. "
             "Low base_weight ensures semantic metrics never displace structural charts."
         ),

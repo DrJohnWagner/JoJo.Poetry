@@ -12,15 +12,15 @@ export default function PoemNotesEditor({
 }) {
     return (
         <label className="block">
-            <span className="text-label">Author's Notes</span>
+            <span className="text-label">Author&apos;s Notes</span>
             <textarea
                 value={value}
                 onChange={(e) => onChange(e.target.value)}
                 rows={4}
                 placeholder="One note per line."
-                className="mt-1 w-full bg-transparent border border-rule focus:border-accent outline-none p-3 font-sans text-sm leading-relaxed resize-y"
+                className="mt-1 w-full resize-y border border-rule bg-transparent p-3 font-sans text-sm leading-relaxed outline-none focus:border-accent"
             />
-            <span className="block text-[0.72rem] text-muted mt-1">
+            <span className="mt-1 block text-[0.72rem] text-muted">
                 One note per line.
             </span>
         </label>

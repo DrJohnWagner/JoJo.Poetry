@@ -1,5 +1,4 @@
 import { notFound } from "next/navigation"
-import Link from "next/link"
 import Page from "@/components/Page"
 import LColumn from "@/components/LColumn"
 import RColumn from "@/components/RColumn"

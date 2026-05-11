@@ -54,5 +54,6 @@ COPY database ./database
 # server.js expects .next/static relative to its own directory (/app/web)
 COPY --from=frontend-builder /app/.next/standalone ./web
 COPY --from=frontend-builder /app/.next/static     ./web/.next/static
+COPY --from=frontend-builder /app/public           ./web/public
 
 EXPOSE 3000 8000

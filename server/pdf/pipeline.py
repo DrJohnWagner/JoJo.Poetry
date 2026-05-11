@@ -13,8 +13,24 @@ from server.social.pipeline import ADULT_HASHTAG, HASHTAGS
 PPI = 150
 
 
-def png_from_source(source: str) -> bytes:
+def png_from_source(source: str, working_dir: Path | None = None) -> bytes:
     """Compile Typst source to PNG at PPI=150; returns the first page only."""
+    if working_dir is not None:
+        typ_file = working_dir / "poem.typ"
+        typ_file.write_text(source)
+        out_pattern = str(working_dir / "p-{p}.png")
+        typst.compile(
+            str(typ_file),
+            output=out_pattern,
+            font_paths=[str(FONTS_DIR)],
+            format="png",
+            ppi=PPI,
+        )
+        pages = sorted(working_dir.glob("p-*.png"))
+        if not pages:
+            raise RuntimeError("typst produced no PNG output")
+        return pages[0].read_bytes()
+
     with tempfile.TemporaryDirectory() as tmp:
         typ_file = Path(tmp) / "poem.typ"
         typ_file.write_text(source)

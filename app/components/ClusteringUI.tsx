@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useMemo, useState } from "react"
+import { useMemo, useState } from "react"
 import { deletePoem, fetchPoem } from "@/lib/api"
 import { getPins } from "@/lib/pins"
 import type { ClusterResponse, Poem, PoemSummaryData } from "@/lib/types"
@@ -36,11 +36,7 @@ export default function ClusteringUI({
     const [rowError, setRowError] = useState<string | null>(null)
     const [loadedPoems, setLoadedPoems] = useState<Record<string, Poem>>({})
     const [deletedIds, setDeletedIds] = useState<Set<string>>(new Set())
-    const [localPins, setLocalPins] = useState<Set<string>>(new Set())
-
-    useEffect(() => {
-        setLocalPins(getPins())
-    }, [])
+    const [localPins, setLocalPins] = useState<Set<string>>(() => getPins())
 
     const totalPoems = result
         ? result.clusters.reduce((sum, c) => sum + c.size, 0)
