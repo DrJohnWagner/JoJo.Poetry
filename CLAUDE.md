@@ -109,3 +109,44 @@ Poem.contest_fit: str[]       # matching tags (inline-editable)
 ```
 
 `medal` values: `Gold`, `Silver`, `Bronze`, `Honorable Mention`, `None` (sentinel for no contests).
+
+---
+
+## Analytics render module boundaries
+
+`app/lib/analytics/render/theme.ts` is now palette-only. It should only hold:
+- `COLOURMAP`
+- `ColourValue`/`ColourmapEntry` types
+- `lighter()` / `darker()` / `darken`
+
+Base chart defaults and shared render chrome live in:
+- `app/lib/analytics/render/base/BaseChart.ts`
+
+Chart-specific settings live in chart modules:
+- `app/lib/analytics/render/charts/interruptionDensity.ts`
+- `app/lib/analytics/render/charts/punctuationPressure.ts`
+- `app/lib/analytics/render/charts/overlays.ts`
+
+`app/lib/analytics/render/interruptionEvents.ts` was removed; consumers should
+import interruption event types/config directly from
+`app/lib/analytics/render/charts/interruptionDensity.ts`.
+
+Dashboard-level migration away from the render-spec engine has started:
+- `app/lib/analytics/render/layout/DashboardComposer.tsx` now instantiates chart objects.
+- `app/lib/analytics/render/charts/BaseChart.tsx` is the new chart-owned boundary.
+- `app/lib/analytics/render/charts/PunctuationPressureChart.tsx` renders directly with Konva and does not use `render/data`, `render/spec`, `render/overlay`, or `render/engine`.
+- `app/lib/analytics/render/charts/LegacySpecChart.tsx` is a temporary adapter for charts still on the old spec/engine pipeline.
+- `app/components/analytics/PoemAnalytics.tsx` now enters the renderer through `DashboardComposer`, not `VisComposer`.
+
+Plotly-first analytics renderer has replaced the old render stack:
+- Active path is now `AnalyticsResponse -> app/components/analytics/PoemAnalytics.tsx -> app/lib/analytics/layout/DashboardComposer.tsx -> app/lib/analytics/charts/*.ts -> app/lib/analytics/plotly/PlotlyRenderer.tsx`.
+- Legacy `app/lib/analytics/render/` and `app/components/analytics/VisComposer.tsx` were removed.
+- New chart modules build Plotly figures directly. The dashboard owns grouping/layout; Plotly owns chart rendering/layout internals.
+
+Spec helpers/builders were split so `spec/index.ts` is now a dispatcher:
+- Shared axis factories are in `app/lib/analytics/render/base/Axis.ts`.
+- Per-visualisation spec builders are in `app/lib/analytics/render/charts/*.ts`:
+	`IndentationMap.ts`, `LineLengthMap.ts`, `LineLengthDistribution.ts`,
+	`InterruptionDensityProfile.ts`, `MomentumProfile.ts`,
+	`StanzaArchitecture.ts`, `PunctuationPressureSpec.ts`, `FractureMap.ts`,
+	and semantic overlay builder in `SemanticPressure.ts`.

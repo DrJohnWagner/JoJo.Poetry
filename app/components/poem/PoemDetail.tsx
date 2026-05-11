@@ -16,6 +16,7 @@ import { fetchPoem } from "@/lib/api"
 import { cleanPoetryUrl } from "@/lib/format"
 import PoemAwards from "./PoemAwards"
 import PoemSummary from "./PoemSummary"
+import { PoemAnalytics } from "@/components/analytics/PoemAnalytics"
 import dynamic from "next/dynamic"
 
 const InstagramEmbed = dynamic(
@@ -41,6 +42,7 @@ export default function PoemDetail({ poem: initial }: { poem: Poem }) {
     const { readOnly } = useAppConfig()
     const [poem, setPoem] = useState<Poem>(initial)
     const [open, setOpen] = useState(false)
+    const [analyticsOpen, setAnalyticsOpen] = useState(false)
     const [caption, setCaption] = useState(false)
     const [editing, setEditing] = useState(false)
     const [liveTitle, setLiveTitle] = useState(initial.title)
@@ -127,7 +129,7 @@ export default function PoemDetail({ poem: initial }: { poem: Poem }) {
                         <p className="text-label mb-3">Mechanism</p>
                         <div
                             ref={mechanismRef}
-                            className={`font-sans text-sm leading-relaxed text-ink/80 space-y-3${mechanismExpanded ? "" : " line-clamp-5"}`}
+                            className={`font-sans text-sm leading-relaxed text-ink/80 space-y-3${mechanismExpanded ? "" : "line-clamp-5"}`}
                         >
                             {poem.mechanism.map((para, i) => (
                                 <p key={i}>{para}</p>
@@ -136,7 +138,7 @@ export default function PoemDetail({ poem: initial }: { poem: Poem }) {
                         {(mechanismOverflows || mechanismExpanded) && (
                             <button
                                 onClick={() => setMechanismExpanded((e) => !e)}
-                                className="mt-3 text-label hover:text-ink"
+                                className="text-label mt-3 hover:text-ink"
                             >
                                 {mechanismExpanded ? "SHOW LESS" : "SHOW MORE"}
                             </button>
@@ -208,6 +210,26 @@ export default function PoemDetail({ poem: initial }: { poem: Poem }) {
                     </a>
                 </dd>
             </dl>
+
+            <HorizontalRule />
+
+            <section aria-label="Analytics" className="my-5">
+                <button
+                    onClick={() => setAnalyticsOpen((a) => !a)}
+                    className="text-label hover:text-ink"
+                >
+                    {analyticsOpen ? "Hide analytics" : "Show analytics"}
+                </button>
+                {analyticsOpen && (
+                    <div
+                        className="mt-4"
+                        data-analytics-root
+                        data-poem-id={poem.id}
+                    >
+                        <PoemAnalytics poemId={poem.id} width={600} />
+                    </div>
+                )}
+            </section>
 
             <HorizontalRule />
 

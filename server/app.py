@@ -37,6 +37,9 @@ def create_app(settings: Optional[Settings] = None) -> FastAPI:
         repo: PoemRepository = init_repository(db_path)
         from server.similarity.service import init_similarity_service, rebuild_similarity_service
         init_similarity_service(repo.list())
+        from server.analytics.scoring import compute_distributions
+        from server.analytics.router import set_distributions
+        set_distributions(compute_distributions(repo.list()))
         app.state.settings = settings
         app.state.repository = repo
         try:
@@ -73,6 +76,9 @@ def create_app(settings: Optional[Settings] = None) -> FastAPI:
 
     from server.fonts.router import router as fonts_router
     app.include_router(fonts_router)
+
+    from server.analytics.router import router as analytics_router
+    app.include_router(analytics_router)
 
     return app
 

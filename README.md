@@ -6,7 +6,7 @@ author pin, edit, create, and delete them, and offers both a simple
 keyword search and a field-specific advanced search.
 
 Complete end-to-end: data model, backend API, typography-first frontend,
-Docker configuration, and a test suite.
+analytics visualisation, PDF export, Docker configuration, and a test suite.
 
 ## Architecture
 
@@ -38,6 +38,29 @@ Two services, one flat JSON data source:
   of poem objects. It is the only persistent store; there is no
   database server.
 
+## Analytics visualisation stack
+
+The analytics path is now Plotly-first and separate from poem rendering.
+
+- **Backend analytics pipeline** (`server/analytics/`): computes per-line
+  metrics and summary scores, ranks visual candidates, and emits
+  `summary`, `per_line`, and a `render_plan`.
+- **Frontend analytics renderer** (`app/components/analytics/PoemAnalytics.tsx`
+  and `app/lib/analytics/`): fetches `/api/analytics/{poem_id}`, builds chart
+  objects in `DashboardComposer`, and renders Plotly figures through
+  `PlotlyRenderer`.
+- **Overlay model**: overlays such as `semantic_pressure_overlay` and
+  `indentation_overlay` are layered onto compatible host charts.
+
+Current emphasis in this branch:
+
+- **Interruption Density** excludes indentation shift events from the primary
+  interruption scatter; indentation shifts render separately via
+  `indentation_overlay` arrow markers.
+- **PDF analytics appendix support** uses pre-rendered chart images captured
+  from a hidden analytics mount in `PDFDialog`, so images are available even
+  when the visible analytics section was never opened.
+
 ## Repository layout
 
 ```
@@ -52,6 +75,14 @@ Two services, one flat JSON data source:
 │   │   ├── router.py                 # FastAPI router: POST /api/poems/cluster
 │   │   ├── types.py                  # ClusterRequest / Cluster / ClusterResponse Pydantic models + VALID_CATEGORIES / CATEGORY_FIELD_MAP constants
 │   │   └── engine.py                 # Feature matrix, auto-k, Ward clustering, lift labels
+│   ├── analytics/
+│   │   ├── router.py                 # FastAPI router: GET /api/analytics/{poem_id}; assembles summary, per_line, scoring, render_plan
+│   │   ├── pipeline.py               # Metric extraction from poem body (indentation, line length, interruption, punctuation, stanza)
+│   │   ├── scoring.py                # Rarity-based metric scoring against loaded corpus distributions
+│   │   ├── resonance.py              # Structural resonance groups and score multipliers
+│   │   ├── visualisation.py          # Visualisation metadata: families, thresholds, suppression, overlay hosts
+│   │   ├── render.py                 # Candidate selection pipeline, role assignment, overlay attachment, explanations
+│   │   └── types.py                  # AnalyticsResponse, PerLineData, render-plan and candidate models
 │   ├── similarity/
 │   │   ├── router.py                 # FastAPI router: GET /api/poems/{id}/similar and five single-axis endpoints
 │   │   ├── types.py                  # NormalisedPoemFeatures, score breakdowns, NeighbourResult, NeighbourListResult, SimilarityBundle
@@ -66,8 +97,8 @@ Two services, one flat JSON data source:
 │   ├── pdf/
 │   │   ├── router.py                 # FastAPI router: POST /api/pdf/{poem_id} → PDF bytes; POST /{poem_id}/post → PNG + multi-platform publish; body_to_stanzas splits on blank lines, inserts empty stanza for 3+ blank lines
 │   │   ├── pipeline.py               # png_from_source (Typst → first-page PNG at 150 PPI) + pdf_caption
-│   │   ├── types.py                  # PDFRequest (paper, margin, font, font_size, colour, columns, gutter, leading, spacing) + PDFPostResponse
-│   │   └── poem.typ                  # Jinja2 + Typst template: paper, margin, font, font_size, colour, columns, gutter, title, author, stanzas
+│   │   ├── types.py                  # PDFRequest (layout options + optional analytics_images payload) + PDFPostResponse
+│   │   └── poem.typ                  # Jinja2 + Typst template: poem layout + optional analytics appendix (primary + secondary charts)
 │   └── social/
 │       ├── router.py                 # FastAPI router: /api/socials/* endpoints; in-memory image store
 │       ├── types.py                  # Social API Pydantic models: GenerateRequest/Response, UpdateRequest, ImageResponse, RegenerateRequest, PostRequest/Response, TextSpecification
@@ -90,8 +121,10 @@ Two services, one flat JSON data source:
 │   ├── poems/new/page.tsx            # Dedicated create page
 │   ├── layout.tsx, globals.css
 │   ├── components/
+│   │   ├── analytics/
+│   │   │   └── PoemAnalytics.tsx         # Analytics entry point: fetches /api/analytics/{poem_id} and renders DashboardComposer
 │   │   ├── pdf/
-│   │   │   ├── PDFDialog.tsx             # Native <dialog>: fetches and renders PDF via react-pdf (pdfjs); loading overlay with spinner; worker configured via import.meta.url (no CDN)
+│   │   │   ├── PDFDialog.tsx             # Native <dialog>: fetches and renders PDF via react-pdf (pdfjs); preloads hidden analytics charts and captures PNGs once per dialog session; worker configured via import.meta.url (no CDN)
 │   │   │   ├── PDFControls.tsx           # PDF layout controls: paper, margin, font, size, colour, columns, gutter, leading, spacing
 │   │   │   └── PDFActions.tsx            # Download (Downloaded flash), Save (File System Access API), Copy (first page → PNG → clipboard), Publish; all with idle/loading/done state feedback
 │   │   ├── social/
@@ -169,6 +202,11 @@ Two services, one flat JSON data source:
 │       ├── cluster.ts                # Cluster feature/group label helpers for cluster UI rendering
 │       ├── types.ts                  # PoemSummaryData / Poem type hierarchy; Award / SearchState / SimilarityBundle / ClusterResponse; social request/response types (SocialGenerateRequest, SocialPostResponse, etc.); FontOption / TextSpecification / Placement
 │       ├── editable.ts               # Canonical editable-field contract
+│       ├── analytics/
+│       │   ├── types.ts              # Frontend analytics models + render-plan and Plotly figure types
+│       │   ├── layout/               # DashboardComposer and legend integration
+│       │   ├── charts/               # Chart implementations per visualisation type
+│       │   └── plotly/               # PlotlyRenderer wrapper component
 │       └── format.ts                 # body ↔ plaintext, date formatting, cleanPoetryUrl, poemToMarkdown, medalColor
 ├── database/
 │   ├── Poems.json                    # Canonical dev fixture collection
@@ -567,6 +605,67 @@ shared metadata tags. The endpoint is read-safe (available in
 6. **Exclusion** — poems in clusters with fewer than `min_cluster_size`
    members are moved to `excluded` with `reason: "cluster too small"`.
 
+## The analytics system
+
+`GET /api/analytics/{poem_id}` is read-safe and returns four layers of data:
+
+- `summary`: aggregate metrics for structure, line length, punctuation,
+  interruption, momentum, repetition and negation.
+- `per_line`: line-indexed data arrays for indentation, line lengths,
+  interruption events, punctuation counts and stanza lengths.
+- `scoring`: rarity-normalised `ScoredMetric` values (plus top metrics).
+- `render_plan`: visualisation candidates organised into primary, secondary,
+  supporting and overlay attachments.
+
+Backend visual selection in `server/analytics/render.py` is deterministic and staged:
+
+1. Candidate generation from available scored metrics.
+2. Resonance boosts for multi-metric structural signatures.
+3. Diversity bonus across visual families.
+4. Threshold/activation gating.
+5. Suppression and family balancing.
+6. Role assignment (primary, secondary, supporting).
+7. Overlay attachment to allowed/preferred hosts.
+8. Explanation text generation for each selected visual.
+
+Current visualisation keys surfaced to the frontend:
+
+- `indentation_map`
+- `line_length_map`
+- `line_length_distribution`
+- `interruption_density_profile`
+- `momentum_profile`
+- `stanza_architecture`
+- `punctuation_pressure_strip`
+- `fracture_map`
+- `semantic_pressure_overlay` (overlay-only)
+- `indentation_overlay` (overlay-only)
+
+Important overlay behaviour:
+
+- `semantic_pressure_overlay` attaches to compatible host charts and never
+  renders standalone.
+- `indentation_overlay` attaches to `interruption_density_profile` and marks
+  indentation increases/decreases with directional glyphs.
+- `indent_shift` events are intentionally removed from the primary interruption
+  event trace and reintroduced by `indentation_overlay` to keep interruption
+  and indentation signals visually separable.
+
+Frontend render path:
+
+1. `PoemAnalytics` fetches `/api/analytics/{poem_id}`.
+2. `DashboardComposer` instantiates chart classes from `render_plan`.
+3. Charts build Plotly figures from `summary` + `per_line`.
+4. `PlotlyRenderer` mounts figures and optional legend-only controls.
+
+PDF integration:
+
+- `PDFDialog` mounts a hidden analytics renderer on open, captures chart
+  images once, and caches them in dialog state.
+- Enabling “Include analytics appendix” injects that cached image set into
+  the PDF request (`analytics_images`), avoiding race conditions when the
+  visible analytics section was never opened.
+
 ## Social post generation
 
 The social feature creates a 1080×1080 PNG and publishes it to Instagram,
@@ -666,6 +765,11 @@ Fetches the poem by UUID, renders `server/pdf/poem.typ` via Jinja2 with
 `typst` Python package (embedded Rust compiler — no external binary). Returns
 the PDF bytes with `Content-Disposition: inline`.
 
+The request also accepts optional `analytics_images` entries
+(`title`, `summary`, `tier`, `mime_type`, `data_base64`). When present,
+the server decodes the images to temp files and the Typst template renders
+an appendix section after the poem body.
+
 `body_to_stanzas` splits the body on runs of two or more blank lines into a
 list of Typst stanza strings. A gap of exactly `\n\n` is a plain stanza
 break; a gap of `\n\n\n` or more inserts an empty-string stanza, preserving
@@ -689,6 +793,11 @@ undefined). It shows `FaEllipsis` while the dialog is open. On click it
 mounts `PDFDialog` — a native `<dialog>` that calls `POST /api/pdf/{poemId}`
 and renders the result via `react-pdf` (pdfjs v5). A loading overlay with a
 CSS spinner covers the dialog body while any operation is in flight.
+
+When the dialog mounts, `PDFDialog` also mounts a hidden `PoemAnalytics`
+instance, captures Plotly charts once, and stores them in local state.
+The “Include analytics appendix” checkbox only toggles inclusion of this
+pre-captured image set, so there is no race with chart rendering.
 
 `PDFControls` exposes all layout parameters: paper size, margin, font (with
 MRU selector), font size, colour, columns, gutter, leading, and spacing.
@@ -767,7 +876,7 @@ filtered set in a single response — no pagination.
 make test           # READ_ONLY=false uv run pytest tests/server
 make test-verbose   # same, with -vv output
 make typecheck      # npx tsc --noEmit
-make lint           # npx next lint
+make lint           # npm run lint (eslint app --ext .ts,.tsx)
 make check          # test + typecheck + lint
 ```
 

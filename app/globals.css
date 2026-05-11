@@ -2,8 +2,26 @@
 @tailwind components;
 @tailwind utilities;
 
+@font-face {
+    font-family: "JoJo Glyph";
+    src: url("/fonts/JoJoGlyph-Regular.woff2") format("woff2");
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "JoJo Glyph Alt";
+    src: url("/fonts/JoJoGlyph-Alt.woff2") format("woff2");
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+}
+
 @layer base {
     :root {
+        --font-glyph: "JoJo Glyph";
+        --font-glyph-alt: "JoJo Glyph Alt", "JoJo Glyph";
         --button-text-font-family:
             ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
         --button-text-font-size-standard: 0.82rem;
